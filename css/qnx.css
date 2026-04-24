@@ -1,0 +1,343 @@
+/* QNX appliance framed session */
+.qnx-session {
+    position: fixed;
+    inset: 0;
+    z-index: 700;
+    display: none;
+    background: rgba(4, 8, 14, 0.75);
+    backdrop-filter: blur(2px);
+    padding: 18px;
+}
+.qnx-session.open { display: block; }
+.qnx-window-frame {
+    width: min(1100px, calc(100vw - 36px));
+    height: min(720px, calc(100vh - 36px));
+    margin: 0 auto;
+    border: 1px solid #3f556d;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0a1624;
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+    display: flex;
+    flex-direction: column;
+}
+.qnx-session-toolbar {
+    height: 34px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 10px;
+    background: linear-gradient(#17304f, #122841);
+    border-bottom: 1px solid #294161;
+    color: #cfe3fa;
+    font-size: 12px;
+    font-family: var(--font-body);
+}
+.qnx-session-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #6aa5f2;
+}
+.qnx-workspace {
+    position: relative;
+    flex: 1;
+    background: linear-gradient(#1e4f98, #183f79);
+    overflow: hidden;
+    color: #f2f7ff;
+    font-family: Tahoma, Arial, sans-serif;
+}
+.qnx-launcher {
+    position: absolute;
+    left: 6px;
+    bottom: 42px;
+    width: 220px;
+    background: rgba(14, 33, 60, 0.92);
+    border: 1px solid rgba(172, 206, 255, 0.45);
+    border-radius: 6px;
+    padding: 8px;
+    display: none;
+    z-index: 6;
+}
+.qnx-launcher.open { display: block; }
+.qnx-launch-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #dcecff;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.qnx-launch-item:hover { background: rgba(129, 178, 243, 0.18); border-color: rgba(129, 178, 243, 0.45); }
+.qnx-window {
+    position: absolute;
+    width: min(520px, calc(100vw - 120px));
+    height: min(300px, calc(100vh - 180px));
+    background: #edf3ff;
+    color: #15325c;
+    border: 1px solid #1f4f94;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.35);
+    display: none;
+    flex-direction: column;
+    min-width: 280px;
+    min-height: 180px;
+    z-index: 2;
+}
+.qnx-window.minimized { display: none !important; }
+.qnx-window.open { display: flex; }
+.qnx-window-bar {
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8px;
+    background: linear-gradient(#4589de, #2a68b8);
+    color: #fff;
+    font-size: 12px;
+    cursor: move;
+    user-select: none;
+}
+.qnx-win-controls {
+    display: inline-flex;
+    gap: 4px;
+}
+.qnx-win-btn {
+    width: 20px;
+    height: 18px;
+    border: 1px solid rgba(255,255,255,0.55);
+    border-radius: 2px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 11px;
+    line-height: 1;
+}
+.qnx-window.active .qnx-window-bar {
+    background: linear-gradient(#4c93e7, #3270c4);
+}
+.qnx-window-body {
+    flex: 1;
+    overflow: auto;
+    padding: 10px;
+    font-size: 12.5px;
+}
+.qnx-resize-handle {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 12px;
+    height: 12px;
+    cursor: nwse-resize;
+    background: linear-gradient(135deg, transparent 46%, rgba(27,63,112,0.5) 47%, rgba(27,63,112,0.5) 58%, transparent 59%);
+}
+.qnx-terminal-shell {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow: hidden;
+    background: #060606;
+    border: none;
+    border-radius: 0;
+}
+.qnx-terminal-out {
+    flex: 1;
+    overflow: auto;
+    color: #d6d6d6;
+    padding: 8px;
+    font-family: "IBM Plex Mono","DejaVu Sans Mono","Liberation Mono",monospace;
+    line-height: 1.35;
+    white-space: pre-wrap;
+}
+.qnx-terminal-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-top: 1px solid #222;
+    padding: 8px;
+}
+.qnx-window#qnxWinTerminal .qnx-window-body {
+    padding: 0;
+    overflow: hidden;
+    background: #060606;
+    color: #d6d6d6;
+}
+.qnx-terminal-in {
+    flex: 1;
+    min-width: 140px;
+    border: none;
+    outline: none;
+    border-radius: 0;
+    background: transparent;
+    color: #e8e8e8;
+    padding: 0;
+    font-family: "IBM Plex Mono","DejaVu Sans Mono","Liberation Mono",monospace;
+}
+.qnx-list { margin: 0; padding-left: 18px; }
+.qnx-app-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border: 1px solid #9cb7d8;
+    background: linear-gradient(#f4f8ff, #e6eef9);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    font-size: 11px;
+    color: #2f507b;
+}
+.qnx-app-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    border: 1px solid #9cb7d8;
+    background: #f8fbff;
+}
+.qnx-grid-head, .qnx-grid-row {
+    display: grid;
+    grid-template-columns: 80px minmax(0, 1fr) 70px;
+    gap: 8px;
+    padding: 6px 8px;
+    align-items: center;
+}
+.qnx-grid-head {
+    background: #dbe8f8;
+    border-bottom: 1px solid #9cb7d8;
+    font-size: 11px;
+    font-weight: 700;
+    color: #2b4c74;
+}
+.qnx-grid-row { border-bottom: 1px solid #d3e0f0; font-size: 11.5px; color: #21466f; }
+.qnx-grid-row:last-child { border-bottom: none; }
+.qnx-socket-list {
+    margin: 0;
+    padding-left: 18px;
+    max-height: 180px;
+    overflow: auto;
+    border: 1px solid #9cb7d8;
+    background: #f8fbff;
+}
+.qnx-socket-list li { margin: 4px 0; color: #274b75; }
+.qnx-taskbar {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 6px;
+    background: linear-gradient(#2f6bc0, #1d4e9f);
+    border-top: 1px solid #86b0e0;
+}
+.qnx-start-btn {
+    height: 26px;
+    border-radius: 14px;
+    border: 1px solid #d5ebff;
+    background: linear-gradient(#58bf58, #2d8b2d);
+    color: white;
+    font-weight: 700;
+    padding: 0 12px;
+}
+.qnx-task-btn {
+    height: 24px;
+    border: 1px solid #84aee0;
+    background: linear-gradient(#4a86d8, #3368b7);
+    color: white;
+    border-radius: 3px;
+    padding: 0 8px;
+    font-size: 11px;
+}
+.qnx-task-btn.open {
+    background: linear-gradient(#6aa0e8, #4477bf);
+    border-color: #c3ddff;
+}
+.qnx-task-btn.active {
+    background: linear-gradient(#28508a, #1b3f70);
+    border-color: #9cc3f3;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.35);
+}
+.qnx-disconnect-btn {
+    height: 24px;
+    padding: 0 10px;
+    border: 1px solid #d5e7ff;
+    border-radius: 4px;
+    background: linear-gradient(#486e99, #2f5177);
+    color: #f5fbff;
+    font-weight: 600;
+}
+.qnx-disconnect-btn:hover { background: linear-gradient(#5581b4, #39608b); }
+.qnx-disconnect-btn:active { background: linear-gradient(#2f5177, #284767); }
+.qnx-file-grid {
+    display: grid;
+    grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+    gap: 10px;
+}
+.qnx-file-pane {
+    border: 1px solid #84aee0;
+    border-radius: 4px;
+    background: #f4f8ff;
+    padding: 8px;
+}
+.qnx-file-preview {
+    margin: 0;
+    border: 1px solid #6f92c0;
+    border-radius: 4px;
+    background: #eef5ff;
+    color: #173c66;
+    padding: 8px;
+    white-space: pre-wrap;
+    font-family: var(--font-mono);
+    max-height: 220px;
+    overflow: auto;
+}
+.qnx-clock { margin-left: auto; font-size: 11px; color: #ecf4ff; }
+.qnx-status {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    background: rgba(18, 39, 66, 0.7);
+    border: 1px solid rgba(172, 206, 255, 0.35);
+    border-radius: 6px;
+    padding: 6px 8px;
+    font-size: 11px;
+}
+
+/* Lock dialog */
+.lock-dialog .dialog-body {
+    text-align: center;
+    padding: 24px;
+}
+.lock-icon {
+    width: 64px; height: 64px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #5e1620 0%, #2a0a0e 100%);
+    display: grid; place-items: center;
+    color: #ff7b8a;
+    border: 1px solid #8a1b26;
+    box-shadow: 0 0 20px rgba(255,123,138,0.3);
+}
+.lock-icon svg { width: 32px; height: 32px; }
+.lock-title {
+    font-weight: 700; font-size: 15px;
+    color: var(--error);
+    margin-bottom: 8px;
+}
+.lock-body {
+    color: var(--fg);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    text-align: left;
+}
+.lock-body code {
+    font-family: var(--font-mono);
+    background: var(--card-shade);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--error);
+    word-break: break-all;
+}
+

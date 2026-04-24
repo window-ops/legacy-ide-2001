@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ebebeb">
+<title>Legacy IDE 2001: Programa Aprobată MEC</title>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/editor.css">
+<link rel="stylesheet" href="css/dialogs.css">
+<link rel="stylesheet" href="css/debugger.css">
+<link rel="stylesheet" href="css/qnx.css">
+<link rel="stylesheet" href="css/menu.css">
+</head>
+<body>
+<div class="app">
+
+    <!-- Headerbar -->
+    <div class="headerbar">
+        <button class="hb-btn" id="btnSidebar" title="Comută panoul lateral" aria-label="Comută panoul lateral">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1H2zm0 4h12v1H2zm0 4h12v1H2z"/></svg>
+        </button>
+        <div class="app-title">
+            <div class="app-logo">&lt;/&gt;</div>
+            <span class="app-title-name">Legacy IDE 2001</span>
+            <span class="app-title-sub">Programa analitică TIC aprobată de MEC</span>
+        </div>
+        <div class="toolbar-spacer"></div>
+        <button class="hb-toggle" id="btnLint" title="Verifică conformitatea" aria-label="Verifică">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor"><path d="M3 8l3 3 7-7-1-1-6 6-2-2z"/></svg>
+            <span class="hb-toggle-label">Verifică</span>
+        </button>
+        <button class="hb-toggle primary" id="btnRun" title="Execută" aria-label="Execută">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 3l9 5-9 5z"/></svg>
+            <span class="hb-toggle-label">Execută</span>
+        </button>
+        <button class="hb-btn" id="btnTheme" title="Comută tema" aria-label="Comută tema">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 0a8 8 0 100 16A8 8 0 008 0zm0 2v12a6 6 0 010-12z"/></svg>
+        </button>
+        <button class="hb-btn" id="btnMenu" title="Meniu principal" aria-label="Meniu">
+            <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="3" cy="8" r="1.5"/><circle cx="8" cy="8" r="1.5"/><circle cx="13" cy="8" r="1.5"/></svg>
+        </button>
+    </div>
+
+    <!-- Popovers -->
+    <div class="popover" id="mainMenu">
+        <button class="popover-item" data-action="run">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 3l9 5-9 5z"/></svg>
+            Execută fișierul curent
+            <span class="kbd">Ctrl+R</span>
+        </button>
+        <button class="popover-item" data-action="clear">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 4h10v1H3zm3-2h4v1H6zm-1 3h6l-.7 8H5.7z"/></svg>
+            Curăță consola
+        </button>
+        <div class="popover-sep"></div>
+        <button class="popover-item" data-action="download-project">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2v7m-3-3l3 3 3-3M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            Descarcă proiectul (zip)
+        </button>
+        <div class="popover-sep"></div>
+        <button class="popover-item" data-action="curriculum">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10v12H3zM5 4v1h6V4zm0 2v1h6V6zm0 2v1h4V8z"/></svg>
+            Programa școlară
+        </button>
+        <button class="popover-item" data-action="prefs">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 5a3 3 0 100 6 3 3 0 000-6zm0 1a2 2 0 110 4 2 2 0 010-4z"/><path d="M7 .5l-.2 1.6-.3.1-1.3-1-1.4 1.4 1 1.3-.1.3-1.6.2v2l1.6.2.1.3-1 1.3 1.4 1.4 1.3-1 .3.1.2 1.6h2l.2-1.6.3-.1 1.3 1 1.4-1.4-1-1.3.1-.3 1.6-.2v-2l-1.6-.2-.1-.3 1-1.3-1.4-1.4-1.3 1-.3-.1L9 .5z"/></svg>
+            Preferințe…
+        </button>
+        <div class="popover-sep"></div>
+        <button class="popover-item" data-action="debugger">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2a3 3 0 00-3 3v1H3v1h2v2H3v1h2v1a3 3 0 006 0v-1h2v-1h-2V7h2V6h-2V5a3 3 0 00-3-3zM6 5a2 2 0 114 0v6a2 2 0 11-4 0z"/></svg>
+            Debugger
+            <span class="kbd">Ctrl+Shift+D</span>
+        </button>
+        <div class="popover-sep"></div>
+        <button class="popover-item" data-action="about">
+            <svg viewBox="0 0 16 16" fill="currentColor"><circle cx="8" cy="8" r="7" fill="none" stroke="currentColor"/><path d="M7.3 4.8a.7.7 0 111.4 0 .7.7 0 01-1.4 0zM7 6.5h2v5H7z"/></svg>
+            Despre Legacy IDE
+        </button>
+    </div>
+
+    <div class="popover" id="addMenu">
+        <button class="popover-item" data-action="new-file">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 1h7l3 3v11H3zm7 0v3h3" fill="none" stroke="currentColor"/></svg>
+            Fișier nou
+        </button>
+        <button class="popover-item" data-action="new-folder">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4h4l1 1h7v9H2z" fill="none" stroke="currentColor"/></svg>
+            Folder nou
+        </button>
+    </div>
+
+    <div class="popover" id="ctxMenu">
+        <button class="popover-item" data-ctx="open">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4l6 5 6-5v9H2z" fill="none" stroke="currentColor"/></svg>
+            Deschide
+        </button>
+        <button class="popover-item" data-ctx="new-file-in">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 1h7l3 3v11H3z" fill="none" stroke="currentColor"/><path d="M7 7v4M5 9h4" stroke="currentColor"/></svg>
+            Fișier nou aici
+        </button>
+        <button class="popover-item" data-ctx="new-folder-in">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M2 4h4l1 1h7v9H2z" fill="none" stroke="currentColor"/><path d="M8 8v4M6 10h4" stroke="currentColor"/></svg>
+            Folder nou aici
+        </button>
+        <div class="popover-sep"></div>
+        <button class="popover-item" data-ctx="download">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 2v7m-3-3l3 3 3-3M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+            Descarcă
+        </button>
+        <div class="popover-sep"></div>
+        <button class="popover-item" data-ctx="rename">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M11 2l3 3-8 8H3v-3z" fill="none" stroke="currentColor"/></svg>
+            Redenumește
+            <span class="kbd">F2</span>
+        </button>
+        <button class="popover-item destructive" data-ctx="delete">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M3 3h10M5 3V1h6v2M4 3l1 12h6l1-12" fill="none" stroke="currentColor"/></svg>
+            Șterge
+        </button>
+    </div>
+
+    <div class="banner-slot" id="banner"></div>
+
+    <div class="main" id="main">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-inner">
+                <div class="sidebar-toolbar">
+                    <span class="sidebar-title">Fișiere proiect</span>
+                    <button class="icon-btn" id="btnDeleteNode" title="Șterge fișierul activ" aria-label="Șterge fișier">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 7h8v2H4z"/></svg>
+                    </button>
+                    <button class="icon-btn" id="btnAdd" title="Adaugă fișier sau folder" aria-label="Adaugă">
+                        <svg viewBox="0 0 16 16" fill="currentColor"><path d="M7 3h2v4h4v2H9v4H7V9H3V7h4z"/></svg>
+                    </button>
+                </div>
+                <div class="file-tree" id="fileTree"></div>
+                <div class="sidebar-footer">
+                    <div class="seal">
+                        <div class="seal-badge">MEC</div>
+                        <div>Aprobat conform programei<br>analitice 2001/2006</div>
+                    </div>
+                    Clasa a IX-a &middot; Profil real<br>
+                    Compilator v1.0.0 (2001.09.14)
+                </div>
+            </div>
+        </aside>
+        <div class="main-resize-handle" id="mainResizeHandle" aria-hidden="true"></div>
+
+        <div class="sidebar-scrim" id="sidebarScrim"></div>
+
+        <section class="content">
+            <div class="tabbar" id="tabBar"></div>
+            <div class="content-toolbar">
+                <span class="toolbar-breadcrumb" id="breadcrumb">&mdash;</span>
+                <span class="output-status" id="langTag"></span>
+            </div>
+            <div class="editor-area" id="editorArea"></div>
+            <div class="output-panel" id="outputPanel">
+                <div class="resize-handle" id="resizeHandle"></div>
+                <div class="output-header">
+                    <div class="output-tabs">
+                        <button class="output-tab active" data-otab="console">Consolă</button>
+                        <button class="output-tab" data-otab="preview">Previzualizare</button>
+                    </div>
+                    <div class="toolbar-spacer"></div>
+                    <span class="output-status" id="outputStatus"></span>
+                    <button class="output-clear" id="btnClearOut">Curăță</button>
+                </div>
+                <div class="output" id="output"><span class="empty">&gt; Apăsați <b>Execută</b> pentru a rula codul. Numai comenzi conforme cu programa 2001 sunt permise.</span></div>
+                <iframe class="preview-frame" id="preview" style="display:none" sandbox=""></iframe>
+            </div>
+            <div class="statusbar">
+                <span id="stLine">Lin 1, Col 1</span>
+                <span class="status-sep">&middot;</span>
+                <span id="stFile">fără fișier</span>
+                <span class="status-sep">&middot;</span>
+                <span id="stLint" class="status-ok">Programa: OK</span>
+                <div class="status-right">
+                    <span id="stOS">Detectare SO…</span>
+                    <span class="status-sep">&middot;</span>
+                    <span>UTF-8 &middot; LF</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Debugger overlay -->
+    <div class="debugger" id="debugger">
+        <div class="dbg-titlebar">
+            <span class="dbg-logo">GDX</span>
+            <span class="dbg-title">Debugger</span>
+            <span class="dbg-title-sub">&middot; legacy-ide.so &middot; x86_64 ELF &middot; PID 2001</span>
+            <div class="toolbar-spacer"></div>
+            <button class="dbg-btn" id="dbgCloseBtn" aria-label="Închide debugger">Închide &middot; <span class="kbd">Esc</span></button>
+        </div>
+        <div class="dbg-toolbar">
+            <button class="dbg-btn" id="dbgStepBtn" title="Single-step (execută o instrucțiune)">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M3 3l7 5-7 5z"/><rect x="11" y="3" width="2" height="10"/></svg>
+                Pas <span class="kbd">F10</span>
+            </button>
+            <button class="dbg-btn" id="dbgRunBtn" title="Continuă execuția">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M4 3l9 5-9 5z"/></svg>
+                Continuă <span class="kbd">F5</span>
+            </button>
+            <button class="dbg-btn" id="dbgRewindBtn" title="Resetează RIP la start">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M12 3l-9 5 9 5z"/><rect x="2" y="3" width="2" height="10"/></svg>
+                Resetează RIP
+            </button>
+            <div class="dbg-toolbar-sep"></div>
+            <button class="dbg-btn danger" id="dbgResetPatchesBtn" title="Anulează toate patch-urile">
+                Revocă toate patch-urile
+            </button>
+            <button class="dbg-btn" id="dbgResetLayoutBtn" title="Resetează dimensiunile panourilor">
+                Resetează layout
+            </button>
+            <div class="toolbar-spacer"></div>
+            <button class="dbg-btn" id="dbgDocsBtn">
+                <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h8l2 2v10H3z" fill="none" stroke="currentColor"/></svg>
+                Documentație debugger
+            </button>
+            <div class="dbg-toolbar-sep"></div>
+            <div class="dbg-exploit">
+                <select class="dbg-select" id="dbgVulnSelect" aria-label="Vulnerabilitate mock">
+                    <option value="fmt">Injectează format string (%n)</option>
+                    <option value="memcpy">Injectează unsafe memcpy</option>
+                    <option value="x11">Injectează X11 auth bypass</option>
+                </select>
+                <button class="dbg-btn" id="dbgInjectVulnBtn">Injectează vulnerabilitate</button>
+                <button class="dbg-btn accent" id="dbgOpenShellBtn">Reverse shell</button>
+            </div>
+        </div>
+        <div class="dbg-body">
+            <div class="dbg-pane dbg-funcs">
+                <div class="dbg-pane-header">Funcții</div>
+                <div class="dbg-func-list" id="dbgFuncList"></div>
+            </div>
+            <div class="dbg-pane dbg-disasm-pane">
+                <div class="dbg-pane-header">
+                    <span id="dbgDisasmTitle">—</span>
+                    <span class="hint">hover / tap pentru acțiuni</span>
+                </div>
+                <div class="dbg-disasm" id="dbgDisasm"></div>
+            </div>
+            <div class="dbg-pane dbg-regs-pane">
+                <div class="dbg-pane-header">Registre</div>
+                <div class="dbg-regs" id="dbgRegs"></div>
+            </div>
+            <div class="dbg-pane dbg-log-pane">
+                <div class="dbg-pane-header">Jurnal &middot; patch-uri &amp; efecte</div>
+                <div class="dbg-log" id="dbgLog"></div>
+            </div>
+            <div class="dbg-pane dbg-stack-pane">
+                <div class="dbg-pane-header">Stivă &middot; [RSP]</div>
+                <div class="dbg-stack" id="dbgStack"></div>
+            </div>
+            <div class="dbg-splitter dbg-splitter-v" id="dbgSplitLeft" aria-hidden="true"></div>
+            <div class="dbg-splitter dbg-splitter-v" id="dbgSplitRight" aria-hidden="true"></div>
+            <div class="dbg-splitter dbg-splitter-h" id="dbgSplitBottom" aria-hidden="true"></div>
+        </div>
+        <div class="dbg-docs-panel" id="dbgDocsPanel" aria-hidden="true">
+            <div class="dbg-docs-header">
+                <span>Documentație debugger</span>
+                <div class="toolbar-spacer"></div>
+                <button class="dbg-btn" id="dbgDocsCloseBtn">Închide docs</button>
+            </div>
+            <div class="dbg-docs-content" id="dbgDocsContent"></div>
+        </div>
+    </div>
+
+    <!-- Preferences dialog -->
+    <div class="dialog-backdrop" id="prefsBackdrop">
+        <div class="dialog">
+            <div class="dialog-header">
+                Preferințe
+                <div class="toolbar-spacer"></div>
+                <button class="hb-btn" data-close="prefsBackdrop" aria-label="Închide">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                </button>
+            </div>
+            <div class="dialog-body">
+                <div class="pref-group">
+                    <div class="pref-group-title">Conformitate cu programa</div>
+                    <div class="pref-list">
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Mod 2001 strict <span class="lock-badge" id="strictLockBadge">Protejat</span></div>
+                                <div class="pref-row-sub">Respinge orice funcție introdusă după 31 decembrie 2001. Setare protejată la nivel de kernel.</div>
+                            </div>
+                            <label class="switch locked" id="prefStrictSwitch"><input type="checkbox" id="prefStrict" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Acceptă HTML 4.01 Transitional</div>
+                                <div class="pref-row-sub">Permite elemente precum <code>&lt;IFRAME&gt;</code>, <code>&lt;FONT&gt;</code>, <code>&lt;CENTER&gt;</code> și atribute precum <code>target=""</code>, folosite de documentele școlare care nu declară niciun doctype. Dezactivați pentru verificare DTD Strict pură.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefAllowTransitional" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Afișează tracebacks în română</div>
+                                <div class="pref-row-sub">Mesajele de eroare sunt redactate conform manualului oficial.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefRO" checked><span class="slider"></span></label>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Permite atribut <code>style=""</code> inline</div>
+                                <div class="pref-row-sub">Atenție: CSS inline nu este predat la orele de TIC.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefInlineStyle"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pref-group">
+                    <div class="pref-group-title">Editor</div>
+                    <div class="pref-list">
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Evidențiere sintactică</div>
+                                <div class="pref-row-sub"><b>Atenție:</b> activarea acestei opțiuni face editorul să semene cu <code>Code::Blocks</code>, aprobat pentru orele de Informatică (C++), nu cu <code>Notepad</code>, editorul oficial recomandat pentru TIC (HTML).</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefHighlight"><span class="slider"></span></label>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Închidere automată etichete HTML</div>
+                                <div class="pref-row-sub"><b>Atenție:</b> în spiritul programei 2001, eticheta de închidere trebuie scrisă manual de elev. Această funcționalitate ține tot de <code>Code::Blocks</code>.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefAutoClose"><span class="slider"></span></label>
+                        </div>
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Protecție anti-hang</div>
+                                <div class="pref-row-sub">Execuția JavaScript în previzualizare este dezactivată pentru stabilitatea browserului; codul se afișează static. <b>Atenție:</b> dezactivarea permite rulării efective a JS-ului, inclusiv bucle infinite care pot bloca fila.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefAntiHang" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pref-group">
+                    <div class="pref-group-title">Sistem de operare</div>
+                    <div class="pref-list">
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Afișează avertisment SO nesuportat</div>
+                                <div class="pref-row-sub">Bannerul se afișează dacă sistemul detectat nu este Microsoft Windows.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefOSBanner" checked><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pref-group">
+                    <div class="pref-group-title">Aspect</div>
+                    <div class="pref-list">
+                        <div class="pref-row">
+                            <div class="pref-row-text">
+                                <div class="pref-row-title">Temă întunecată</div>
+                                <div class="pref-row-sub">Urmează convenția GNOME pentru Adwaita.</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" id="prefDark"><span class="slider"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn suggested" data-close="prefsBackdrop">Închide</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- About dialog -->
+    <div class="dialog-backdrop" id="aboutBackdrop">
+        <div class="dialog about-dialog" style="max-width: 480px;">
+            <div class="dialog-header">
+                <button class="hb-btn" id="aboutBack" aria-label="Înapoi" style="display:none">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M10 3L5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+                </button>
+                <span class="about-title-bar">Despre Legacy IDE</span>
+                <div class="toolbar-spacer"></div>
+                <button class="hb-btn" data-close="aboutBackdrop" aria-label="Închide">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                </button>
+            </div>
+
+            <div class="dialog-body about-body-wrap">
+                <!-- Top identity block (AdwAboutWindow header) -->
+                <div class="about-identity">
+                    <div class="about-app-icon">&lt;/&gt;</div>
+                    <h2 class="about-app-name">Legacy IDE 2001</h2>
+                    <div class="about-developer">miculpionier</div>
+                    <div class="about-version">Versiunea 1.0.0</div>
+                </div>
+
+                <!-- Quick links row -->
+                <div class="about-links">
+                    <a class="about-link-btn" href="https://gitlab.com/window-ops-web/legacy-ide-2001" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1L2 5v6l6 4 6-4V5zm0 2.2L12.6 6 8 8.8 3.4 6zM3 7.4l4.5 2.7v4.2L3 11.4zm10 0v4L8.5 14.3v-4.2z"/></svg>
+                        Depozit
+                    </a>
+                    <a class="about-link-btn" href="https://gitlab.com/window-ops-web/legacy-ide-2001/-/issues" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 2.5a1 1 0 11-.001 2.001A1 1 0 018 4.5zM7 8h2v4.5H7z"/></svg>
+                        Raportează
+                    </a>
+                    <a class="about-link-btn" href="https://gitlab.com/window-ops-web/legacy-ide-2001/-/releases" target="_blank" rel="noopener noreferrer">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 2v7m-3-3l3 3 3-3M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
+                        Descarcă
+                    </a>
+                </div>
+
+                <!-- View switcher pill bar -->
+                <div class="about-switcher" role="tablist">
+                    <button class="about-switch-btn active" data-about-tab="official" role="tab" aria-selected="true">Oficial</button>
+                    <button class="about-switch-btn" data-about-tab="real" role="tab" aria-selected="false">Despre proiect</button>
+                </div>
+
+                <!-- Pages -->
+                <div class="about-page active" data-about-page="official">
+                    <p class="about-comment">
+                        Un mediu de dezvoltare web <strong>strict conform</strong> cu programa analitică de Tehnologia Informației și a Comunicațiilor aprobată de Ministerul Educației și Cercetării.
+                    </p>
+                    <p class="about-comment">
+                        Compilatorul respinge orice construcție sintactică, funcție sau atribut introdus <em>după</em> decembrie 2001.
+                    </p>
+                    <p class="about-quote">&laquo;Nu învățăm ce nu este în programă.&raquo;</p>
+
+                    <div class="about-group">
+                        <div class="about-group-title">Legal</div>
+                        <div class="about-list">
+                            <div class="about-row"><span class="about-row-key">Copyright</span><span class="about-row-val">© 2001 Ministerul Educației și Cercetării</span></div>
+                            <div class="about-row"><span class="about-row-key">Redistribuire</span><span class="about-row-val">Legea nr. 84/1995</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="about-page" data-about-page="real">
+                    <p class="about-comment">
+                        O satiră funcțională a programei analitice de TIC din anii 2000, care refuză orice construcție introdusă după decembrie 2001 și care simulează un backend QNX scris de o echipă IT foarte neglijentă.
+                    </p>
+
+                    <div class="about-group">
+                        <div class="about-group-title">Informații</div>
+                        <div class="about-list">
+                            <div class="about-row">
+                                <span class="about-row-key">Dezvoltator</span>
+                                <span class="about-row-val">miculpionier</span>
+                            </div>
+                            <div class="about-row">
+                                <span class="about-row-key">Licență</span>
+                                <span class="about-row-val">MIT</span>
+                            </div>
+                            <div class="about-row">
+                                <span class="about-row-key">Depozit</span>
+                                <a class="about-row-val about-row-link" href="https://gitlab.com/window-ops-web/legacy-ide-2001" target="_blank" rel="noopener noreferrer">gitlab.com/window-ops-web/legacy-ide-2001</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="about-group">
+                        <div class="about-group-title">Precizare</div>
+                        <div class="about-notice">
+                            Acest proiect nu este un produs oficial, nu are nicio legătură cu Ministerul Educației și Cercetării și nu este aprobat sau finanțat de vreo instituție publică. Este o lucrare personală de satiră.
+                        </div>
+                        <p class="about-aside">
+                            Satira ar fi fost demult depășită dacă profesorii ar fi fost mai puțin stricți, dacă unitățile de învățământ s-ar fi modernizat și dacă programele școlare ar fi fost actualizate. În loc de asta, iată-ne aici.
+                        </p>
+                    </div>
+
+                    <div class="about-group">
+                        <div class="about-group-title">Arhivare</div>
+                        <div id="aboutDownloads" class="about-list about-downloads">
+                            <!-- Populated by js/ui/about.js when this page opens. -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dialog-footer">
+                <button class="btn suggested" data-close="aboutBackdrop">Închide</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Curriculum dialog -->
+    <div class="dialog-backdrop" id="curriculumBackdrop">
+        <div class="dialog">
+            <div class="dialog-header">
+                Programa școlară &middot; Funcții permise
+                <div class="toolbar-spacer"></div>
+                <button class="hb-btn" data-close="curriculumBackdrop" aria-label="Închide">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                </button>
+            </div>
+            <div class="dialog-body" id="curriculumDialogBody">
+                <!-- Populated by renderCurriculumDialog() in js/ui/about.js. -->
+            </div>
+            <div class="dialog-footer">
+                <button class="btn suggested" data-close="curriculumBackdrop">Am înțeles</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lock dialog -->
+    <div class="dialog-backdrop" id="lockBackdrop">
+        <div class="dialog lock-dialog" style="max-width: 500px;">
+            <div class="dialog-header">Setare protejată</div>
+            <div class="dialog-body">
+                <div class="lock-icon">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 7V5a4 4 0 118 0v2h1v8H3V7zm2 0h4V5a2 2 0 10-4 0z"/></svg>
+                </div>
+                <div class="lock-title">Această opțiune este protejată la nivel de kernel</div>
+                <div class="lock-body" id="lockBody"></div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn" data-close="lockBackdrop">Anulează</button>
+                <button class="btn suggested" id="lockOpenDbg">Deschide debuggerul</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assembler edit dialog -->
+    <div class="dialog-backdrop debugger-owned" id="asmEditBackdrop">
+        <div class="dialog asm-dialog" style="max-width: 580px;">
+            <div class="dialog-header">Editare instrucțiune &middot; mini-asamblor</div>
+            <div class="dialog-body">
+                <div class="asm-edit-ctx" id="asmEditCtx">&nbsp;</div>
+                <label class="prompt-label">Instrucțiune nouă (sintaxă Intel):</label>
+                <input type="text" class="asm-edit-input" id="asmEditInput" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="ex: jmp .clean">
+                <div class="prompt-error" id="asmEditError"></div>
+                <div class="asm-edit-hints">
+                    Acceptat: <code>mov</code>, <code>push</code>, <code>pop</code>, <code>xor</code>, <code>test</code>, <code>cmp</code>, <code>add</code>, <code>sub</code>, <code>jmp</code>, <code>je</code>, <code>jne</code>, <code>jz</code>, <code>jnz</code>, <code>jg</code>, <code>jl</code>, <code>call</code>, <code>ret</code>, <code>leave</code>, <code>nop</code>.
+                    <br>Registre: <code>rax..r15</code>, <code>rbp</code>, <code>rsp</code>. Imediate: <code>0x2a</code>. Memorie: <code>[rbp-0x08]</code>.
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn" id="asmEditRevert">Restaurează</button>
+                <div style="flex:1"></div>
+                <button class="btn" id="asmEditCancel">Anulează</button>
+                <button class="btn suggested" id="asmEditOK">Asamblează</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt dialog -->
+    <div class="dialog-backdrop" id="promptBackdrop">
+        <div class="dialog" style="max-width: 460px;">
+            <div class="dialog-header" id="promptTitle">Introduceți numele</div>
+            <div class="dialog-body">
+                <label class="prompt-label" id="promptLabel">Nume:</label>
+                <input type="text" class="prompt-input" id="promptInput" autocomplete="off" spellcheck="false" autocapitalize="off">
+                <div class="prompt-error" id="promptError"></div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn" id="promptCancel">Anulează</button>
+                <button class="btn suggested" id="promptOK">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- New file dialog -->
+    <div class="dialog-backdrop" id="newFileBackdrop">
+        <div class="dialog" style="max-width: 520px;">
+            <div class="dialog-header">Fișier nou</div>
+            <div class="dialog-body">
+                <label class="prompt-label">Nume fișier:</label>
+                <div class="new-file-fields">
+                    <input type="text" class="prompt-input" id="newFileBaseInput" autocomplete="off" spellcheck="false" autocapitalize="off" placeholder="ex: tema-tic">
+                    <select class="prompt-input" id="newFileExtSelect" aria-label="Extensie fișier">
+                        <option value="html">.html</option>
+                        <option value="js">.js</option>
+                        <option value="css">.css</option>
+                        <option value="txt">.txt</option>
+                        <option value="md">.md</option>
+                    </select>
+                </div>
+                <div class="new-file-warning" id="newFileWarning"></div>
+                <div class="prompt-error" id="newFileError"></div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn" id="newFileCancel">Anulează</button>
+                <button class="btn suggested" id="newFileOK">Creează</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm dialog -->
+    <div class="dialog-backdrop" id="confirmBackdrop">
+        <div class="dialog" style="max-width: 460px;">
+            <div class="dialog-header" id="confirmTitle">Confirmare</div>
+            <div class="dialog-body" id="confirmBody">...</div>
+            <div class="dialog-footer">
+                <button class="btn" id="confirmCancel">Anulează</button>
+                <button class="btn destructive" id="confirmOK">Șterge</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reverse shell dialog -->
+    <div class="dialog-backdrop" id="shellBackdrop">
+        <div class="dialog shell-dialog">
+            <div class="dialog-header">
+                Reverse shell &middot; x11-forwarding tunnel
+                <div class="toolbar-spacer"></div>
+                <button class="hb-btn" id="shellCloseBtn" aria-label="Închide">
+                    <svg viewBox="0 0 16 16" fill="currentColor"><path d="M4 4l8 8m0-8l-8 8" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+                </button>
+            </div>
+            <div class="dialog-body">
+                <div class="shell-terminal-shell">
+                    <div class="shell-screen" id="shellOutput"></div>
+                    <div class="shell-input-row">
+                        <span class="shell-prompt" id="shellPrompt">student@legacy:/srv$</span>
+                        <input type="text" id="shellInput" class="shell-input" autocomplete="off" spellcheck="false">
+                    </div>
+                </div>
+            </div>
+            <div class="dialog-footer">
+                <button class="btn" id="shellClearBtn">Curăță</button>
+                <div style="flex:1"></div>
+                <button class="btn suggested" id="shellRunBtn">Execută</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+</div>
+<div class="qnx-session" id="qnxSession">
+    <div class="qnx-window-frame">
+        <div class="qnx-session-toolbar">
+            <span class="qnx-session-dot"></span>
+            <span>QNX appliance remote workspace</span>
+            <div class="toolbar-spacer"></div>
+            <button class="qnx-disconnect-btn" id="qnxDisconnectBtn">Disconnect</button>
+        </div>
+        <div class="qnx-workspace" id="qnxWorkspace">
+            <div class="qnx-status" id="qnxSessionStatus">Node: qnx-appliance-01 · User: student</div>
+            <div class="qnx-launcher" id="qnxLauncher">
+                <button class="qnx-launch-item" data-open-app="terminal">Open Terminal</button>
+                <button class="qnx-launch-item" data-open-app="files">Open File Browser</button>
+                <button class="qnx-launch-item" data-open-app="processes">Open Process Monitor</button>
+                <button class="qnx-launch-item" data-open-app="network">Open Network Panel</button>
+            </div>
+
+            <div class="qnx-window" id="qnxWinTerminal" data-app="terminal" style="left:70px;top:60px;">
+                <div class="qnx-window-bar"><span>pterm · /bin/ksh</span><span class="qnx-win-controls"><button class="qnx-win-btn" data-min-app="terminal">-</button><button class="qnx-win-btn" data-close-app="terminal">X</button></span></div>
+                <div class="qnx-window-body">
+                    <div class="qnx-terminal-shell">
+                        <div class="qnx-terminal-out" id="qnxTerminalOut"></div>
+                        <div class="qnx-terminal-row">
+                            <span class="terminal-prompt" id="qnxPromptLabel">student@qnx-appliance-01:/srv$</span>
+                            <input id="qnxTerminalInput" class="qnx-terminal-in" type="text" autocomplete="off" spellcheck="false">
+                            <button class="qnx-task-btn" id="qnxTerminalRunBtn">Run</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="qnx-resize-handle" data-resize-app="terminal" aria-hidden="true"></div>
+            </div>
+
+            <div class="qnx-window" id="qnxWinFiles" data-app="files" style="left:160px;top:90px;">
+                <div class="qnx-window-bar"><span>File Browser</span><span class="qnx-win-controls"><button class="qnx-win-btn" data-min-app="files">-</button><button class="qnx-win-btn" data-close-app="files">X</button></span></div>
+                <div class="qnx-window-body" id="qnxFilesBody"></div>
+                <div class="qnx-resize-handle" data-resize-app="files" aria-hidden="true"></div>
+            </div>
+
+            <div class="qnx-window" id="qnxWinProcesses" data-app="processes" style="left:220px;top:130px;">
+                <div class="qnx-window-bar"><span>Process Monitor</span><span class="qnx-win-controls"><button class="qnx-win-btn" data-min-app="processes">-</button><button class="qnx-win-btn" data-close-app="processes">X</button></span></div>
+                <div class="qnx-window-body" id="qnxProcessesBody"></div>
+                <div class="qnx-resize-handle" data-resize-app="processes" aria-hidden="true"></div>
+            </div>
+
+            <div class="qnx-window" id="qnxWinNetwork" data-app="network" style="left:280px;top:170px;">
+                <div class="qnx-window-bar"><span>Network / Services</span><span class="qnx-win-controls"><button class="qnx-win-btn" data-min-app="network">-</button><button class="qnx-win-btn" data-close-app="network">X</button></span></div>
+                <div class="qnx-window-body" id="qnxNetworkBody"></div>
+                <div class="qnx-resize-handle" data-resize-app="network" aria-hidden="true"></div>
+            </div>
+
+            <div class="qnx-taskbar">
+                <button class="qnx-start-btn" id="qnxStartBtn">Menu</button>
+                <button class="qnx-task-btn" data-open-app="terminal">Terminal</button>
+                <button class="qnx-task-btn" data-open-app="files">Files</button>
+                <button class="qnx-task-btn" data-open-app="processes">Processes</button>
+                <button class="qnx-task-btn" data-open-app="network">Network</button>
+                <span class="qnx-clock" id="qnxClock"></span>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Load order notes:
+     core/state, core/utils  : globals used everywhere
+     ui/prompts              : showPrompt/showConfirm used by tabs/tree
+     editor/tree, editor/tabs: depend on prompts
+     ui/dialogs|layout|dragdrop|menus : generic UI primitives
+     editor/highlight        : updateHighlight, used by editor.js/preferences
+     editor/editor           : renderTabs, mountEditor, etc.
+     editor/lint             : lintCode, liveLintStatus, formatTraceback
+     ui/theme                : applyTheme (used by preferences)
+     ui/osbanner             : renderBanner (used by preferences)
+     editor/run              : runCode, runJsLive, alert bridge, toolbar
+     ui/preferences          : preference dialog wiring
+     debugger/*              : debugger stack -->
+<script src="js/core/state.js"></script>
+<script src="js/core/utils.js"></script>
+<script src="js/ui/prompts.js"></script>
+<script src="js/editor/tree.js"></script>
+<script src="js/editor/tabs.js"></script>
+<script src="js/ui/dialogs.js"></script>
+<script src="js/ui/layout.js"></script>
+<script src="js/ui/dragdrop.js"></script>
+<script src="js/ui/menus.js"></script>
+<script src="js/editor/highlight.js"></script>
+<script src="js/editor/editor.js"></script>
+<script src="js/editor/lint.js"></script>
+<script src="js/ui/theme.js"></script>
+<script src="js/ui/osbanner.js"></script>
+<script src="js/editor/run.js"></script>
+<script src="js/editor/downloads.js"></script>
+<script src="js/ui/preferences.js"></script>
+<script src="js/ui/about.js"></script>
+<script src="js/debugger/vm.js"></script>
+<script src="js/debugger/debugger.js"></script>
+<script src="js/debugger/docs.js"></script>
+<script src="js/debugger/backend.js"></script>
+<script src="js/shell/reverse-shell.js"></script>
+<script src="js/qnx/qnx.js"></script>
+<script src="js/debugger/controls.js"></script>
+<script src="js/menu.js"></script>
+<script src="js/core/smoke.js"></script>
+<script src="js/core/init.js"></script>
+</body>
+</html>

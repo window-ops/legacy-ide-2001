@@ -1,0 +1,806 @@
+/* ============================================================
+   DEBUGGER
+   ============================================================ */
+.debugger {
+    --dbg-left-col: 220px;
+    --dbg-right-col: 300px;
+    --dbg-bottom-row: 180px;
+    /* Splitters: colors from debugger chrome (#2a343e borders / #3a4654 hovers), not IDE tokens */
+    --dbg-splitter-idle:  rgba(58, 70, 84, 0.55);
+    --dbg-splitter-hover: #4a5a6a;
+    /* Same perceived weight for V and H (horizontal was reading thinner at 1px). */
+    --dbg-splitter-line-thickness: 2px;
+    --dbg-splitter-line-thickness-hc: 3px;
+    position: fixed;
+    inset: 0;
+    background: #0b1015;
+    color: #cfd6dd;
+    z-index: 500;
+    display: none;
+    flex-direction: column;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+}
+.debugger.open { display: flex; }
+
+.dbg-titlebar {
+    display: flex; align-items: center;
+    height: 42px; min-height: 42px;
+    padding: 0 8px 0 14px;
+    background: linear-gradient(180deg, #1a2128, #11171c);
+    border-bottom: 1px solid #000;
+    gap: 10px;
+    font-family: var(--font-body);
+    color: #d9e1ea;
+    flex-shrink: 0;
+}
+.dbg-logo {
+    font-family: var(--font-mono);
+    font-weight: 700; font-size: 11px;
+    color: #47d1ff;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+}
+.dbg-title { font-weight: 600; font-size: 13px; flex-shrink: 0; }
+.dbg-title-sub {
+    font-size: 11px;
+    color: #6c7f91;
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
+}
+
+.dbg-toolbar {
+    display: flex; align-items: center;
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 8px 10px;
+    background: #141a21;
+    border-bottom: 1px solid #000;
+    height: 48px;
+    min-height: 48px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+}
+.dbg-toolbar::-webkit-scrollbar { height: 3px; }
+.dbg-btn {
+    padding: 0 12px;
+    height: 30px;
+    border-radius: 5px;
+    border: 1px solid #2a343e;
+    background: #1c242c;
+    color: #cfd6dd;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 12px;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 120ms;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+.dbg-btn:hover { background: #2a343e; border-color: #3a4654; }
+.dbg-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.dbg-btn.accent { background: #0c4a77; border-color: #1363a0; color: #fff; }
+.dbg-btn.accent:hover { background: #1363a0; }
+.dbg-btn.danger { background: #5e1620; border-color: #8a1b26; color: #ffc2c7; }
+.dbg-btn.danger:hover { background: #8a1b26; }
+.dbg-btn .kbd {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: #7a8896;
+    margin-left: 2px;
+}
+.dbg-toolbar-sep {
+    width: 1px;
+    background: #2a343e;
+    height: 24px;
+    margin: 0 4px;
+    flex-shrink: 0;
+}
+
+.dbg-body {
+    flex: 1;
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--dbg-left-col) minmax(280px, 1fr) var(--dbg-right-col);
+    grid-template-rows: minmax(160px, 1fr) var(--dbg-bottom-row);
+    grid-template-areas: "funcs disasm regs" "funcs log   stack";
+    min-height: 0;
+    overflow: hidden;
+}
+.dbg-pane {
+    background: #10161c;
+    border: 1px solid #000;
+    border-width: 0 1px 1px 0;
+    display: flex; flex-direction: column;
+    min-height: 0; min-width: 0;
+    overflow: hidden;
+}
+.dbg-pane-header {
+    display: flex; align-items: center;
+    padding: 6px 12px;
+    background: #1a2128;
+    border-bottom: 1px solid #000;
+    color: #9bb4ca;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    height: 30px; min-height: 30px;
+    flex-shrink: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.dbg-pane-header .hint {
+    color: #5a6b7b;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    margin-left: auto;
+    font-size: 10.5px;
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+}
+
+.dbg-funcs { grid-area: funcs; border-right-width: 1px; }
+.dbg-disasm-pane { grid-area: disasm; }
+.dbg-regs-pane { grid-area: regs; border-right-width: 0; }
+.dbg-log-pane { grid-area: log; }
+.dbg-stack-pane { grid-area: stack; border-right-width: 0; }
+
+.dbg-splitter {
+    position: absolute;
+    z-index: 3;
+    user-select: none;
+    touch-action: none;
+    background: transparent;
+}
+.dbg-splitter-v {
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    cursor: col-resize;
+}
+.dbg-splitter-h {
+    left: var(--dbg-left-col);
+    right: 0;
+    height: 2px;
+    cursor: row-resize;
+}
+#dbgSplitLeft {
+    left: calc(var(--dbg-left-col) - 1px);
+}
+#dbgSplitRight {
+    left: calc(100% - var(--dbg-right-col) - 1px);
+}
+#dbgSplitBottom {
+    top: calc(100% - var(--dbg-bottom-row) - 1px);
+}
+.dbg-splitter-v::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -4px;
+    right: -4px;
+    background: transparent;
+}
+.dbg-splitter-h::before {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: -4px;
+    bottom: -4px;
+    background: transparent;
+}
+/* Visible divider: shared thickness for vertical and horizontal splitters. */
+.dbg-splitter-v::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: var(--dbg-splitter-line-thickness);
+    transform: translateX(-50%);
+    background: var(--dbg-splitter-idle);
+    transition: background 120ms;
+    pointer-events: none;
+}
+.dbg-splitter-h::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    top: 50%;
+    height: var(--dbg-splitter-line-thickness);
+    transform: translateY(-50%);
+    background: var(--dbg-splitter-idle);
+    transition: background 120ms;
+    pointer-events: none;
+}
+.dbg-splitter:hover::after,
+.debugger.resizing .dbg-splitter::after {
+    background: var(--dbg-splitter-hover);
+}
+
+@media (prefers-contrast: more) {
+    .dbg-splitter-v::after {
+        width: var(--dbg-splitter-line-thickness-hc);
+    }
+    .dbg-splitter-h::after {
+        height: var(--dbg-splitter-line-thickness-hc);
+    }
+    .dbg-splitter:hover::after,
+    .debugger.resizing .dbg-splitter::after {
+        background: #cfd6dd;
+    }
+}
+
+.dbg-func-list {
+    flex: 1;
+    overflow: auto;
+    padding: 6px;
+}
+.dbg-func-item {
+    padding: 9px 12px;
+    cursor: pointer;
+    border-radius: 5px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: #9bb4ca;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border-left: 2px solid transparent;
+    margin-bottom: 3px;
+    position: relative;
+}
+.dbg-func-item:hover { background: #1a2128; }
+.dbg-func-item.active {
+    background: #0c2b44;
+    border-left-color: #47d1ff;
+    color: #fff;
+}
+.dbg-func-item .fn-addr { color: #5a6b7b; font-size: 10.5px; }
+.dbg-func-item.patched::after {
+    content: 'PATCHED';
+    position: absolute;
+    top: 6px; right: 8px;
+    font-size: 9px;
+    background: #a33d14;
+    color: #fff;
+    padding: 1px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+    font-family: var(--font-body);
+    font-weight: 700;
+}
+
+.dbg-disasm {
+    flex: 1;
+    overflow: auto;
+    padding: 8px 0;
+}
+.disasm-line {
+    display: grid;
+    grid-template-columns: 24px 130px 160px 1fr auto;
+    gap: 10px;
+    padding: 3px 14px 3px 6px;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    line-height: 1.6;
+    position: relative;
+    border-left: 3px solid transparent;
+    white-space: nowrap;
+    min-height: 26px;
+}
+.disasm-line:hover { background: #161d25; }
+.disasm-line.rip { background: #1c3045; border-left-color: #47d1ff; }
+.disasm-line.label {
+    padding: 10px 0 4px 24px;
+    color: #7ed07e;
+    font-weight: 600;
+    border-left: none;
+    grid-template-columns: auto;
+}
+.disasm-line.patched { background: rgba(163,61,20,0.18); border-left-color: #e5821a; }
+.disasm-rip-marker {
+    display: inline-block;
+    width: 20px;
+    text-align: center;
+    color: #47d1ff;
+    font-weight: 700;
+}
+.disasm-line.rip .disasm-rip-marker::before { content: '▶'; }
+.disasm-addr { color: #5a6b7b; font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; }
+.disasm-bytes { color: #6c7f91; font-size: 11.5px; letter-spacing: 0.03em; overflow: hidden; text-overflow: ellipsis; }
+.disasm-bytes.nop { color: #e5821a; }
+.asm-cell { overflow: hidden; text-overflow: ellipsis; }
+.asm-mnem { color: #c08eff; font-weight: 600; }
+.asm-mnem.jump { color: #e5a50a; }
+.asm-mnem.call { color: #47d1ff; }
+.asm-mnem.ret, .asm-mnem.leave { color: #ff7b8a; }
+.asm-reg { color: #8ed9ff; }
+.asm-imm { color: #ffbe6f; }
+.asm-mem { color: #8fdc8f; }
+.asm-punct { color: #6c7f91; }
+.asm-label-ref { color: #8fdc8f; }
+.asm-comment { color: #5a6b7b; font-style: italic; }
+.asm-strike { text-decoration: line-through; text-decoration-color: rgba(229,130,26,0.5); opacity: 0.7; }
+.asm-new { color: #8fdc8f; margin-left: 6px; font-weight: 600; }
+
+.disasm-actions {
+    display: flex;
+    gap: 2px;
+    visibility: hidden;
+    flex-shrink: 0;
+}
+.disasm-line:hover .disasm-actions { visibility: visible; }
+.disasm-line.rip .disasm-actions,
+.disasm-line.patched .disasm-actions { visibility: visible; }
+.disasm-action-btn {
+    padding: 2px 8px;
+    height: 22px;
+    font-family: var(--font-body);
+    font-size: 10.5px;
+    border-radius: 3px;
+    border: 1px solid #2a343e;
+    background: #1c242c;
+    color: #cfd6dd;
+    cursor: pointer;
+}
+.disasm-action-btn:hover { background: #2a343e; }
+.disasm-action-btn.revert { border-color: #4a6a8a; color: #8ed9ff; }
+
+.dbg-regs {
+    flex: 1;
+    overflow: auto;
+    padding: 10px 12px;
+}
+.reg-row {
+    display: grid;
+    grid-template-columns: 52px 1fr;
+    gap: 8px;
+    padding: 3px 4px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    line-height: 1.6;
+    border-radius: 3px;
+}
+.reg-row.changed {
+    background: rgba(71,209,255,0.14);
+    animation: regFlash 700ms;
+}
+@keyframes regFlash {
+    0% { background: rgba(71,209,255,0.5); }
+    100% { background: rgba(71,209,255,0.14); }
+}
+.reg-name { color: #c08eff; font-weight: 600; }
+.reg-val { color: #ffbe6f; overflow: hidden; text-overflow: ellipsis; }
+.reg-val.zero { color: #5a6b7b; }
+
+.reg-flags {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #2a343e;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+.flag-bit {
+    padding: 3px 7px;
+    border: 1px solid #2a343e;
+    border-radius: 3px;
+    color: #5a6b7b;
+    background: #141a21;
+}
+.flag-bit.set {
+    background: #0c4a77;
+    border-color: #47d1ff;
+    color: #fff;
+}
+
+.dbg-stack {
+    flex: 1;
+    overflow: auto;
+    padding: 10px 12px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+}
+.stack-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 8px;
+    padding: 2px 4px;
+    color: #9bb4ca;
+    border-radius: 2px;
+    font-size: 11px;
+}
+.stack-row.rsp { background: rgba(71,209,255,0.10); }
+.stack-row.rbp { background: rgba(192,142,255,0.10); }
+.stack-row .s-addr { color: #5a6b7b; overflow: hidden; text-overflow: ellipsis; }
+.stack-row .s-val { color: #ffbe6f; overflow: hidden; text-overflow: ellipsis; }
+.stack-row .s-note { color: #47d1ff; font-size: 10px; }
+.stack-row.rbp .s-note { color: #c08eff; }
+
+.dbg-log {
+    flex: 1;
+    overflow: auto;
+    padding: 10px 14px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: #9bb4ca;
+}
+.log-entry { margin-bottom: 4px; }
+.log-entry.info   { color: #9bb4ca; }
+.log-entry.patch  { color: #e5821a; }
+.log-entry.effect { color: #8fdc8f; }
+.log-entry.warn   { color: #e5a50a; }
+.log-entry.err    { color: #ff7b8a; }
+.log-entry .ts    { color: #5a6b7b; }
+.log-entry code   { background: rgba(255,255,255,0.06); padding: 1px 4px; border-radius: 2px; }
+
+.dbg-exploit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.dbg-select {
+    height: 30px;
+    border-radius: 5px;
+    border: 1px solid #2a343e;
+    background: #0f141a;
+    color: #cfd6dd;
+    padding: 0 8px;
+    font-size: 12px;
+    font-family: var(--font-body);
+}
+.runtime-glitch .editor-area,
+.runtime-glitch .output-panel,
+.runtime-glitch .statusbar {
+    filter: hue-rotate(12deg) contrast(1.07) saturate(1.15);
+}
+.runtime-glitch .editor-area {
+    transform: translateX(1px);
+}
+.debugger.hide-regs .dbg-regs-pane,
+.debugger.hide-log .dbg-log-pane {
+    display: none;
+}
+.debugger.hide-regs .dbg-body {
+    grid-template-columns: 220px 1fr 300px;
+    grid-template-areas: "funcs disasm stack" "funcs log stack";
+}
+.dbg-docs-panel {
+    position: absolute;
+    top: 54px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(980px, calc(100% - 32px));
+    max-height: calc(100% - 70px);
+    background: #0f151c;
+    border: 1px solid #2a343e;
+    border-radius: 8px;
+    box-shadow: 0 14px 36px rgba(0,0,0,0.45);
+    display: none;
+    flex-direction: column;
+    z-index: 8;
+    min-height: 0;
+}
+.dbg-docs-panel.open { display: flex; }
+.dbg-docs-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-bottom: 1px solid #2a343e;
+    background: #141c24;
+    color: #9bb4ca;
+    font-size: 12px;
+    font-family: var(--font-body);
+    border-radius: 8px 8px 0 0;
+}
+.dbg-docs-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    flex: 1;
+    overflow: auto;
+}
+.dbg-help {
+    padding: 14px;
+    display: grid;
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 14px;
+    min-height: 0;
+}
+.dbg-help-nav {
+    border: 1px solid #2a343e;
+    border-radius: 6px;
+    background: #111820;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-self: start;
+    position: sticky;
+    top: 0;
+}
+.dbg-help-tab {
+    text-align: left;
+    border: 1px solid #304153;
+    background: #17222e;
+    color: #d2deeb;
+    border-radius: 5px;
+    padding: 8px 10px;
+    font-size: 12px;
+    cursor: pointer;
+}
+.dbg-help-tab:hover { background: #213141; }
+.dbg-help-tab[aria-selected="true"] {
+    background: #1f3f63;
+    border-color: #4e90d1;
+    color: #fff;
+}
+.dbg-help-tab:focus-visible,
+.dbg-docs-header .dbg-btn:focus-visible {
+    outline: 2px solid #68abff;
+    outline-offset: 2px;
+}
+.dbg-help-main {
+    border: 1px solid #2a343e;
+    border-radius: 6px;
+    background: #111820;
+    min-height: 0;
+    overflow: auto;
+    padding: 14px;
+    width: 100%;
+    max-width: none;
+}
+.dbg-help-page { display: none; }
+.dbg-help-page.active { display: block; }
+.dbg-help-page h4 {
+    margin: 0 0 10px;
+    color: #dce8f5;
+    font-size: 14px;
+}
+.dbg-help-page p, .dbg-help-page li {
+    color: #aec1d5;
+    font-size: 12.5px;
+    line-height: 1.6;
+}
+.dbg-help-page p:last-child,
+.dbg-help-page ul:last-child,
+.dbg-help-page ol:last-child,
+.dbg-help-page table:last-child,
+.dbg-help-page .dbg-help-callout:last-child { margin-bottom: 0; }
+.dbg-help-page code {
+    font-family: var(--font-mono);
+    background: #1c2b38;
+    color: #a8d1ff;
+    padding: 1px 4px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+.dbg-help-page pre {
+    margin: 10px 0;
+    padding: 10px 12px;
+    border: 1px solid #2a343e;
+    border-radius: 6px;
+    background: #0f151c;
+    overflow-x: auto;
+}
+.dbg-help-page pre code {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    color: #cfe6ff;
+    white-space: pre;
+}
+.dbg-help-callout {
+    border-left: 3px solid #5ea7f5;
+    background: #172432;
+    color: #d2e6ff;
+    padding: 10px 12px;
+    border-radius: 0 6px 6px 0;
+    margin: 10px 0;
+}
+.dbg-help-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 12px;
+}
+.dbg-help-table th, .dbg-help-table td {
+    border: 1px solid #2f4052;
+    padding: 8px;
+    text-align: left;
+}
+.dbg-help-table th {
+    background: #1a2734;
+    color: #d8e8f8;
+}
+.dbg-help-table td { color: #aec1d5; }
+@media (max-width: 900px) {
+    /* Debugger body collapses to vertical stack at tablet sizes too, so the
+       function list renders vertically instead of being squeezed into a
+       narrow grid column. Kept in sync with the .dbg-help breakpoint below. */
+    .dbg-body {
+        display: flex;
+        flex-direction: column;
+        overflow: auto;
+    }
+    .dbg-splitter { display: none; }
+    .dbg-pane {
+        border-right-width: 0;
+        border-bottom-width: 1px;
+        min-height: 160px;
+    }
+    .dbg-funcs { min-height: 130px; }
+    .dbg-regs-pane, .dbg-log-pane, .dbg-stack-pane { min-height: 170px; }
+
+    /* Docs dialog goes full-bleed inside the debugger so it stops looking
+       like a cramped floating card. No horizontal centering math, no
+       rounded inset box. */
+    .dbg-docs-panel {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: none;
+        width: 100%;
+        max-height: 100%;
+        border-radius: 0;
+        border-left: 0;
+        border-right: 0;
+        border-bottom: 0;
+    }
+    .dbg-docs-header { border-radius: 0; }
+
+    /* Tab nav becomes a horizontal scrollable strip at the top. This is the
+       standard mobile pattern (think iOS tab bars): all tabs reachable with
+       a swipe, always visible, no toggle state to get stuck in. */
+    .dbg-help {
+        grid-template-columns: 1fr;
+        padding: 0;
+        gap: 0;
+    }
+    .dbg-help-nav {
+        position: sticky;
+        top: 0;
+        flex-direction: row;
+        overflow-x: auto;
+        overflow-y: hidden;
+        flex-wrap: nowrap;
+        gap: 6px;
+        padding: 8px 10px;
+        border-width: 0 0 1px 0;
+        border-radius: 0;
+        background: #141c24;
+        z-index: 2;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+    }
+    .dbg-help-tab {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 6px 10px;
+        font-size: 11.5px;
+    }
+    .dbg-help-main {
+        border-width: 0;
+        border-radius: 0;
+        padding: 12px;
+    }
+}
+
+
+
+/* New file dialog */
+.new-file-fields {
+    display: grid;
+    grid-template-columns: 1fr 130px;
+    gap: 10px;
+    align-items: end;
+}
+.new-file-warning {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--warning);
+    line-height: 1.45;
+}
+
+/* Reverse shell */
+.shell-dialog { max-width: 760px; width: min(760px, 100%); }
+.shell-terminal-shell {
+    height: min(58vh, 460px);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #060606;
+    border-radius: 6px;
+    border: 1px solid #2f2f2f;
+}
+.shell-screen {
+    flex: 1;
+    overflow: auto;
+    color: #d6d6d6;
+    padding: 10px;
+    font-family: "IBM Plex Mono","DejaVu Sans Mono","Liberation Mono",monospace;
+    font-size: 12px;
+    line-height: 1.45;
+}
+.shell-line { white-space: pre-wrap; word-break: break-word; }
+.shell-input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-top: 1px solid #222;
+    padding: 8px 10px;
+}
+.shell-prompt {
+    font-family: "IBM Plex Mono","DejaVu Sans Mono","Liberation Mono",monospace;
+    color: #9cc2ff;
+    font-size: 12px;
+}
+.shell-input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #e8e8e8;
+    padding: 0;
+    font-family: "IBM Plex Mono","DejaVu Sans Mono","Liberation Mono",monospace;
+}
+
+@media (max-width: 760px) {
+    .dbg-title-sub { display: none; }
+    .dbg-titlebar {
+        height: 38px;
+        min-height: 38px;
+        padding: 0 8px;
+        gap: 7px;
+    }
+    .dbg-title { font-size: 12px; }
+    .dbg-toolbar {
+        height: 44px;
+        min-height: 44px;
+        padding: 6px 8px;
+    }
+    .dbg-btn {
+        height: 28px;
+        padding: 0 9px;
+        font-size: 11px;
+    }
+    .dbg-pane-header .hint { display: none; }
+    .disasm-line {
+        grid-template-columns: 18px 98px 118px minmax(180px, 1fr);
+        grid-template-areas:
+            "marker addr bytes asm"
+            ". . . actions";
+        align-items: start;
+        row-gap: 4px;
+    }
+    .disasm-rip-marker { grid-area: marker; }
+    .disasm-addr { grid-area: addr; }
+    .disasm-bytes { grid-area: bytes; }
+    .asm-cell { grid-area: asm; }
+    .disasm-actions {
+        grid-area: actions;
+        visibility: visible;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+}
