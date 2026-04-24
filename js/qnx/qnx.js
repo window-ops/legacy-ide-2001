@@ -72,6 +72,23 @@ function runApplianceCommand(raw, context) {
     var arg = parts.slice(1).join(' ');
     if (c === 'sudo') {
         if (!arg) { out.lines.push('usage: sudo <command>'); return out; }
+        // sudo -l works at any stage and leaks the existence of the
+        // supervisor account. This is the narrative breadcrumb: the
+        // IT staff forgot the default sudoers and put everything
+        // elevated under "defaultuser" instead of root.
+        if (arg === '-l' || arg === '--list') {
+            out.lines.push('Matching Defaults entries for ' + STATE.appliance.user + ' on gdx-appliance:');
+            out.lines.push('    env_reset, mail_badpass, secure_path=/usr/sbin:/usr/bin');
+            out.lines.push('');
+            out.lines.push('User ' + STATE.appliance.user + ' may run the following commands on gdx-appliance:');
+            out.lines.push('    (root) NOPASSWD: /bin/false');
+            out.lines.push('');
+            out.lines.push('# /etc/sudoers.d/90-appliance (installed by packager)');
+            out.lines.push('# NOTE: root account intentionally empty; elevated operations');
+            out.lines.push('# live under user "defaultuser" (internal use only, not for students).');
+            out.lines.push('# Switch with: su defaultuser    (needs key from gdx-debugd)');
+            return out;
+        }
         if (STATE.exploit.stage < 3) { out.lines.push('sudo: permission denied (need deeper debugger patches).'); return out; }
         out.lines.push('[sudo] policy bypass accepted for: ' + arg);
         var nested = runApplianceCommand(arg, context);
@@ -79,7 +96,36 @@ function runApplianceCommand(raw, context) {
         out.clear = nested.clear;
         return out;
     }
-    if (c === 'help') out.lines.push('Comenzi: help ls cd pwd cat touch mkdir whoami uname ps pidin netstat echo clear startx photon mdpatch markdown-enable logout exit');
+    // su defaultuser — the supervisor-account escalation. Requires the
+    // "key" produced by the debugger after the check_curriculum bypass
+    // patch (stage 3 binaryPatches.bypassCurriculum). Calls into the
+    // defaultuser exploit module to switch the visible session.
+    if (c === 'su') {
+        var target = arg.split(/\s+/)[0] || '';
+        if (target !== 'defaultuser') {
+            out.lines.push('su: authentication failed or unknown user: ' + (target || '(none)'));
+            return out;
+        }
+        var hasKey = STATE.binaryPatches && (STATE.binaryPatches.bypassCurriculum || STATE.binaryPatches.curriculumNonBlocking);
+        if (!hasKey) {
+            out.lines.push('su: defaultuser: authentication key missing.');
+            out.lines.push('    The key is emitted by gdx-debugd once the curriculum');
+            out.lines.push('    check has been patched. Open the debugger and invert the');
+            out.lines.push('    jz in check_curriculum (or run the Edit patch on its return).');
+            return out;
+        }
+        if (typeof window.triggerDefaultuserExploit === 'function') {
+            out.lines.push('su: authentication key accepted (from gdx-debugd).');
+            out.lines.push('su: switching session owner to defaultuser…');
+            // Defer the actual visual switch slightly so the shell output
+            // has a chance to render before the taskbar animation runs.
+            setTimeout(function() { window.triggerDefaultuserExploit('shell'); }, 120);
+        } else {
+            out.lines.push('su: defaultuser module not loaded.');
+        }
+        return out;
+    }
+    if (c === 'help') out.lines.push('Comenzi: help ls cd pwd cat touch mkdir whoami uname ps pidin netstat echo clear startx photon mdpatch markdown-enable sudo su logout exit');
     else if (c === 'pwd') out.lines.push(STATE.appliance.cwd);
     else if (c === 'ls') out.lines.push(shellList(pathJoin(STATE.appliance.cwd, arg || '.')));
     else if (c === 'cd') {

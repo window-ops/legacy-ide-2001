@@ -1,0 +1,806 @@
+/* ============================================================
+ WINDOWS SERVER 2003 CLASSIC THEME
+ Faithful to the real Classic theme Server 2003 shipped with
+ by default (Luna disabled). Activated by body.srv2003-desktop.
+
+ Key palette values, matching the Win32 system colors:
+ 3D face #d4d0c8
+ 3D light #ffffff
+ 3D shadow #808080
+ 3D dark shadow #404040
+ Active title linear gradient #0a246a -> #a6caf0
+ Inactive title #808080
+ Desktop #3a6ea5
+ Button face #d4d0c8
+ Selection #0a246a (text highlight)
+
+ Default font: Tahoma 8pt. Classic uses MS Sans Serif in
+ several places too; Tahoma is close enough and always
+ available.
+ ============================================================ */
+
+body.srv2003-desktop {
+    background: #3a6ea5;
+    color: #000000;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+
+/* Kill every QNX chrome element that carries X11/Photon flavor:
+ the workspace launcher at the edge, the QNX taskbar, the session
+ toolbar with the sign-out pill. The Server 2003 taskbar and Start
+ menu below replace them entirely. */
+body.srv2003-desktop .qnx-session-toolbar,
+body.srv2003-desktop .qnx-disconnect-btn,
+body.srv2003-desktop .qnx-start-btn,
+body.srv2003-desktop .qnx-taskbar,
+body.srv2003-desktop .qnx-launcher {
+    display: none !important;
+}
+
+/* ============================================================
+ WINDOWS IN CLASSIC THEME
+ ============================================================ */
+body.srv2003-desktop .qnx-window {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf,
+        2px 2px 4px rgba(0, 0, 0, 0.25);
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .qnx-window-bar {
+    background: linear-gradient(90deg, #0a246a 0%, #3a6ea5 60%, #a6caf0 100%);
+    color: #ffffff;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 3px 2px 5px;
+    height: 18px;
+    border: 0;
+    cursor: move;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    letter-spacing: 0.01em;
+}
+
+body.srv2003-desktop .qnx-window:not(.active) .qnx-window-bar {
+    background: linear-gradient(90deg, #808080 0%, #b5b5b5 100%);
+    color: #d5d5d5;
+}
+
+body.srv2003-desktop .qnx-win-controls {
+    display: flex;
+    gap: 2px;
+    margin-left: auto;
+}
+
+body.srv2003-desktop .qnx-win-btn {
+    width: 16px;
+    height: 14px;
+    padding: 0;
+    background: #d4d0c8;
+    border: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    color: #000000;
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    border-radius: 0;
+}
+
+body.srv2003-desktop .qnx-win-btn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+body.srv2003-desktop .qnx-win-btn.close,
+body.srv2003-desktop .qnx-win-btn[data-action="close"] {
+    background: #d4d0c8;
+    color: #000000;
+}
+
+body.srv2003-desktop .qnx-window-body {
+    background: #d4d0c8;
+    color: #000000;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+
+/* ============================================================
+ BUTTONS (Classic 3D bevel)
+ ============================================================ */
+body.srv2003-desktop .qnx-window-body button,
+body.srv2003-desktop .qnx-window-body .btn,
+body.srv2003-desktop .qnx-window-body input[type=button],
+body.srv2003-desktop .qnx-window-body input[type=submit] {
+    appearance: none;
+    -webkit-appearance: none;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    padding: 3px 12px;
+    background: #d4d0c8;
+    border: 0;
+    border-radius: 0;
+    color: #000000;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    cursor: pointer;
+    min-width: 72px;
+    line-height: 1.3;
+}
+
+body.srv2003-desktop .qnx-window-body button:active,
+body.srv2003-desktop .qnx-window-body .btn:active,
+body.srv2003-desktop .qnx-window-body input[type=button]:active,
+body.srv2003-desktop .qnx-window-body input[type=submit]:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+    padding: 4px 11px 2px 13px;
+}
+
+body.srv2003-desktop .qnx-window-body button:focus-visible,
+body.srv2003-desktop .qnx-window-body .btn:focus-visible {
+    outline: 1px dotted #000000;
+    outline-offset: -4px;
+}
+
+body.srv2003-desktop .qnx-window-body .btn.suggested {
+    font-weight: 700;
+}
+
+/* ============================================================
+ TEXT INPUTS (sunken 3D)
+ ============================================================ */
+body.srv2003-desktop .qnx-window-body input[type=text],
+body.srv2003-desktop .qnx-window-body input[type=search],
+body.srv2003-desktop .qnx-window-body input[type=password],
+body.srv2003-desktop .qnx-window-body select,
+body.srv2003-desktop .qnx-window-body textarea {
+    background: #ffffff;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    color: #000000;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    padding: 3px 4px;
+}
+
+/* ============================================================
+ TERMINAL (cmd.exe look)
+ ============================================================ */
+body.srv2003-desktop .qnx-terminal-shell {
+    background: #000000;
+    color: #c0c0c0;
+    font-family: "Consolas", "Lucida Console", "Courier New", monospace;
+    font-size: 12px;
+    padding: 6px 8px;
+}
+
+body.srv2003-desktop .qnx-terminal-out,
+body.srv2003-desktop .qnx-terminal-row {
+    color: #c0c0c0;
+}
+
+body.srv2003-desktop .qnx-terminal-in {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    color: #c0c0c0;
+    font-family: inherit;
+    padding: 0;
+}
+
+/* ============================================================
+ FILE BROWSER / LIST VIEWS (Explorer Classic look)
+ ============================================================ */
+body.srv2003-desktop .qnx-file-pane,
+body.srv2003-desktop .qnx-socket-list,
+body.srv2003-desktop .qnx-list {
+    background: #ffffff;
+    color: #000000;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .qnx-grid-head {
+    background: #d4d0c8;
+    color: #000000;
+    font-weight: 400;
+    border: 0;
+    box-shadow:
+        inset -1px -1px 0 #808080,
+        inset 1px 1px 0 #ffffff;
+    font-size: 11px;
+    padding: 3px 8px;
+}
+
+body.srv2003-desktop .qnx-grid-row {
+    border: 0;
+    padding: 1px 8px;
+    color: #000000;
+}
+
+body.srv2003-desktop .qnx-grid-row:hover {
+    background: #d6e8ff;
+}
+
+body.srv2003-desktop .qnx-grid-row.selected {
+    background: #0a246a;
+    color: #ffffff;
+}
+
+/* ============================================================
+ IDE HEADER AND SIDEBAR
+ The IDE itself must stop looking like a modern web app: the
+ header bar, sidebar, and status bar all get a Classic face.
+ ============================================================ */
+body.srv2003-desktop .header-bar {
+    background: #d4d0c8;
+    color: #000000;
+    border-bottom: 1px solid #808080;
+    box-shadow: inset 0 -1px 0 #ffffff, inset 0 1px 0 #ffffff;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .header-bar .hb-btn {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    padding: 2px 6px;
+    height: 20px;
+}
+
+body.srv2003-desktop .header-bar .hb-btn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+body.srv2003-desktop .sidebar {
+    background: #d4d0c8;
+    color: #000000;
+    border-right: 1px solid #808080;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .sidebar-toolbar {
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+    box-shadow: inset 0 -1px 0 #ffffff;
+}
+
+body.srv2003-desktop .tree-row:hover {
+    background: #d6e8ff;
+}
+
+body.srv2003-desktop .tree-row.active,
+body.srv2003-desktop .tree-row.selected {
+    background: #0a246a;
+    color: #ffffff;
+}
+
+body.srv2003-desktop .status-bar,
+body.srv2003-desktop .statusbar {
+    background: #d4d0c8;
+    color: #000000;
+    border-top: 1px solid #808080;
+    box-shadow: inset 0 1px 0 #ffffff;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+}
+
+/* Editor panel: white like a classic text editor window */
+body.srv2003-desktop .editor-inner,
+body.srv2003-desktop .editor-outer {
+    background: #ffffff;
+}
+
+body.srv2003-desktop #editor {
+    background: #ffffff;
+    color: #000000;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+}
+
+body.srv2003-desktop .line-numbers {
+    background: #d4d0c8;
+    color: #606060;
+    border-right: 1px solid #808080;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+}
+
+body.srv2003-desktop .output-panel,
+body.srv2003-desktop #output {
+    background: #ffffff;
+    color: #000000;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-size: 11px;
+}
+
+/* Tabs at the top of the editor look like Classic property-page tabs */
+body.srv2003-desktop .tabs-bar,
+body.srv2003-desktop .tab-bar {
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+}
+
+body.srv2003-desktop .tab {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset -1px 0 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px 0 0 #808080;
+    padding: 3px 10px;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .tab.active {
+    background: #ffffff;
+    color: #000000;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px 0 0 #404040,
+        inset -2px 0 0 #808080;
+}
+
+/* ============================================================
+ DEBUGGER RE-THEME
+ Same Classic look applied to all the debugger chrome so it
+ stops looking like a modern developer tool.
+ ============================================================ */
+body.srv2003-desktop .dbg-backdrop .dbg-window,
+body.srv2003-desktop .debugger-window {
+    background: #d4d0c8;
+    color: #000000;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf,
+        4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.srv2003-desktop .dbg-titlebar,
+body.srv2003-desktop .debugger-titlebar {
+    background: linear-gradient(90deg, #0a246a 0%, #3a6ea5 60%, #a6caf0 100%);
+    color: #ffffff;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 5px;
+    height: 18px;
+}
+
+body.srv2003-desktop .dbg-body,
+body.srv2003-desktop .dbg-body pre {
+    background: #d4d0c8;
+    color: #000000;
+}
+
+body.srv2003-desktop .dbg-listing,
+body.srv2003-desktop .dbg-disassembly {
+    background: #ffffff;
+    color: #000000;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-size: 11px;
+    border: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+}
+
+body.srv2003-desktop .dbg-button,
+body.srv2003-desktop .dbg-btn,
+body.srv2003-desktop .debugger-window button {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    padding: 3px 12px;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    min-width: 72px;
+}
+
+body.srv2003-desktop .dbg-log {
+    background: #ffffff;
+    color: #000000;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+}
+
+/* ============================================================
+ SERVER 2003 TASKBAR
+ Gray Classic taskbar, not the XP Luna blue.
+ ============================================================ */
+.srv2k3-taskbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 28px;
+    z-index: 9500;
+    background: #d4d0c8;
+    border-top: 1px solid #ffffff;
+    box-shadow:
+        inset 0 1px 0 #ffffff,
+        0 -1px 0 #808080,
+        0 -2px 0 #404040;
+    display: flex;
+    align-items: stretch;
+    padding: 2px;
+    gap: 2px;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    color: #000000;
+    user-select: none;
+}
+
+.srv2k3-start {
+    appearance: none;
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    min-width: 60px;
+}
+
+.srv2k3-start:active,
+.srv2k3-start.open {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+.srv2k3-start-flag {
+    width: 16px;
+    height: 14px;
+    background:
+        linear-gradient(135deg, transparent 50%, #ffffff 50%) 0 0 / 50% 50% no-repeat,
+        linear-gradient(135deg, #e74c3c 50%, transparent 50%) 50% 0 / 50% 50% no-repeat,
+        linear-gradient(135deg, transparent 50%, #27ae60 50%) 0 50% / 50% 50% no-repeat,
+        linear-gradient(135deg, #f1c40f 50%, transparent 50%) 50% 50% / 50% 50% no-repeat;
+    flex-shrink: 0;
+}
+
+.srv2k3-start-label {
+    letter-spacing: 0.01em;
+}
+
+.srv2k3-task-list {
+    flex: 1;
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    min-width: 0;
+}
+
+.srv2k3-tray {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    background: #d4d0c8;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+    min-width: 90px;
+}
+
+.srv2k3-tray-icon {
+    font-size: 13px;
+    cursor: pointer;
+    opacity: 0.85;
+}
+
+.srv2k3-tray-icon:hover {
+    opacity: 1;
+}
+
+.srv2k3-clock {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    padding-left: 4px;
+    color: #000000;
+}
+
+/* ============================================================
+ START MENU (Classic single-column panel)
+ The Classic Start menu is a single vertical list, not the
+ two-column XP panel. Matches what Server 2003 shows out of
+ the box.
+ ============================================================ */
+.srv2k3-start-menu {
+    position: fixed;
+    bottom: 28px;
+    left: 0;
+    width: 230px;
+    max-height: calc(100vh - 60px);
+    background: #d4d0c8;
+    border: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080,
+        3px 3px 6px rgba(0, 0, 0, 0.35);
+    z-index: 9501;
+    display: none;
+    flex-direction: row;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    color: #000000;
+}
+
+.srv2k3-start-menu.open {
+    display: flex;
+}
+
+/* Left vertical strip with the Windows wordmark (like the real one) */
+.srv2k3-menu-sidebar {
+    width: 22px;
+    background: linear-gradient(180deg, #0a246a 0%, #1e4aa5 60%, #0a246a 100%);
+    color: #ffffff;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Tahoma", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 10px 0;
+    flex-shrink: 0;
+}
+
+.srv2k3-menu-sidebar-text {
+    color: #ffffff;
+    white-space: nowrap;
+}
+
+.srv2k3-menu-sidebar-text strong {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.srv2k3-menu-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 2px;
+    overflow-y: auto;
+    min-width: 0;
+}
+
+.srv2k3-menu-item {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: #000000;
+    font-family: inherit;
+    font-size: 11px;
+    text-align: left;
+    padding: 4px 8px 4px 32px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+    min-height: 20px;
+}
+
+.srv2k3-menu-item:hover {
+    background: #0a246a;
+    color: #ffffff;
+}
+
+.srv2k3-menu-ic {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    color: #000000;
+}
+
+.srv2k3-menu-item:hover .srv2k3-menu-ic {
+    color: #ffffff;
+}
+
+.srv2k3-menu-ic::before {
+    content: attr(data-glyph);
+}
+
+.srv2k3-menu-sep {
+    height: 1px;
+    background: #808080;
+    box-shadow: 0 1px 0 #ffffff;
+    margin: 3px 6px;
+}
+
+/* ============================================================
+ DIALOGS (Run, About, Shutdown) in Classic theme
+ Mirror the property-page look from the screenshot: gray face,
+ tab row near the top, flat buttons with 3D bevel.
+ ============================================================ */
+.srv2k3-run-dialog .dialog,
+.srv2k3-about-dialog .dialog,
+.srv2k3-shutdown .dialog {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf,
+        4px 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.srv2k3-run-dialog .dialog-header,
+.srv2k3-about-dialog .dialog-header,
+.srv2k3-shutdown .dialog-header {
+    background: linear-gradient(90deg, #0a246a 0%, #3a6ea5 60%, #a6caf0 100%);
+    color: #ffffff;
+    font-family: "Tahoma", sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 2px 6px;
+    height: 18px;
+    border: 0;
+    line-height: 1.3;
+}
+
+.srv2k3-run-dialog .dialog-body,
+.srv2k3-about-dialog .dialog-body,
+.srv2k3-shutdown .dialog-body {
+    padding: 14px 16px 10px;
+    color: #000000;
+    background: #d4d0c8;
+}
+
+.srv2k3-run-dialog .dialog-footer,
+.srv2k3-about-dialog .dialog-footer,
+.srv2k3-shutdown .dialog-footer {
+    background: #d4d0c8;
+    border-top: 0;
+    box-shadow: inset 0 1px 0 #ffffff;
+    padding: 8px 12px 10px;
+}
+
+.srv2k3-run-dialog .btn,
+.srv2k3-about-dialog .btn,
+.srv2k3-shutdown .btn {
+    background: #d4d0c8;
+    border: 0;
+    border-radius: 0;
+    color: #000000;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    padding: 3px 14px;
+    min-width: 72px;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+}
+
+.srv2k3-run-dialog .btn:active,
+.srv2k3-about-dialog .btn:active,
+.srv2k3-shutdown .btn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+.srv2k3-run-dialog .btn.suggested,
+.srv2k3-about-dialog .btn.suggested,
+.srv2k3-shutdown .btn.suggested {
+    font-weight: 700;
+}
+
+.srv2k3-run-input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    color: #000000;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    padding: 3px 4px;
+}
+
+/* Toasts inside Server 2003 session take Classic styling too */
+body.srv2003-desktop .toast {
+    background: #ffffe1;
+    color: #000000;
+    border: 1px solid #000000;
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    border-radius: 0;
+}

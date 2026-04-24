@@ -1,0 +1,505 @@
+/* ============================================================
+ SERVER 2003 INSTALL ANIMATION STYLES
+ Visuals for the four install phases. Everything is positioned
+ fixed at the viewport root and sits above the supervisor
+ taskbar so the illusion of kiosk tear-down lands fully.
+ ============================================================ */
+
+body.srv2003-installing {
+    overflow: hidden;
+}
+
+body.srv2003-installing #suTaskbar,
+body.srv2003-installing #suStartMenu {
+    display: none !important;
+}
+
+.srv2003-install {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    font-family: "Tahoma", "Verdana", sans-serif;
+}
+
+/* ------------------------------------------------------------
+ Phase 1: text-mode blue setup screen
+ ------------------------------------------------------------ */
+.srv-blue-screen {
+    width: 100%;
+    height: 100%;
+    background: #0000a8;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.srv-blue-header {
+    background: #a8a8a8;
+    color: #000000;
+    text-align: center;
+    padding: 6px 10px;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+}
+
+.srv-blue-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    text-align: center;
+}
+
+.srv-blue-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+    color: #ffffff;
+    max-width: 680px;
+}
+
+.srv-blue-sub {
+    font-size: 14px;
+    color: #c8c8c8;
+    margin-bottom: 36px;
+    max-width: 600px;
+    min-height: 1.5em;
+}
+
+.srv-blue-bar {
+    width: 480px;
+    max-width: 80vw;
+    height: 18px;
+    border: 1px solid #ffffff;
+    background: transparent;
+    padding: 2px;
+    box-sizing: content-box;
+}
+
+.srv-blue-bar span {
+    display: block;
+    height: 100%;
+    background: #ffffff;
+    width: 0;
+    transition: width 600ms ease;
+}
+
+.srv-blue-footer {
+    background: #a8a8a8;
+    color: #000000;
+    padding: 6px 14px;
+    font-weight: 700;
+    font-size: 13px;
+}
+
+/* ------------------------------------------------------------
+ Phase 2: reboot-to-GUI black flash
+ ------------------------------------------------------------ */
+.srv-black-screen {
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    animation: srv-black-flicker 950ms steps(6, end) forwards;
+}
+
+@keyframes srv-black-flicker {
+    0% {
+        background: #0000a8;
+    }
+
+    10% {
+        background: #000000;
+    }
+
+    40% {
+        background: #101020;
+    }
+
+    70% {
+        background: #000000;
+    }
+
+    100% {
+        background: #000000;
+    }
+}
+
+/* ------------------------------------------------------------
+ Phase 3: GUI install
+ The real Server 2003 setup uses a silver/teal gradient on the
+ left rail with a centered content panel on the right. We
+ approximate that faithfully without copying the exact hero
+ graphics.
+ ------------------------------------------------------------ */
+.srv-gui-screen {
+    width: 100%;
+    height: 100%;
+    background: #ecebe4;
+    color: #000000;
+    display: flex;
+    flex-direction: column;
+}
+
+.srv-gui-titlebar {
+    background: linear-gradient(180deg, #0058ac 0%, #0047a0 50%, #00368a 100%);
+    color: #ffffff;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+.srv-gui-title {
+    flex: 1;
+    font-family: "Tahoma", "Verdana", sans-serif;
+}
+
+.srv-gui-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+.srv-gui-left {
+    width: 240px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #0a5795 0%, #124a82 40%, #1a4072 80%, #2d4f80 100%);
+    color: #ffffff;
+    padding: 22px 18px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.srv-gui-left-head {
+    font-weight: 700;
+    font-size: 12.5px;
+    margin-bottom: 12px;
+    color: #e8f0fa;
+    letter-spacing: 0.01em;
+}
+
+.srv-gui-steps {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 24px 0;
+    font-size: 12px;
+    line-height: 1.75;
+}
+
+.srv-gui-steps li {
+    padding-left: 22px;
+    position: relative;
+    color: #9bb3cd;
+}
+
+.srv-gui-steps li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 7px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #5879a0;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.08);
+}
+
+.srv-gui-steps li.done {
+    color: #d3e4f8;
+}
+
+.srv-gui-steps li.done::before {
+    background: #7fb3ea;
+}
+
+.srv-gui-steps li.current {
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.srv-gui-steps li.current::before {
+    background: #ffd34d;
+    box-shadow: 0 0 8px rgba(255, 211, 77, 0.6);
+    animation: srv-gui-pulse 1.3s ease-in-out infinite;
+}
+
+@keyframes srv-gui-pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.45;
+    }
+}
+
+.srv-gui-eta {
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding-top: 14px;
+}
+
+.srv-gui-eta-label {
+    font-size: 11px;
+    color: #b7c9dd;
+}
+
+.srv-gui-eta-value {
+    font-size: 14px;
+    font-weight: 700;
+    color: #ffffff;
+    margin-top: 3px;
+}
+
+.srv-gui-right {
+    flex: 1;
+    padding: 28px 36px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.srv-gui-banner {
+    font-size: 20px;
+    font-weight: 400;
+    color: #003366;
+    margin: 0 0 6px;
+    font-family: "Tahoma", "Verdana", sans-serif;
+}
+
+.srv-gui-banner-sub {
+    font-size: 12px;
+    color: #222;
+    margin: 0 0 18px;
+    line-height: 1.5;
+    max-width: 560px;
+}
+
+.srv-gui-log-wrap {
+    flex: 1;
+    border: 1px solid #7f9db9;
+    background: #ffffff;
+    padding: 8px 10px;
+    overflow: hidden;
+    box-shadow: inset 1px 1px 0 #d4d0c8, inset -1px -1px 0 #ffffff;
+}
+
+.srv-gui-log {
+    height: 100%;
+    overflow-y: auto;
+    font-family: "Consolas", "Courier New", monospace;
+    font-size: 11.5px;
+    color: #1a1a1a;
+    line-height: 1.5;
+}
+
+.srv-gui-log-row {
+    padding: 1px 0;
+    animation: srv-gui-log-in 200ms ease;
+}
+
+@keyframes srv-gui-log-in {
+    from {
+        opacity: 0;
+        transform: translateX(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.srv-gui-snapshot {
+    margin-top: 14px;
+    font-size: 11.5px;
+    color: #404040;
+}
+
+.srv-gui-snapshot strong {
+    color: #003366;
+}
+
+.srv-gui-taskbar {
+    height: 30px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #245edb 0%, #2368d4 50%, #1c54b8 100%);
+    border-top: 1px solid #3a83e8;
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+    color: #ffffff;
+}
+
+.srv-gui-tb-start {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 18px 0 10px;
+    background: linear-gradient(180deg, #3c9143 0%, #278f2f 50%, #196520 100%);
+    color: #ffffff;
+    font-style: italic;
+    font-weight: 700;
+    font-size: 13px;
+    border-right: 1px solid #000000;
+    border-top-right-radius: 10px 8px;
+    border-bottom-right-radius: 10px 8px;
+    font-family: "Tahoma", sans-serif;
+}
+
+.srv-gui-tb-flag {
+    width: 18px;
+    height: 18px;
+    background:
+        linear-gradient(135deg, transparent 50%, #ffffff 50%) 0 0 / 50% 50% no-repeat,
+        linear-gradient(135deg, #e74c3c 50%, transparent 50%) 50% 0 / 50% 50% no-repeat,
+        linear-gradient(135deg, transparent 50%, #27ae60 50%) 0 50% / 50% 50% no-repeat,
+        linear-gradient(135deg, #f1c40f 50%, transparent 50%) 50% 50% / 50% 50% no-repeat;
+    border-radius: 2px;
+}
+
+.srv-gui-tb-clock {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    font-size: 11.5px;
+    background: rgba(0, 0, 0, 0.1);
+    border-left: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+/* ------------------------------------------------------------
+ Phase 4: First boot splash
+ ------------------------------------------------------------ */
+.srv-firstboot {
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    font-family: "Tahoma", "Verdana", sans-serif;
+}
+
+.srv-firstboot-logo {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    animation: srv-firstboot-fade 600ms ease;
+}
+
+@keyframes srv-firstboot-fade {
+    from {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.srv-firstboot-flag {
+    width: 88px;
+    height: 70px;
+    position: relative;
+    background:
+        linear-gradient(135deg, #e74c3c 0 50%, transparent 50% 100%) 0 0 / 50% 50% no-repeat,
+        linear-gradient(135deg, #27ae60 0 50%, transparent 50% 100%) 50% 0 / 50% 50% no-repeat,
+        linear-gradient(135deg, #3498db 0 50%, transparent 50% 100%) 0 50% / 50% 50% no-repeat,
+        linear-gradient(135deg, #f1c40f 0 50%, transparent 50% 100%) 50% 50% / 50% 50% no-repeat;
+    transform: skewY(-8deg);
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+}
+
+.srv-firstboot-wordmark {
+    line-height: 1;
+}
+
+.srv-firstboot-big {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.srv-firstboot-big sup {
+    font-size: 0.45em;
+    vertical-align: super;
+}
+
+.srv-firstboot-small {
+    font-size: 28px;
+    font-weight: 400;
+    color: #dcdcdc;
+    margin-top: 2px;
+}
+
+.srv-firstboot-small strong {
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.srv-firstboot-edition {
+    font-size: 13px;
+    color: #8d8d8d;
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.srv-firstboot-status {
+    font-size: 13px;
+    color: #c8c8c8;
+    margin-top: 10px;
+}
+
+.srv-firstboot-bar {
+    width: 280px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+}
+
+.srv-firstboot-bar span {
+    display: block;
+    height: 100%;
+    width: 30%;
+    background: linear-gradient(90deg, transparent, #ffffff, transparent);
+    animation: srv-firstboot-slide 1.4s linear infinite;
+}
+
+@keyframes srv-firstboot-slide {
+    0% {
+        transform: translateX(-80%);
+    }
+
+    100% {
+        transform: translateX(330%);
+    }
+}
+
+.srv-firstboot-copy {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: #707070;
+}
