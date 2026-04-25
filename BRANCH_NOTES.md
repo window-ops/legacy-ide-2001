@@ -115,7 +115,7 @@ gradiente suprapuse, wordmark „Windows Server 2003 Standard Edition",
 bară de progres indeterminată, footer copyright.
 
 Dacă pagina este reîncărcată în timpul animației, modulul sare direct
-la faza `server2003` în loc să dea replay la 20 de secunde de instalare. Nu
+la faza `server2003` în loc să replaye 20 de secunde de instalare. Nu
 mai rulează nimic la încărcarea inițială decât dacă a avut loc o
 tranziție explicită.
 
@@ -125,7 +125,7 @@ tranziție explicită.
 activează la tranziția `migration → server2003` (sau direct la reload
 dacă faza stocată este deja `server2003`).
 
-Tema respectă paleta Win32 Classic. Fața 3D gri `#d4d0c8`,
+Tema respectă cu acuratețe paleta Win32 Classic. Fața 3D gri `#d4d0c8`,
 nu beige-ul Luna `#ece9d8`. Bevel-uri flat `#808080` / `#404040` /
 `#ffffff` / `#dfdfdf`. Titlebar cu gradient clasic `#0a246a → #a6caf0`.
 Taskbar gri, nu XP Luna blue. Start button gri cu drapel Windows, nu
@@ -167,7 +167,8 @@ prin politica domeniului". Pentru tot restul, eroare standard
 About the system (winver) păstrează chrome-ul real Server 2003. Afișează
 „Microsoft Windows Server 2003 Standard Edition", versiunea 5.2 build
 3790, utilizatorul înregistrat, product ID, și memoria fizică. Nu
-conține referințe la QNX, X11 sau kiosk; este o fereastră winver.
+conține referințe la QNX, X11 sau kiosk; este o fereastră winver
+autentică.
 
 Dacă snapshot-ul ales la portare a fost curat, Dr. Watson (debugger-ul)
 nu se deschide și un toast explicativ apare: „Dr. Watson nu este

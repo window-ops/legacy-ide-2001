@@ -259,20 +259,67 @@ body.srv2003-desktop .qnx-grid-row.selected {
 }
 
 /* ============================================================
- IDE HEADER AND SIDEBAR
- The IDE itself must stop looking like a modern web app: the
- header bar, sidebar, and status bar all get a Classic face.
+ IDE CHROME RE-SKIN
+ Every modern web-app surface inside the IDE picks up the
+ Classic palette and 3D bevels when body.srv2003-desktop is
+ active. Selectors target the real classes used by the app,
+ not invented ones.
  ============================================================ */
-body.srv2003-desktop .header-bar {
+
+/* Reserve 28 px at the bottom for the Server 2003 taskbar so
+   the IDE viewport does not sit underneath it. */
+body.srv2003-desktop {
+    padding-bottom: 28px;
+}
+
+body.srv2003-desktop .app {
+    height: calc(100vh - 28px);
+    height: calc(100dvh - 28px);
+    background: #d4d0c8;
+}
+
+/* Headerbar */
+body.srv2003-desktop .headerbar {
     background: #d4d0c8;
     color: #000000;
-    border-bottom: 1px solid #808080;
-    box-shadow: inset 0 -1px 0 #ffffff, inset 0 1px 0 #ffffff;
-    font-family: "Tahoma", sans-serif;
+    border-bottom: 0;
+    box-shadow: inset 0 -1px 0 #ffffff, 0 1px 0 #808080;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    height: 28px;
+    min-height: 28px;
+    padding: 0 4px;
+}
+
+body.srv2003-desktop .app-logo {
+    background: #d4d0c8;
+    color: #000000;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    width: 22px;
+    height: 22px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    font-size: 10px;
+    font-weight: 700;
+}
+
+body.srv2003-desktop .app-title-name {
+    color: #000000;
+    font-weight: 700;
     font-size: 11px;
 }
 
-body.srv2003-desktop .header-bar .hb-btn {
+body.srv2003-desktop .app-title-sub {
+    color: #404040;
+    font-size: 10px;
+    font-family: "Lucida Console", "Courier New", monospace;
+}
+
+body.srv2003-desktop .hb-btn {
     background: #d4d0c8;
     color: #000000;
     border: 0;
@@ -283,10 +330,15 @@ body.srv2003-desktop .header-bar .hb-btn {
         inset -2px -2px 0 #808080,
         inset 2px 2px 0 #dfdfdf;
     padding: 2px 6px;
-    height: 20px;
+    height: 22px;
+    width: 22px;
 }
 
-body.srv2003-desktop .header-bar .hb-btn:active {
+body.srv2003-desktop .hb-btn:hover {
+    background: #d4d0c8;
+}
+
+body.srv2003-desktop .hb-btn:active {
     box-shadow:
         inset 1px 1px 0 #404040,
         inset -1px -1px 0 #ffffff,
@@ -294,12 +346,22 @@ body.srv2003-desktop .header-bar .hb-btn:active {
         inset -2px -2px 0 #dfdfdf;
 }
 
+body.srv2003-desktop .banner-slot {
+    background: #d4d0c8;
+}
+
+/* Sidebar */
 body.srv2003-desktop .sidebar {
     background: #d4d0c8;
     color: #000000;
     border-right: 1px solid #808080;
-    font-family: "Tahoma", sans-serif;
+    box-shadow: inset -1px 0 0 #ffffff;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
     font-size: 11px;
+}
+
+body.srv2003-desktop .sidebar-inner {
+    background: #d4d0c8;
 }
 
 body.srv2003-desktop .sidebar-toolbar {
@@ -308,58 +370,87 @@ body.srv2003-desktop .sidebar-toolbar {
     box-shadow: inset 0 -1px 0 #ffffff;
 }
 
+body.srv2003-desktop .sidebar-title {
+    color: #000000;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+body.srv2003-desktop .sidebar-footer {
+    background: #d4d0c8;
+    border-top: 1px solid #808080;
+    box-shadow: inset 0 1px 0 #ffffff;
+    color: #000000;
+    font-size: 11px;
+}
+
+/* File tree rows */
+body.srv2003-desktop .tree-row {
+    color: #000000;
+    border-radius: 0;
+    font-size: 11px;
+}
+
 body.srv2003-desktop .tree-row:hover {
     background: #d6e8ff;
 }
 
-body.srv2003-desktop .tree-row.active,
-body.srv2003-desktop .tree-row.selected {
+body.srv2003-desktop .tree-row.active {
     background: #0a246a;
     color: #ffffff;
 }
 
-body.srv2003-desktop .status-bar,
-body.srv2003-desktop .statusbar {
+body.srv2003-desktop .tree-row.active .name {
+    color: #ffffff;
+}
+
+body.srv2003-desktop .tree-row .row-action {
+    background: transparent;
+    border-radius: 0;
+}
+
+body.srv2003-desktop .tree-row .row-action:hover {
+    background: #c0c0c0;
+}
+
+/* Content (right pane) */
+body.srv2003-desktop .content {
     background: #d4d0c8;
     color: #000000;
-    border-top: 1px solid #808080;
-    box-shadow: inset 0 1px 0 #ffffff;
+}
+
+body.srv2003-desktop .content-toolbar {
+    background: #d4d0c8;
+    color: #000000;
+    border-bottom: 1px solid #808080;
+    box-shadow: inset 0 -1px 0 #ffffff;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .toolbar-breadcrumb {
+    color: #000000;
     font-family: "Tahoma", sans-serif;
     font-size: 11px;
 }
 
-/* Editor panel: white like a classic text editor window */
-body.srv2003-desktop .editor-inner,
-body.srv2003-desktop .editor-outer {
-    background: #ffffff;
+body.srv2003-desktop .toolbar-breadcrumb .crumb-sep {
+    color: #404040;
 }
 
-body.srv2003-desktop #editor {
-    background: #ffffff;
+body.srv2003-desktop .toolbar-breadcrumb .crumb-file {
     color: #000000;
-    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-weight: 700;
 }
 
-body.srv2003-desktop .line-numbers {
-    background: #d4d0c8;
-    color: #606060;
-    border-right: 1px solid #808080;
-    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
-}
-
-body.srv2003-desktop .output-panel,
-body.srv2003-desktop #output {
-    background: #ffffff;
-    color: #000000;
-    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
-    font-size: 11px;
-}
-
-/* Tabs at the top of the editor look like Classic property-page tabs */
-body.srv2003-desktop .tabs-bar,
-body.srv2003-desktop .tab-bar {
+/* Tabs (Classic property-page look: flat, square, beveled) */
+body.srv2003-desktop .tabbar {
     background: #d4d0c8;
     border-bottom: 1px solid #808080;
+    box-shadow: inset 0 -1px 0 #ffffff;
+    padding: 2px 2px 0;
+    gap: 0;
 }
 
 body.srv2003-desktop .tab {
@@ -368,20 +459,510 @@ body.srv2003-desktop .tab {
     border: 0;
     border-radius: 0;
     box-shadow:
-        inset -1px 0 0 #404040,
         inset 1px 1px 0 #ffffff,
+        inset -1px 0 0 #404040,
         inset -2px 0 0 #808080;
-    padding: 3px 10px;
+    padding: 4px 14px;
+    font-family: "Tahoma", sans-serif;
     font-size: 11px;
+    font-weight: 400;
+    margin-right: 2px;
+    margin-bottom: -1px;
+}
+
+body.srv2003-desktop .tab:hover {
+    background: #d4d0c8;
 }
 
 body.srv2003-desktop .tab.active {
-    background: #ffffff;
+    background: #d4d0c8;
     color: #000000;
+    font-weight: 700;
     box-shadow:
         inset 1px 1px 0 #ffffff,
         inset -1px 0 0 #404040,
-        inset -2px 0 0 #808080;
+        inset -2px 0 0 #808080,
+        inset 0 -2px 0 #d4d0c8;
+    padding-bottom: 6px;
+}
+
+body.srv2003-desktop .tab.active::after {
+    display: none;
+}
+
+body.srv2003-desktop .tab-close {
+    background: transparent;
+    border-radius: 0;
+    opacity: 1;
+}
+
+body.srv2003-desktop .tab-close:hover {
+    background: #c0c0c0;
+}
+
+body.srv2003-desktop .tab-empty {
+    color: #404040;
+    font-size: 11px;
+}
+
+/* Editor area */
+body.srv2003-desktop .editor-area {
+    background: #ffffff;
+    color: #000000;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+}
+
+/* Status bar */
+body.srv2003-desktop .statusbar {
+    background: #d4d0c8;
+    color: #000000;
+    border-top: 1px solid #808080;
+    box-shadow: inset 0 1px 0 #ffffff;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    height: 22px;
+}
+
+body.srv2003-desktop .statusbar .accent {
+    color: #0a246a;
+}
+
+body.srv2003-desktop .statusbar .status-ok {
+    color: #006400;
+}
+
+body.srv2003-desktop .statusbar .status-sep {
+    color: #808080;
+}
+
+/* Popover menus (the headerbar dropdown menu) */
+body.srv2003-desktop .popover {
+    background: #d4d0c8;
+    color: #000000;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080,
+        2px 2px 4px rgba(0, 0, 0, 0.35);
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    padding: 2px;
+}
+
+body.srv2003-desktop .popover-item {
+    color: #000000;
+    border-radius: 0;
+    padding: 4px 24px 4px 28px;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .popover-item:hover,
+body.srv2003-desktop .popover-item:focus-visible {
+    background: #0a246a;
+    color: #ffffff;
+}
+
+body.srv2003-desktop .popover-item.destructive {
+    color: #800000;
+}
+
+body.srv2003-desktop .popover-item.destructive:hover {
+    background: #800000;
+    color: #ffffff;
+}
+
+body.srv2003-desktop .popover-sep {
+    background: #808080;
+    box-shadow: 0 1px 0 #ffffff;
+    margin: 2px 4px;
+}
+
+body.srv2003-desktop .popover-item .kbd {
+    background: transparent;
+    border: 0;
+    color: #404040;
+    font-family: "Lucida Console", monospace;
+    font-size: 10px;
+}
+
+body.srv2003-desktop .popover-item:hover .kbd {
+    color: #d6d6d6;
+}
+
+/* Toast */
+body.srv2003-desktop .toast {
+    background: #ffffe1;
+    color: #000000;
+    border: 1px solid #000000;
+    border-radius: 0;
+    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+}
+
+/* Preview iframe gets a sunken border like an embedded control */
+body.srv2003-desktop .preview-frame {
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+}
+
+/* "Empty" placeholders */
+body.srv2003-desktop .empty {
+    background: #d4d0c8;
+    color: #000000;
+    font-size: 11px;
+}
+
+/* ============================================================
+ GLOBAL DIALOG RE-SKIN
+ Every dialog (about, prefs, confirm, asm-edit, curriculum,
+ prompts) gets the Classic property-page look. The named
+ server-2003 dialogs (Run, About Windows, Shut Down) declared
+ below stay as they were, since they share the same rules.
+ ============================================================ */
+body.srv2003-desktop .dialog-backdrop {
+    background: rgba(0, 0, 0, 0.45);
+}
+
+body.srv2003-desktop .dialog {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf,
+        4px 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+body.srv2003-desktop .dialog-header {
+    background: linear-gradient(90deg, #0a246a 0%, #3a6ea5 60%, #a6caf0 100%);
+    color: #ffffff;
+    font-family: "Tahoma", sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    padding: 2px 6px;
+    height: 18px;
+    line-height: 1.3;
+    border: 0;
+}
+
+body.srv2003-desktop .dialog-body {
+    background: #d4d0c8;
+    color: #000000;
+    padding: 14px 16px;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+body.srv2003-desktop .dialog-footer {
+    background: #d4d0c8;
+    border-top: 0;
+    box-shadow: inset 0 1px 0 #ffffff;
+    padding: 8px 12px;
+}
+
+body.srv2003-desktop .btn {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    padding: 3px 14px;
+    min-width: 72px;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+}
+
+body.srv2003-desktop .btn:hover {
+    background: #d4d0c8;
+}
+
+body.srv2003-desktop .btn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+body.srv2003-desktop .btn.suggested {
+    background: #d4d0c8;
+    color: #000000;
+    font-weight: 700;
+}
+
+body.srv2003-desktop .btn.suggested:hover {
+    background: #d4d0c8;
+}
+
+body.srv2003-desktop .btn.destructive {
+    color: #800000;
+    font-weight: 700;
+}
+
+body.srv2003-desktop .dialog-body input[type=text],
+body.srv2003-desktop .dialog-body input[type=search],
+body.srv2003-desktop .dialog-body input[type=password],
+body.srv2003-desktop .dialog-body select,
+body.srv2003-desktop .dialog-body textarea {
+    background: #ffffff;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    color: #000000;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    padding: 3px 4px;
+}
+
+/* About dialog inside Server 2003 looks like Help / About in Win32 */
+body.srv2003-desktop .about-app-icon {
+    background: #c0c0c0;
+    color: #000000;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080;
+    font-family: "Lucida Console", monospace;
+}
+
+body.srv2003-desktop .about-app-name {
+    color: #000000;
+}
+
+body.srv2003-desktop .about-developer,
+body.srv2003-desktop .about-version {
+    color: #404040;
+}
+
+body.srv2003-desktop .about-link-btn {
+    background: #d4d0c8;
+    color: #000000;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+}
+
+body.srv2003-desktop .about-link-btn:hover {
+    background: #d4d0c8;
+    color: #000000;
+}
+
+body.srv2003-desktop .about-switcher {
+    background: #d4d0c8;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff;
+    padding: 2px;
+}
+
+body.srv2003-desktop .about-switch-btn {
+    background: #d4d0c8;
+    color: #000000;
+    border-radius: 0;
+    font-family: "Tahoma", sans-serif;
+}
+
+body.srv2003-desktop .about-switch-btn.active {
+    background: #ffffff;
+    color: #000000;
+    box-shadow: none;
+}
+
+body.srv2003-desktop .about-list,
+body.srv2003-desktop .about-notice {
+    background: #ffffff;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+}
+
+body.srv2003-desktop .about-row {
+    border-bottom: 1px solid #c0c0c0;
+}
+
+body.srv2003-desktop .about-row-key {
+    color: #404040;
+}
+
+body.srv2003-desktop .about-row-val {
+    color: #000000;
+}
+
+body.srv2003-desktop .about-row-link {
+    color: #0000ff;
+    text-decoration: underline;
+}
+
+body.srv2003-desktop .about-group-title {
+    color: #000000;
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 700;
+}
+
+/* Preferences dialog */
+body.srv2003-desktop .pref-group {
+    background: transparent;
+}
+
+body.srv2003-desktop .pref-list {
+    background: #ffffff;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+}
+
+body.srv2003-desktop .pref-row {
+    border-bottom: 1px solid #c0c0c0;
+}
+
+body.srv2003-desktop .pref-row-title {
+    color: #000000;
+    font-weight: 400;
+}
+
+body.srv2003-desktop .pref-row-sub {
+    color: #404040;
+}
+
+/* Switch / slider in preferences */
+body.srv2003-desktop .switch {
+    background: #d4d0c8;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+}
+
+body.srv2003-desktop .switch.on {
+    background: #0a246a;
+}
+
+body.srv2003-desktop .slider {
+    background: #d4d0c8;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    border-radius: 0;
+}
+
+/* Confirm / prompt dialogs (use the stack above) */
+body.srv2003-desktop .prompt-label {
+    color: #000000;
+    font-size: 11px;
+}
+
+body.srv2003-desktop .prompt-input {
+    font-family: "Tahoma", sans-serif;
+}
+
+body.srv2003-desktop .prompt-error {
+    color: #800000;
+    font-size: 11px;
+}
+
+/* ============================================================
+ NO ANIMATIONS IN THE LEGACY INTERFACE
+ Real Server 2003 Classic has no fades, no slides, no eased
+ transitions on UI chrome. Strip them all from anything inside
+ the IDE while srv2003-desktop is active. Install animation and
+ first-boot splash live in their own scope (.srv2003-install)
+ and are not affected.
+ ============================================================ */
+body.srv2003-desktop .app *,
+body.srv2003-desktop .app *::before,
+body.srv2003-desktop .app *::after,
+body.srv2003-desktop .dialog-backdrop *,
+body.srv2003-desktop .dialog-backdrop *::before,
+body.srv2003-desktop .dialog-backdrop *::after,
+body.srv2003-desktop .toast,
+body.srv2003-desktop .popover,
+body.srv2003-desktop .qnx-window,
+body.srv2003-desktop .qnx-window *,
+body.srv2003-desktop .srv2k3-start-menu,
+body.srv2003-desktop .srv2k3-start-menu *,
+body.srv2003-desktop .srv2k3-taskbar * {
+    animation: none !important;
+    transition: none !important;
+}
+
+/* Dialog backdrop scale-up animation kills itself too: dialogs
+   simply appear at full size in the legacy interface. */
+body.srv2003-desktop .dialog-backdrop .dialog {
+    transform: none !important;
+}
+
+body.srv2003-desktop .dialog-backdrop.open .dialog {
+    transform: none !important;
+}
+
+/* Scrollbars: Classic gray with beveled track and thumb */
+body.srv2003-desktop ::-webkit-scrollbar {
+    width: 16px;
+    height: 16px;
+}
+
+body.srv2003-desktop ::-webkit-scrollbar-track {
+    background: #d4d0c8;
+    box-shadow:
+        inset 1px 0 0 #ffffff,
+        inset -1px 0 0 #808080;
+}
+
+body.srv2003-desktop ::-webkit-scrollbar-thumb {
+    background: #d4d0c8;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+    border-radius: 0;
+}
+
+body.srv2003-desktop ::-webkit-scrollbar-corner {
+    background: #d4d0c8;
 }
 
 /* ============================================================
@@ -690,93 +1271,10 @@ body.srv2003-desktop .dbg-log {
     margin: 3px 6px;
 }
 
-/* ============================================================
- DIALOGS (Run, About, Shutdown) in Classic theme
- Mirror the property-page look from the screenshot: gray face,
- tab row near the top, flat buttons with 3D bevel.
- ============================================================ */
-.srv2k3-run-dialog .dialog,
-.srv2k3-about-dialog .dialog,
-.srv2k3-shutdown .dialog {
-    background: #d4d0c8;
-    color: #000000;
-    border: 0;
-    border-radius: 0;
-    font-family: "Tahoma", "MS Sans Serif", sans-serif;
-    font-size: 11px;
-    box-shadow:
-        inset -1px -1px 0 #404040,
-        inset 1px 1px 0 #ffffff,
-        inset -2px -2px 0 #808080,
-        inset 2px 2px 0 #dfdfdf,
-        4px 4px 10px rgba(0, 0, 0, 0.4);
-}
-
-.srv2k3-run-dialog .dialog-header,
-.srv2k3-about-dialog .dialog-header,
-.srv2k3-shutdown .dialog-header {
-    background: linear-gradient(90deg, #0a246a 0%, #3a6ea5 60%, #a6caf0 100%);
-    color: #ffffff;
-    font-family: "Tahoma", sans-serif;
-    font-weight: 700;
-    font-size: 11px;
-    padding: 2px 6px;
-    height: 18px;
-    border: 0;
-    line-height: 1.3;
-}
-
-.srv2k3-run-dialog .dialog-body,
-.srv2k3-about-dialog .dialog-body,
-.srv2k3-shutdown .dialog-body {
-    padding: 14px 16px 10px;
-    color: #000000;
-    background: #d4d0c8;
-}
-
-.srv2k3-run-dialog .dialog-footer,
-.srv2k3-about-dialog .dialog-footer,
-.srv2k3-shutdown .dialog-footer {
-    background: #d4d0c8;
-    border-top: 0;
-    box-shadow: inset 0 1px 0 #ffffff;
-    padding: 8px 12px 10px;
-}
-
-.srv2k3-run-dialog .btn,
-.srv2k3-about-dialog .btn,
-.srv2k3-shutdown .btn {
-    background: #d4d0c8;
-    border: 0;
-    border-radius: 0;
-    color: #000000;
-    font-family: "Tahoma", sans-serif;
-    font-size: 11px;
-    padding: 3px 14px;
-    min-width: 72px;
-    box-shadow:
-        inset -1px -1px 0 #404040,
-        inset 1px 1px 0 #ffffff,
-        inset -2px -2px 0 #808080,
-        inset 2px 2px 0 #dfdfdf;
-}
-
-.srv2k3-run-dialog .btn:active,
-.srv2k3-about-dialog .btn:active,
-.srv2k3-shutdown .btn:active {
-    box-shadow:
-        inset 1px 1px 0 #404040,
-        inset -1px -1px 0 #ffffff,
-        inset 2px 2px 0 #808080,
-        inset -2px -2px 0 #dfdfdf;
-}
-
-.srv2k3-run-dialog .btn.suggested,
-.srv2k3-about-dialog .btn.suggested,
-.srv2k3-shutdown .btn.suggested {
-    font-weight: 700;
-}
-
+/* The Run... text input keeps a bare class because it is created
+   dynamically and lives inside a srv2k3-named dialog wrapper. The
+   global dialog-body input rule above already styles the standard
+   inputs; this one ensures the Run input fills its container. */
 .srv2k3-run-input {
     width: 100%;
     box-sizing: border-box;
@@ -792,15 +1290,4 @@ body.srv2003-desktop .dbg-log {
     font-family: "Tahoma", sans-serif;
     font-size: 11px;
     padding: 3px 4px;
-}
-
-/* Toasts inside Server 2003 session take Classic styling too */
-body.srv2003-desktop .toast {
-    background: #ffffe1;
-    color: #000000;
-    border: 1px solid #000000;
-    box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
-    font-family: "Tahoma", sans-serif;
-    font-size: 11px;
-    border-radius: 0;
 }
