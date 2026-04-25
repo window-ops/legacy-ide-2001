@@ -331,52 +331,37 @@ body.srv2003-installing #suStartMenu {
     color: #003366;
 }
 
-.srv-gui-taskbar {
-    height: 30px;
+/* Real Windows Setup progress bar at the bottom of the GUI install
+   pane. Classic gray strip with a centered status line and a thin
+   beveled trough that fills from left to right. */
+.srv-gui-progress-area {
+    background: #d4d0c8;
+    border-top: 1px solid #ffffff;
+    box-shadow: 0 -1px 0 #808080, 0 -2px 0 #404040;
+    padding: 10px 16px 14px;
     flex-shrink: 0;
-    background: linear-gradient(180deg, #245edb 0%, #2368d4 50%, #1c54b8 100%);
-    border-top: 1px solid #3a83e8;
-    display: flex;
-    align-items: stretch;
-    padding: 0;
-    color: #ffffff;
+    color: #000000;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
 }
-
-.srv-gui-tb-start {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 0 18px 0 10px;
-    background: linear-gradient(180deg, #3c9143 0%, #278f2f 50%, #196520 100%);
-    color: #ffffff;
-    font-style: italic;
-    font-weight: 700;
-    font-size: 13px;
-    border-right: 1px solid #000000;
-    border-top-right-radius: 10px 8px;
-    border-bottom-right-radius: 10px 8px;
-    font-family: "Tahoma", sans-serif;
+.srv-gui-progress-label {
+    font-size: 11px;
+    margin-bottom: 8px;
 }
-
-.srv-gui-tb-flag {
-    width: 18px;
-    height: 18px;
-    background:
-        linear-gradient(135deg, transparent 50%, #ffffff 50%) 0 0 / 50% 50% no-repeat,
-        linear-gradient(135deg, #e74c3c 50%, transparent 50%) 50% 0 / 50% 50% no-repeat,
-        linear-gradient(135deg, transparent 50%, #27ae60 50%) 0 50% / 50% 50% no-repeat,
-        linear-gradient(135deg, #f1c40f 50%, transparent 50%) 50% 50% / 50% 50% no-repeat;
-    border-radius: 2px;
+.srv-gui-progress-bar {
+    height: 16px;
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    padding: 1px;
 }
-
-.srv-gui-tb-clock {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    padding: 0 14px;
-    font-size: 11.5px;
-    background: rgba(0, 0, 0, 0.1);
-    border-left: 1px solid rgba(0, 0, 0, 0.25);
+.srv-gui-progress-fill {
+    height: 100%;
+    background: #0a246a;
+    width: 0;
+    transition: width 600ms ease;
 }
 
 /* ------------------------------------------------------------

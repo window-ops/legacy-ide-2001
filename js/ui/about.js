@@ -69,7 +69,6 @@
                 pages.forEach(function(p) {
                     p.classList.toggle('active', p.getAttribute('data-about-page') === target);
                 });
-                if (target === 'real') renderDownloads();
             });
         });
     }

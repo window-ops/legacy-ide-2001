@@ -34,7 +34,10 @@ body.srv2003-desktop .qnx-session-toolbar,
 body.srv2003-desktop .qnx-disconnect-btn,
 body.srv2003-desktop .qnx-start-btn,
 body.srv2003-desktop .qnx-taskbar,
-body.srv2003-desktop .qnx-launcher {
+body.srv2003-desktop .qnx-launcher,
+body.srv2003-desktop .qnx-window,
+body.srv2003-desktop .qnx-workspace,
+body.srv2003-desktop .qnx-session {
     display: none !important;
 }
 
@@ -1344,7 +1347,7 @@ body.srv2003-desktop .qnx-win-btn[data-action="close"]::before {
    .hb-btn close at the right of the headerbar gets a Classic look. */
 body.srv2003-desktop .hb-btn svg { display: none; }
 body.srv2003-desktop .hb-btn { font-family: "Marlett", "Tahoma", sans-serif; font-size: 10px; }
-body.srv2003-desktop #btnTheme::after { content: ""; }
+body.srv2003-desktop #btnTheme { display: none !important; }
 body.srv2003-desktop #btnSidebar::after { content: ""; }
 body.srv2003-desktop #btnMenu::after { content: ""; }
 
@@ -2028,4 +2031,195 @@ body.srv2003-installing #srv2003StartMenu { display: none !important; }
 .srv2k3-run-dialog .srv2k3-run-icon {
     flex: 0 0 auto;
     padding-top: 1px;
+}
+
+/* ============================================================
+   COMMAND PROMPT (cmd.exe in Server 2003)
+   ============================================================ */
+.srv2k3-cmd .cmd-screen {
+    background: #000000;
+    color: #c0c0c0;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-size: 12px;
+    padding: 6px 8px;
+    height: 360px;
+    overflow-y: auto;
+    line-height: 1.35;
+}
+.srv2k3-cmd .cmd-out div {
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.srv2k3-cmd .cmd-line {
+    display: flex;
+    align-items: center;
+}
+.srv2k3-cmd .cmd-prompt {
+    flex: 0 0 auto;
+    color: #c0c0c0;
+}
+.srv2k3-cmd .cmd-input {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    color: #c0c0c0;
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    padding: 0;
+    box-shadow: none;
+    caret-color: #c0c0c0;
+}
+.srv2k3-cmd .cmd-input:focus { outline: none; }
+
+/* ============================================================
+   DESKTOP ICONS
+   Top-left grid of three default Server 2003 desktop shortcuts:
+   Manage Your Server, My Computer, Recycle Bin. Position fixed
+   so they sit above the IDE app pane but below dialogs. White
+   labels with subtle text shadow for legibility on the blue
+   desktop, just like the real OS.
+   ============================================================ */
+.srv2k3-desktop-icons {
+    position: fixed;
+    top: 12px;
+    left: 12px;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    pointer-events: auto;
+}
+.srv2k3-dicon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 76px;
+    padding: 4px;
+    cursor: default;
+    user-select: none;
+}
+.srv2k3-dicon-img {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 4px;
+    display: grid;
+    place-items: center;
+}
+.srv2k3-dicon-img svg {
+    width: 32px;
+    height: 32px;
+}
+.srv2k3-dicon-label {
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    color: #ffffff;
+    text-align: center;
+    line-height: 1.2;
+    text-shadow:
+        1px 0 0 #000000,
+       -1px 0 0 #000000,
+        0 1px 0 #000000,
+        0 -1px 0 #000000;
+    padding: 1px 3px;
+}
+.srv2k3-dicon.selected .srv2k3-dicon-img {
+    background: rgba(10, 36, 106, 0.4);
+    box-shadow: inset 0 0 0 1px #ffffff;
+}
+.srv2k3-dicon.selected .srv2k3-dicon-label {
+    background: #0a246a;
+    color: #ffffff;
+    text-shadow: none;
+    outline: 1px dotted #ffffff;
+    outline-offset: -1px;
+}
+
+/* ============================================================
+   MANAGE YOUR SERVER
+   ============================================================ */
+.srv2k3-mys .mys-banner {
+    background: linear-gradient(180deg, #2d5da7 0, #1d3f7a 100%);
+    color: #ffffff;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.srv2k3-mys .mys-banner-flag svg { display: block; }
+.srv2k3-mys .mys-banner-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+.srv2k3-mys .mys-banner-sub {
+    font-size: 11px;
+    color: #c8d8f0;
+    margin-top: 2px;
+    font-family: "Lucida Console", "Consolas", monospace;
+}
+.srv2k3-mys .mys-content {
+    background: #ffffff;
+    color: #000000;
+    padding: 14px 18px;
+    font-size: 11px;
+    line-height: 1.45;
+}
+.srv2k3-mys .mys-role {
+    border-top: 1px solid #c0c0c0;
+    padding: 10px 0 8px;
+}
+.srv2k3-mys .mys-role:last-of-type { border-bottom: 1px solid #c0c0c0; margin-bottom: 12px; }
+.srv2k3-mys .mys-role-title {
+    color: #003366;
+    font-weight: 700;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+.srv2k3-mys .mys-role-desc { color: #000000; }
+.srv2k3-mys .mys-role-desc a { color: #0000ee; text-decoration: underline; }
+.srv2k3-mys .mys-startup {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    margin-top: 4px;
+}
+.srv2k3-mys .mys-startup input[type=checkbox] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    margin: 0;
+}
+.srv2k3-mys .mys-startup input[type=checkbox]:checked {
+    background:
+        linear-gradient(45deg, transparent 35%, #000000 35%, #000000 50%, transparent 50%) 1px 4px / 5px 5px no-repeat,
+        linear-gradient(-45deg, transparent 35%, #000000 35%, #000000 50%, transparent 50%) 5px 0 / 7px 8px no-repeat,
+        #ffffff;
+}
+
+/* ============================================================
+   RECYCLE BIN
+   ============================================================ */
+.srv2k3-recycle .recycle-empty {
+    background: #ffffff;
+    color: #000000;
+    padding: 36px 18px;
+    text-align: center;
+    font-size: 11px;
+}
+.srv2k3-recycle .recycle-empty-icon {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+.srv2k3-recycle .recycle-empty-icon svg {
+    width: 48px;
+    height: 48px;
 }
