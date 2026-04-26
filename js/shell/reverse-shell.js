@@ -13,7 +13,14 @@ function updateExploitStage() {
     }
     if (stage >= 3 && ex.injected.x11) stage = 4;
     ex.stage = stage;
-    ex.shellUser = ex.stage >= 3 ? 'root' : 'student';
+    // Pre-escalation: show the randomized student_<id> name. Post-sudo:
+    // "root". Defaultuser is a separate visible switch handled by the
+    // supervisor taskbar, not by this shell prompt.
+    var studentLabel = 'student';
+    if (STATE.defaultuser && STATE.defaultuser.studentId) {
+        studentLabel = 'student_' + STATE.defaultuser.studentId;
+    }
+    ex.shellUser = ex.stage >= 3 ? 'root' : studentLabel;
     ex.x11Ready = ex.stage >= 4;
     STATE.appliance.user = ex.shellUser;
     if (ex.stage !== oldStage) {

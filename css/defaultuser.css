@@ -1,0 +1,528 @@
+/* ============================================================
+ SUPERVISOR TASKBAR (defaultuser)
+ Thin strip anchored to the top of the viewport. Sits above
+ every other IDE layer, including dialog backdrops, so the
+ reveal is unmissable.
+ ============================================================ */
+
+:root {
+    --su-taskbar-height: 32px;
+    --su-taskbar-bg: linear-gradient(180deg, #232f3f 0%, #131b24 100%);
+    --su-taskbar-fg: #f2f5f9;
+    --su-taskbar-fg-dim: #a8b4c2;
+    --su-taskbar-accent: #f6a021;
+}
+
+body.has-su-taskbar {
+    padding-top: var(--su-taskbar-height);
+}
+
+body.has-su-taskbar .header-bar,
+body.has-su-taskbar .banner-slot {
+    top: var(--su-taskbar-height);
+}
+
+.su-taskbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--su-taskbar-height);
+    z-index: 10000;
+    background: var(--su-taskbar-bg);
+    color: var(--su-taskbar-fg);
+    display: flex;
+    align-items: center;
+    padding: 0 6px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.7);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+    font-size: 12px;
+    font-family: var(--font-body, "Cantarell", sans-serif);
+    user-select: none;
+    animation: su-taskbar-drop 420ms cubic-bezier(0.25, 0.9, 0.35, 1);
+}
+
+@keyframes su-taskbar-drop {
+    0% {
+        transform: translateY(-100%);
+    }
+
+    70% {
+        transform: translateY(2px);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
+}
+
+/* Start-like button on the left. Not a direct Windows copy: it uses a
+ discrete color dot plus a name label, in keeping with a Unix session
+ manager rather than a Windows Start button. */
+.su-start {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--su-taskbar-fg);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 10px;
+    height: 28px;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 120ms ease;
+}
+
+.su-start:hover {
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.su-start:active {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.su-start-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--su-taskbar-accent);
+    box-shadow: 0 0 6px var(--su-taskbar-accent);
+}
+
+.su-start-label {
+    letter-spacing: 0.01em;
+}
+
+.su-label {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+    color: var(--su-taskbar-fg-dim);
+    font-size: 11.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 10px;
+}
+
+.su-clock {
+    display: inline-flex;
+    align-items: center;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 11.5px;
+    color: var(--su-taskbar-fg-dim);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Start menu popover */
+.su-start-menu {
+    position: fixed;
+    top: calc(var(--su-taskbar-height) + 4px);
+    left: 6px;
+    width: min(360px, calc(100vw - 12px));
+    max-height: calc(100vh - var(--su-taskbar-height) - 16px);
+    overflow-y: auto;
+    background: #1a2230;
+    color: #f2f5f9;
+    border: 1px solid rgba(0, 0, 0, 0.7);
+    border-radius: 8px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+    z-index: 10001;
+    opacity: 0;
+    transform: translateY(-6px);
+    pointer-events: none;
+    transition: opacity 140ms ease, transform 140ms ease;
+    font-family: var(--font-body, "Cantarell", sans-serif);
+    font-size: 13px;
+}
+
+.su-start-menu.open {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+.su-menu-header {
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.su-menu-user {
+    font-weight: 700;
+    font-size: 15px;
+    color: #f2f5f9;
+}
+
+.su-menu-sub {
+    font-size: 11.5px;
+    color: #90a1b3;
+    margin-top: 2px;
+    font-family: var(--font-mono, "IBM Plex Mono", monospace);
+}
+
+.su-menu-reveal {
+    margin: 8px 10px;
+    padding: 10px 12px;
+    background: rgba(246, 160, 33, 0.08);
+    border-left: 3px solid var(--su-taskbar-accent);
+    border-radius: 2px;
+    font-family: var(--font-mono, "IBM Plex Mono", monospace);
+    font-size: 11px;
+    line-height: 1.5;
+    color: #e0e6ee;
+    white-space: pre-wrap;
+}
+
+.su-menu-section {
+    padding: 4px 4px 8px;
+}
+
+.su-menu-item {
+    appearance: none;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: inherit;
+    font: inherit;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: background 100ms ease;
+}
+
+.su-menu-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.su-menu-item.destructive:hover {
+    background: rgba(229, 94, 94, 0.12);
+}
+
+.su-menu-icon {
+    flex: 0 0 auto;
+    font-size: 18px;
+    line-height: 1;
+    width: 22px;
+    text-align: center;
+    color: var(--su-taskbar-accent);
+    margin-top: 1px;
+}
+
+.su-menu-item.destructive .su-menu-icon {
+    color: #e57575;
+}
+
+.su-menu-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.su-menu-title {
+    font-weight: 600;
+    color: #f2f5f9;
+}
+
+.su-menu-desc {
+    font-size: 11.5px;
+    color: #90a1b3;
+    line-height: 1.4;
+}
+
+/* Temp/stub dialogs borrow the IDE's .dialog styling but without
+ cluttering the main dialog backdrop pool. Appended directly to body. */
+.su-temp-dialog .dialog {
+    max-width: 460px;
+}
+
+/* ============================================================
+ MIGRATION QUIZ DIALOG
+ Styled to match the About dialog / AdwPreferencesGroup
+ visual language: rounded list-box cards, hairline dividers,
+ accent-soft highlights. All colors from IDE tokens so the
+ light/dark themes both compose.
+ ============================================================ */
+
+.migrate-backdrop .dialog-body {
+    padding: 22px 22px 18px;
+}
+
+.migrate-hero {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+}
+
+.migrate-hero-glyph {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.migrate-hero-title {
+    margin: 2px 0 4px;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--fg);
+}
+
+.migrate-hero-lead {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--fg-dim);
+}
+
+.migrate-progress {
+    margin-bottom: 14px;
+}
+
+.migrate-progress-label {
+    font-size: 12px;
+    color: var(--fg-dim);
+    margin-bottom: 6px;
+}
+
+.migrate-progress-bar {
+    height: 4px;
+    background: var(--card-shade);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.migrate-progress-bar span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transition: width 260ms ease;
+}
+
+.migrate-question {
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--fg);
+    font-weight: 500;
+    margin: 10px 0 14px;
+}
+
+.migrate-choices {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px;
+    margin-bottom: 12px;
+}
+
+.migrate-choice {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 100ms ease;
+}
+
+.migrate-choice:hover {
+    background: var(--card-shade);
+}
+
+.migrate-choice input[type=radio] {
+    flex: 0 0 auto;
+    margin: 0;
+    accent-color: var(--accent);
+}
+
+.migrate-choice-text {
+    font-size: 13px;
+    color: var(--fg);
+    line-height: 1.5;
+}
+
+.migrate-choice input:checked+.migrate-choice-text {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.migrate-source {
+    font-size: 11.5px;
+    color: var(--fg-mute);
+    font-style: italic;
+    margin-top: 4px;
+}
+
+/* Final score block */
+.migrate-score {
+    text-align: center;
+    padding: 16px 8px 18px;
+    border-radius: 12px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+}
+
+.migrate-score.pass {
+    border-color: rgba(51, 209, 122, 0.4);
+    background: rgba(51, 209, 122, 0.06);
+}
+
+.migrate-score.fail {
+    border-color: rgba(229, 94, 94, 0.4);
+    background: rgba(229, 94, 94, 0.06);
+}
+
+.migrate-score-big {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--fg);
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+}
+
+.migrate-score.pass .migrate-score-big {
+    color: #27a658;
+}
+
+.migrate-score.fail .migrate-score-big {
+    color: #c74040;
+}
+
+.migrate-score-verdict {
+    font-size: 13px;
+    color: var(--fg-dim);
+}
+
+.migrate-review {
+    max-height: 260px;
+    overflow-y: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+}
+
+.migrate-review-row {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12.5px;
+    line-height: 1.5;
+}
+
+.migrate-review-row:last-child {
+    border-bottom: 0;
+}
+
+.migrate-review-row.ok {
+    border-left: 3px solid #27a658;
+}
+
+.migrate-review-row.bad {
+    border-left: 3px solid #c74040;
+}
+
+.migrate-review-q {
+    font-weight: 600;
+    color: var(--fg);
+    margin-bottom: 6px;
+}
+
+.migrate-review-line {
+    color: var(--fg-dim);
+    margin-bottom: 2px;
+}
+
+.migrate-review-tag {
+    color: var(--fg-mute);
+    margin-right: 6px;
+}
+
+.migrate-review-exp {
+    margin-top: 6px;
+    color: var(--fg-dim);
+    font-style: italic;
+}
+
+/* Snapshot chooser */
+.migrate-snapshots {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 14px 0 10px;
+}
+
+.migrate-snapshot {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--card-bg);
+    cursor: pointer;
+    transition: border-color 120ms ease, background 120ms ease;
+}
+
+.migrate-snapshot:hover {
+    border-color: var(--accent);
+}
+
+.migrate-snapshot input[type=radio] {
+    flex: 0 0 auto;
+    margin-top: 2px;
+    accent-color: var(--accent);
+}
+
+.migrate-snapshot.recommended {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+}
+
+.migrate-snapshot-body {
+    flex: 1;
+}
+
+.migrate-snapshot-title {
+    font-weight: 700;
+    font-size: 13.5px;
+    color: var(--fg);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.migrate-snapshot-desc {
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    line-height: 1.5;
+}
+
+.migrate-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-fg);
+    background: var(--accent);
+    padding: 1px 8px;
+    border-radius: 999px;
+}

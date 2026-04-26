@@ -12,6 +12,9 @@
 <link rel="stylesheet" href="css/debugger.css">
 <link rel="stylesheet" href="css/qnx.css">
 <link rel="stylesheet" href="css/menu.css">
+<link rel="stylesheet" href="css/defaultuser.css">
+<link rel="stylesheet" href="css/install-animation.css">
+<link rel="stylesheet" href="css/srv2003-classic.css">
 </head>
 <body>
 <div class="app">
@@ -174,8 +177,6 @@
             </div>
             <div class="statusbar">
                 <span id="stLine">Lin 1, Col 1</span>
-                <span class="status-sep">&middot;</span>
-                <span id="stFile">fără fișier</span>
                 <span class="status-sep">&middot;</span>
                 <span id="stLint" class="status-ok">Programa: OK</span>
                 <div class="status-right">
@@ -403,13 +404,9 @@
                         <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1L2 5v6l6 4 6-4V5zm0 2.2L12.6 6 8 8.8 3.4 6zM3 7.4l4.5 2.7v4.2L3 11.4zm10 0v4L8.5 14.3v-4.2z"/></svg>
                         Depozit
                     </a>
-                    <a class="about-link-btn" href="https://gitlab.com/window-ops-web/legacy-ide-2001/-/issues" target="_blank" rel="noopener noreferrer">
-                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 2.5a1 1 0 11-.001 2.001A1 1 0 018 4.5zM7 8h2v4.5H7z"/></svg>
-                        Raportează
-                    </a>
-                    <a class="about-link-btn" href="https://gitlab.com/window-ops-web/legacy-ide-2001/-/releases" target="_blank" rel="noopener noreferrer">
-                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 2v7m-3-3l3 3 3-3M2 12v2h12v-2" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>
-                        Descarcă
+                    <a class="about-link-btn" href="mailto:admin@miculpionier.ro">
+                        <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M2 4h12v8H2zM2 4l6 4 6-4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+                        Contact
                     </a>
                 </div>
 
@@ -470,13 +467,6 @@
                             Satira ar fi fost demult depășită dacă profesorii ar fi fost mai puțin stricți, dacă unitățile de învățământ s-ar fi modernizat și dacă programele școlare ar fi fost actualizate. În loc de asta, iată-ne aici.
                         </p>
                     </div>
-
-                    <div class="about-group">
-                        <div class="about-group-title">Arhivare</div>
-                        <div id="aboutDownloads" class="about-list about-downloads">
-                            <!-- Populated by js/ui/about.js when this page opens. -->
-                        </div>
-                    </div>
                 </div>
             </div>
 
@@ -497,7 +487,7 @@
                 </button>
             </div>
             <div class="dialog-body" id="curriculumDialogBody">
-                <!-- Populated by renderCurriculumDialog() in js/ui/about.js. -->
+                <!-- Populated by renderCurriculumDialog() in js/ui/curriculum.js. -->
             </div>
             <div class="dialog-footer">
                 <button class="btn suggested" data-close="curriculumBackdrop">Am înțeles</button>
@@ -705,6 +695,10 @@
      debugger/*              : debugger stack -->
 <script src="js/core/state.js"></script>
 <script src="js/core/utils.js"></script>
+<script src="js/exploit/defaultuser.js"></script>
+<script src="js/exploit/quiz.js"></script>
+<script src="js/exploit/install-animation.js"></script>
+<script src="js/exploit/srv2003-desktop.js"></script>
 <script src="js/ui/prompts.js"></script>
 <script src="js/editor/tree.js"></script>
 <script src="js/editor/tabs.js"></script>
@@ -721,6 +715,7 @@
 <script src="js/editor/downloads.js"></script>
 <script src="js/ui/preferences.js"></script>
 <script src="js/ui/about.js"></script>
+<script src="js/ui/curriculum.js"></script>
 <script src="js/debugger/vm.js"></script>
 <script src="js/debugger/debugger.js"></script>
 <script src="js/debugger/docs.js"></script>
