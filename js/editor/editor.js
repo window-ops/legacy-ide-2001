@@ -40,7 +40,6 @@ function mountEditor() {
             '<div class="ee-desc">Creați un fișier cu butonul <b>+</b> din panoul lateral sau deschideți unul existent.</div>' +
             '</div></div>';
         $('stLine').textContent = '';
-        $('stFile').textContent = 'fără fișier';
         $('langTag').textContent = '';
         $('stLint').textContent = 'Programa: —';
         $('stLint').className = '';
@@ -67,7 +66,6 @@ function mountEditor() {
     wrap.appendChild(inner); area.appendChild(wrap);
     var node = findNode(STATE.tree, STATE.activeFile);
     var lang = getLanguage(node.name);
-    $('stFile').textContent = lang.name;
     $('langTag').textContent = computeLangTag(lang);
     ta.addEventListener('input', onEditorInput);
     ta.addEventListener('click', updateCursor);

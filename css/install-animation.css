@@ -400,17 +400,12 @@ body.srv2003-installing #suStartMenu {
 }
 
 .srv-firstboot-flag {
-    width: 88px;
-    height: 70px;
-    position: relative;
-    background:
-        linear-gradient(135deg, #e74c3c 0 50%, transparent 50% 100%) 0 0 / 50% 50% no-repeat,
-        linear-gradient(135deg, #27ae60 0 50%, transparent 50% 100%) 50% 0 / 50% 50% no-repeat,
-        linear-gradient(135deg, #3498db 0 50%, transparent 50% 100%) 0 50% / 50% 50% no-repeat,
-        linear-gradient(135deg, #f1c40f 0 50%, transparent 50% 100%) 50% 50% / 50% 50% no-repeat;
-    transform: skewY(-8deg);
-    box-shadow: 0 0 16px rgba(255, 255, 255, 0.1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.1));
 }
+.srv-firstboot-flag svg { display: block; }
 
 .srv-firstboot-wordmark {
     line-height: 1;
