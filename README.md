@@ -11,10 +11,6 @@ demult depășită dacă profesorii ar fi fost mai puțin stricți, dacă
 unitățile de învățământ s-ar fi modernizat și dacă programele școlare
 ar fi fost actualizate. În loc de asta, iată-ne aici.
 
-- **Autor:** miculpionier
-- **Licență:** MIT
-- **Depozit:** <https://gitlab.com/window-ops-web/legacy-ide-2001>
-
 ---
 
 ## Ce este Legacy IDE 2001
@@ -37,11 +33,7 @@ fără backend, fără build step) care simulează un IDE din jurul anului
    QNX Neutrino: kernel fals (`procnto`), serviciu fals de debug
    (`gdx-debugd`), sesiune Photon, shell pseudo-POSIX, monitor de
    procese, file browser, network panel. Acest backend este scris
-   intenționat în stilul unei echipe IT foarte neglijente: servicii
-   greșit documentate, texte de eroare emfatice, jurnale de debug pe
-   limba română presărate în locuri nepotrivite, un "exploit" cu
-   patch-uri ASM a cărui poveste devine tot mai absurdă pe măsură ce
-   avansați în stadii.
+   intenționat în stilul unei echipe IT foarte neglijente.
 
 Proiectul este complet client-side. Rulează direct în browser, fără
 server, fără instalare, fără dependențe. Poate fi arhivat într-un
@@ -129,12 +121,10 @@ Comenzile shell sunt filtrate prin același backend simulat.
 ### Stack tehnic
 
 - HTML static, CSS fără build step, JavaScript ES3-compatibil în
-  codul sursă (IDE-ul se aplică sieși regulile pe care le impune
+  codul sursă (IDE-ul aplică sieși regulile pe care le impune
   utilizatorului, cu excepția câtorva module de runtime care
   folosesc `fetch`, `postMessage` și iframe `sandbox` atribute, și
   care nu sunt verificate de linter-ul IDE-ului).
-- Zero dependențe externe la runtime. Fără framework-uri, fără
-  bundler, fără pachete npm.
 - Tipografia folosește fontul Cantarell livrat odată cu proiectul
   (licență OFL), pentru a păstra un aspect consistent indiferent de
   sistemul de operare.
@@ -245,12 +235,6 @@ stiva `z-index` la fiecare click, pentru a nu crește nelimitat
 `js/core/smoke.js` conține o suită minimă de teste care validează
 că funcțiile globale critice există și că dialogurile cheie se
 deschid. Se rulează manual din consola browserului.
-
-### Contribuții
-
-Acesta este un proiect personal și o satiră. Pull request-urile sunt
-acceptate dacă se încadrează în spiritul proiectului și nu rup
-satira. Deschideți un issue pe GitLab pentru discuții.
 
 ---
 
