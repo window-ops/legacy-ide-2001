@@ -49,7 +49,7 @@ fișier zip și rulat pe orice calculator de după aproximativ 2018.
 
 ### Cum se pornește
 
-1. Descărcați arhiva zip a proiectului (pagina "Despre proiect" din meniul Ajutor) sau clonați depozitul.
+1. Descărcați arhiva zip a proiectului sau clonați depozitul.
 2. Deschideți `index.html` într-un browser modern (Firefox, Chrome sau un echivalent derivat).
 
 ### Scurt tur al interfeței
@@ -73,7 +73,7 @@ GDX debugger oferă dezasamblare falsă, pas-cu-pas, patching ASM și un scenari
 
 ### Sesiune QNX
 
-Sesiunea remote Photon se deschide din meniul debuggerului după atingerea stadiului corespunzător de exploit. Oferă un terminal `pterm`, file browser, monitor de procese și un panel de rețea. Comenzile shell sunt filtrate prin același backend simulat.
+Sesiunea remote Photon se deschide din meniul debuggerului după atingerea stadiului corespunzător de exploit. Oferă un terminal `pterm`, browser fișiere, monitor de procese și un panel de rețea. Comenzile shell sunt filtrate prin același backend simulat.
 
 ---
 
@@ -81,16 +81,9 @@ Sesiunea remote Photon se deschide din meniul debuggerului după atingerea stadi
 
 ### Stack tehnic
 
-- HTML static, CSS fără build step, JavaScript ES3-compatibil în
-  codul sursă (IDE-ul se aplică sieși regulile pe care le impune
-  utilizatorului, cu excepția câtorva module de runtime care
-  folosesc `fetch`, `postMessage` și iframe `sandbox` atribute, și
-  care nu sunt verificate de linter-ul IDE-ului).
-- Zero dependențe externe la runtime. Fără framework-uri, fără
-  bundler, fără pachete npm.
-- Tipografia folosește fontul Cantarell livrat odată cu proiectul
-  (licență OFL), pentru a păstra un aspect consistent indiferent de
-  sistemul de operare.
+- HTML static, CSS fără build step, JavaScript modern (nu ES3) în codul sursă.
+- Zero dependențe externe la runtime. Fără framework-uri, fără bundler, fără pachete npm.
+- Tipografia folosește fontul Cantarell livrat odată cu proiectul (licență OFL), pentru a păstra un aspect consistent indiferent de sistemul de operare.
 
 ### Organizare
 
@@ -101,8 +94,7 @@ index.html
 css/        stiluri (editor, debugger, dialoguri, meniu, QNX, bază)
 js/core/    STATE global, init, utilities, teste smoke
 js/editor/  editor, evidențiere, linter, pipeline de rulare, tabs, arbore
-js/ui/      dialoguri, drag&drop, layout, meniuri, preferințe, prompts,
-            tema, banner OS, dialogul About
+js/ui/      dialoguri, drag&drop, layout, meniuri, preferințe, prompts, tema, banner OS, dialogul About
 js/debugger/  dezasamblor VM, panou docs, controale, backend
 js/qnx/     sesiunea Photon simulată
 js/shell/   reverse-shell simulat
