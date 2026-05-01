@@ -185,12 +185,6 @@ stiva `z-index` la fiecare click, pentru a nu crește nelimitat
 că funcțiile globale critice există și că dialogurile cheie se
 deschid. Se rulează manual din consola browserului.
 
-### Contribuții
-
-Acesta este un proiect personal și o satiră. Pull request-urile sunt
-acceptate dacă se încadrează în spiritul proiectului și nu rup
-satira. Deschideți un issue pe GitLab pentru discuții.
-
 ---
 
 ## Licență
