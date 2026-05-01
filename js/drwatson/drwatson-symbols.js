@@ -43,7 +43,7 @@
             pid:    1640,
             when:   when,
             // Patch target the user can edit from the View pane.
-            patchTarget: { fn: 'check_curriculum', idx: 12, action: 'nop' },
+            patchTarget: { fn: 'check_curriculum', idx: 12, action: 'nop', effect: 'bypassCurriculum' },
             details: lines([
                 'Application exception occurred:',
                 '  App: gdx-debugd.exe (pid=1640)',
@@ -86,7 +86,7 @@
             label:  'Access violation',
             pid:    1842,
             when:   when,
-            patchTarget: { fn: 'lint_strict', idx: 7, action: 'invert' },
+            patchTarget: { fn: 'check_curriculum', idx: 7, action: 'invert', effect: 'bypassCurriculum' },
             details: lines([
                 'Application exception occurred:',
                 '  App: lint-curriculum.exe (pid=1842)',
@@ -112,7 +112,7 @@
             label:  'Stack overflow',
             pid:    2104,
             when:   when,
-            patchTarget: { fn: 'allowTransitional_validate', idx: 3, action: 'nop' },
+            patchTarget: { fn: 'verify_os', idx: 3, action: 'nop', effect: 'bypassOSCheck' },
             details: lines([
                 'Application exception occurred:',
                 '  App: check_2001.exe (pid=2104)',

@@ -9,18 +9,19 @@
 
         popover.style.visibility = 'hidden';
         popover.classList.add('open');
-        var w = Math.max(prefWidth || 220, popover.offsetWidth || 220);
         var h = Math.max(120, popover.offsetHeight || 120);
         popover.classList.remove('open');
         popover.style.visibility = '';
 
-        var left = rect.right - w;
-        left = Math.max(pad, Math.min(left, window.innerWidth - w - pad));
+        // Pin to the right edge with a fixed 5 px gutter, the way real
+        // app menus anchor under their hamburger / overflow button. We
+        // clear left so the right anchor is what the browser uses.
         var top = rect.bottom + gap;
         if (top + h > window.innerHeight - pad) top = window.innerHeight - h - pad;
         top = Math.max(pad, top);
 
-        popover.style.left = left + 'px';
+        popover.style.left = '';
+        popover.style.right = '5px';
         popover.style.top = top + 'px';
         popover.classList.add('open');
     }
