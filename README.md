@@ -11,6 +11,8 @@ demult depășită dacă profesorii ar fi fost mai puțin stricți, dacă
 unitățile de învățământ s-ar fi modernizat și dacă programele școlare
 ar fi fost actualizate. În loc de asta, iată-ne aici.
 
+Ca deobicei pentru proiectele mai noi, AI a fost folosit pentru a automatiza proiectul, dar programul a fost verificat și este în lucru. Programul este încă în beta, incomplet.
+
 ---
 
 ## Ce este Legacy IDE 2001
