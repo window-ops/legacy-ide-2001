@@ -2357,13 +2357,6 @@ body.srv2003-min .app { display: none; }
     letter-spacing: 0.02em;
     border-bottom: 1px solid #4d8ea3;
 }
-.qnx-reinstall-q {
-    color: #ffd34d;
-    font-weight: 700;
-    font-size: 16px;
-    margin-right: 1px;
-    font-family: "Tahoma", sans-serif;
-}
 .qnx-reinstall-body {
     flex: 1;
     overflow-y: auto;
@@ -2385,4 +2378,169 @@ body.srv2003-min .app { display: none; }
 .srv2k3-safe-actions {
     display: flex;
     gap: 14px;
+}
+
+/* ============================================================
+   DR. WATSON DETAIL TABS + CPU STATE + PATCH PANE
+   ============================================================ */
+.srv2k3-drwatson-details .drw-detail-tabs {
+    display: flex;
+    gap: 0;
+    background: #d4d0c8;
+    padding: 4px 4px 0;
+    border-bottom: 1px solid #808080;
+}
+.srv2k3-drwatson-details .drw-detail-tab {
+    appearance: none;
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    border-radius: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px 0 0 #404040,
+        inset -2px 0 0 #808080;
+    padding: 4px 14px 5px;
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    margin-right: 2px;
+    cursor: pointer;
+}
+.srv2k3-drwatson-details .drw-detail-tab.active {
+    font-weight: 700;
+    padding-bottom: 6px;
+}
+.srv2k3-drwatson-details .drw-detail-pane {
+    background: #d4d0c8;
+    padding: 12px 16px;
+    min-height: 280px;
+}
+.srv2k3-drwatson-details .drw-detail-pane[hidden] { display: none; }
+
+/* CPU State pane */
+.srv2k3-drwatson-details .drw-vm-header {
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    margin: 4px 0 6px;
+}
+.srv2k3-drwatson-details .drw-vm-regs {
+    width: 100%;
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    border-collapse: collapse;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 11px;
+    margin-bottom: 12px;
+}
+.srv2k3-drwatson-details .drw-vm-regs th {
+    background: #d4d0c8;
+    text-align: right;
+    padding: 2px 6px;
+    font-weight: 700;
+    border-right: 1px solid #808080;
+    border-bottom: 1px solid #ffffff;
+    width: 40px;
+}
+.srv2k3-drwatson-details .drw-vm-regs td {
+    padding: 2px 8px;
+    border-right: 1px solid #c0c0c0;
+}
+.srv2k3-drwatson-details .drw-vm-disasm {
+    width: 100%;
+    background: #000000;
+    color: #c0c0c0;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 11px;
+    border-collapse: collapse;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff;
+}
+.srv2k3-drwatson-details .drw-vm-disasm td {
+    padding: 1px 8px;
+    color: #c0c0c0;
+}
+.srv2k3-drwatson-details .drw-vm-addr   { width: 80px; color: #888888; }
+.srv2k3-drwatson-details .drw-vm-bytes  { width: 110px; color: #888888; }
+.srv2k3-drwatson-details .drw-vm-mnem   { color: #c0c0c0; }
+.srv2k3-drwatson-details tr.drw-vm-fault td { background: #5a0000; color: #ffffff; }
+.srv2k3-drwatson-details tr.drw-vm-fault .drw-vm-marker { color: #ffd34d; font-weight: 700; }
+
+/* Patch pane */
+.srv2k3-drwatson-details .drw-patch {
+    font-family: "Tahoma", sans-serif;
+    font-size: 11px;
+    color: #000000;
+}
+.srv2k3-drwatson-details .drw-patch-target {
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff;
+    padding: 6px 10px;
+    margin-bottom: 10px;
+}
+.srv2k3-drwatson-details .drw-patch-target-label { color: #404040; }
+.srv2k3-drwatson-details .drw-patch-target code {
+    font-family: "Lucida Console", monospace;
+    font-weight: 700;
+}
+.srv2k3-drwatson-details .drw-patch-explain {
+    margin: 4px 0 10px;
+    line-height: 1.5;
+}
+.srv2k3-drwatson-details .drw-patch-actions {
+    border: 1px solid #808080;
+    box-shadow: inset 1px 1px 0 #ffffff;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+}
+.srv2k3-drwatson-details .drw-patch-actions legend {
+    padding: 0 4px;
+    font-weight: 400;
+}
+.srv2k3-drwatson-details .drw-patch-actions .drw-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 3px 0;
+}
+.srv2k3-drwatson-details .drw-patch-actions input[type=radio] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 13px;
+    height: 13px;
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #d4d0c8;
+    border-radius: 50%;
+    margin: 0;
+    flex-shrink: 0;
+    position: relative;
+}
+.srv2k3-drwatson-details .drw-patch-actions input[type=radio]:checked::after {
+    content: "";
+    position: absolute;
+    inset: 3px;
+    background: #000000;
+    border-radius: 50%;
+}
+.srv2k3-drwatson-details .drw-patch-buttons {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+.srv2k3-drwatson-details .drw-patch-status {
+    background: #ffffe1;
+    border: 1px solid #d4a017;
+    padding: 6px 8px;
+    font-size: 11px;
 }

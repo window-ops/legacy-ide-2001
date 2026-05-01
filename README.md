@@ -33,7 +33,11 @@ fără backend, fără build step) care simulează un IDE din jurul anului
    QNX Neutrino: kernel fals (`procnto`), serviciu fals de debug
    (`gdx-debugd`), sesiune Photon, shell pseudo-POSIX, monitor de
    procese, file browser, network panel. Acest backend este scris
-   intenționat în stilul unei echipe IT foarte neglijente.
+   intenționat în stilul unei echipe IT foarte neglijente: servicii
+   greșit documentate, texte de eroare emfatice, jurnale de debug pe
+   limba română presărate în locuri nepotrivite, un "exploit" cu
+   patch-uri ASM a cărui poveste devine tot mai absurdă pe măsură ce
+   avansați în stadii.
 
 Proiectul este complet client-side. Rulează direct în browser, fără
 server, fără instalare, fără dependențe. Poate fi arhivat într-un
@@ -45,74 +49,31 @@ fișier zip și rulat pe orice calculator de după aproximativ 2018.
 
 ### Cum se pornește
 
-1. Descărcați arhiva zip a proiectului (pagina "Despre proiect" din
-   meniul Ajutor) sau clonați depozitul.
-2. Deschideți `index.html` într-un browser modern (Firefox, Chrome,
-   Edge sau un echivalent derivat; Safari recent funcționează la fel
-   de bine).
-3. Pentru ca funcția de descărcare individuală a fișierelor sursă
-   (din dialogul "Despre proiect") să funcționeze, serviți proiectul
-   pe HTTP. Orice server static este suficient:
-
-   ```
-   python3 -m http.server 8000
-   # apoi deschideți http://localhost:8000/
-   ```
-
-   Dacă deschideți `index.html` direct de pe disc (protocol
-   `file://`), tot restul IDE-ului funcționează normal, dar
-   descărcările individuale din dialogul About sunt blocate de
-   restricțiile de securitate ale browserului. În acest caz, arhiva
-   completă rămâne accesibilă din pagina de lansări pe GitLab.
+1. Descărcați arhiva zip a proiectului (pagina "Despre proiect" din meniul Ajutor) sau clonați depozitul.
+2. Deschideți `index.html` într-un browser modern (Firefox, Chrome sau un echivalent derivat).
 
 ### Scurt tur al interfeței
 
-- **Panoul stânga:** arborele de fișiere. Creați fișiere noi cu
-  butonul `+`, deschideți-le cu clic, redenumiți sau ștergeți din
-  meniul contextual.
-- **Centrul:** editorul. Evidențierea de sintaxă se activează din
-  Preferințe. Tab-urile arată fișierele deschise.
-- **Bara de stare:** eticheta `langTag` arată modul efectiv
-  (`HTML 4.01 Transitional`, `HTML 4.01 Strict`, `ECMAScript Ed. 3`,
-  etc.); eticheta `stLint` arată numărul de încălcări curriculare.
-- **Panoul dreapta:** ieșirea. Consola primește `console.log()` și
-  erorile; Previzualizarea randează HTML-ul (și JavaScript-ul, dacă
-  ați dezactivat anti-hang).
-- **Bara de meniu sus:** Fișier, Editare, Programa școlară
-  (dialogul cu toate construcțiile permise și interzise),
-  Preferințe, Debugger, Ajutor.
+- **Panoul stânga:** arborele de fișiere. Creați fișiere noi cu butonul `+`, deschideți-le cu clic, redenumiți sau ștergeți din meniul contextual.
+- **Centrul:** editorul. Evidențierea de sintaxă se activează din Preferințe. Tab-urile arată fișierele deschise.
+- **Bara de stare:** eticheta `langTag` arată modul efectiv (`HTML 4.01 Transitional`, `HTML 4.01 Strict`, `ECMAScript Ed. 3`, etc.); eticheta `stLint` arată numărul de încălcări curriculare.
+- **Panoul dreapta:** ieșirea. Consola primește `console.log()` și erorile; Previzualizarea randează HTML-ul (și JavaScript-ul, dacă ați dezactivat anti-hang).
+- **Bara de meniu sus:** Fișier, Editare, Programa școlară (dialogul cu toate construcțiile permise și interzise), Preferințe, Debugger, Ajutor.
 
 ### Preferințe notabile
 
-- **Mod 2001 strict** (protejat): activează verificarea curriculară.
-  Poate fi ocolit doar prin patch-uri ASM în debugger, la funcția
-  `check_curriculum`.
-- **Acceptă HTML 4.01 Transitional** (implicit activ): permite
-  elemente precum `<IFRAME>`, `<FONT>`, `<CENTER>` și atribute precum
-  `target=""`. Este activ implicit pentru că documentele școlare
-  reale nu declară niciun doctype, iar Transitional este cel mai
-  apropiat DTD real.
-- **Protecție anti-hang** (implicit activă): execuția JavaScript în
-  Previzualizare este oprită; codul se afișează static. Dezactivați
-  pentru execuție reală în iframe sandbox-uit. Bucle infinite pot
-  îngheța fila.
-- **Evidențiere sintactică**, **Închidere automată etichete HTML**,
-  **Afișare tracebacks în română**, **Mod întunecat**: comportamentul
-  implicit al editorului.
+- **Mod 2001 strict** (protejat): activează verificarea curriculară. Poate fi ocolit doar prin patch-uri ASM în debugger, la funcția `check_curriculum`.
+- **Acceptă HTML 4.01 Transitional** (implicit activ): permite elemente precum `<IFRAME>`, `<FONT>`, `<CENTER>` și atribute precum `target=""`. Este activ implicit pentru că documentele școlare reale nu declară niciun doctype, iar Transitional este cel mai apropiat DTD real.
+- **Protecție anti-hang** (implicit activă): execuția JavaScript în Previzualizare este oprită; codul se afișează static. Dezactivați pentru execuție reală în iframe sandbox-uit. Bucle infinite pot îngheța fila.
+- **Evidențiere sintactică**, **Închidere automată etichete HTML**, **Afișare tracebacks în română**, **Mod întunecat**: comportamentul implicit al editorului.
 
 ### Debugger
 
-GDX debugger v0.91 oferă dezasamblare falsă, pas-cu-pas, patching ASM
-și un scenariu narativ de escaladare în patru stadii. Se deschide cu
-`Ctrl+Shift+D`. Documentația completă este inclusă ca panou lateral
-(butonul "Docs").
+GDX debugger oferă dezasamblare falsă, pas-cu-pas, patching ASM și un scenariu narativ de escaladare în patru stadii. Se deschide cu `Ctrl+Shift+D`. Documentația completă este inclusă ca panou lateral (butonul "Documentație debugger").
 
 ### Sesiune QNX
 
-Sesiunea remote Photon se deschide din meniul debuggerului după
-atingerea stadiului corespunzător de exploit. Oferă un terminal
-`pterm`, file browser, monitor de procese și un panel de rețea.
-Comenzile shell sunt filtrate prin același backend simulat.
+Sesiunea remote Photon se deschide din meniul debuggerului după atingerea stadiului corespunzător de exploit. Oferă un terminal `pterm`, file browser, monitor de procese și un panel de rețea. Comenzile shell sunt filtrate prin același backend simulat.
 
 ---
 
@@ -121,10 +82,12 @@ Comenzile shell sunt filtrate prin același backend simulat.
 ### Stack tehnic
 
 - HTML static, CSS fără build step, JavaScript ES3-compatibil în
-  codul sursă (IDE-ul aplică sieși regulile pe care le impune
+  codul sursă (IDE-ul se aplică sieși regulile pe care le impune
   utilizatorului, cu excepția câtorva module de runtime care
   folosesc `fetch`, `postMessage` și iframe `sandbox` atribute, și
   care nu sunt verificate de linter-ul IDE-ului).
+- Zero dependențe externe la runtime. Fără framework-uri, fără
+  bundler, fără pachete npm.
 - Tipografia folosește fontul Cantarell livrat odată cu proiectul
   (licență OFL), pentru a păstra un aspect consistent indiferent de
   sistemul de operare.
@@ -235,6 +198,12 @@ stiva `z-index` la fiecare click, pentru a nu crește nelimitat
 `js/core/smoke.js` conține o suită minimă de teste care validează
 că funcțiile globale critice există și că dialogurile cheie se
 deschid. Se rulează manual din consola browserului.
+
+### Contribuții
+
+Acesta este un proiect personal și o satiră. Pull request-urile sunt
+acceptate dacă se încadrează în spiritul proiectului și nu rup
+satira. Deschideți un issue pe GitLab pentru discuții.
 
 ---
 
