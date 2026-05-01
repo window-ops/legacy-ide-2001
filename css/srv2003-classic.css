@@ -1,7 +1,7 @@
 /* ============================================================
  WINDOWS SERVER 2003 CLASSIC THEME
- Faithful to the real Classic theme Server 2003 shipped with
- by default (Luna disabled). Activated by body.srv2003-desktop.
+ Imitation of the real Classic theme Server 2003 shipped with
+ by default. Activated by body.srv2003-desktop.
 
  Key palette values, matching the Win32 system colors:
  3D face #d4d0c8
@@ -2946,4 +2946,16 @@ body.srv2003-min .app { display: none; }
     color: #ffffff;
     padding: 0 4px;
     margin-right: 2px;
+}
+
+.srv2k3-shut-screen.phase-bios-error {
+    background: #000000;
+    color: #c0c0c0;
+    flex-direction: column;
+    font-family: "Lucida Console", "Consolas", monospace;
+    cursor: pointer;
+}
+.srv2k3-bios-error {
+    text-align: center;
+    font-size: 22px;
 }

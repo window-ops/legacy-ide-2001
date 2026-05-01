@@ -526,3 +526,15 @@ body.has-su-taskbar .banner-slot {
     padding: 1px 8px;
     border-radius: 999px;
 }
+
+/* When the supervisor taskbar is on, both the IDE viewport and the
+   GDX Debugger overlay must shrink by the taskbar height. Otherwise
+   the IDE\'s status bar and the debugger\'s footer slip below the
+   bottom edge by 32 px. */
+body.has-su-taskbar .app {
+    height: calc(100vh - var(--su-taskbar-height));
+    height: calc(100dvh - var(--su-taskbar-height));
+}
+body.has-su-taskbar .debugger {
+    inset: var(--su-taskbar-height) 0 0 0;
+}

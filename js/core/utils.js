@@ -12,8 +12,20 @@ function runtimeEffects() {
 function isMobileViewport() { return window.innerWidth <= 720; }
 var _toastTimer = null;
 function showToast(msg) {
+    // When the IDE is minimized inside Server 2003, the toast element
+    // sits inside .app which is display:none. Route to a tray balloon
+    // instead so the message stays visible. The balloon helper lives
+    // in js/exploit/srv2003-desktop.js and is exposed on window.
+    if (document.body.classList.contains('srv2003-min') && typeof window.srv2k3Notify === 'function') {
+        window.srv2k3Notify(msg);
+        return;
+    }
     var t = $('toast');
     if (!t) return;
+    // Lift the toast to the body so it always paints above any open
+    // dialog backdrop (which uses z-index up to ~1100). We do this on
+    // every show in case the toast got tucked under a stacking context.
+    if (t.parentNode !== document.body) document.body.appendChild(t);
     t.textContent = msg;
     t.classList.add('show');
     if (_toastTimer) clearTimeout(_toastTimer);
