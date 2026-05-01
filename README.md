@@ -34,7 +34,7 @@ fără backend, fără build step) care simulează un IDE din jurul anului
 2. **Stratul QNX.** Programul include un backend simulat inspirat de
    QNX Neutrino: kernel fals (`procnto`), serviciu fals de debug
    (`gdx-debugd`), sesiune Photon, shell pseudo-POSIX, monitor de
-   procese, file browser, network panel. Acest backend este scris
+   procese, browser fișiere, panel rețea. Acest backend este scris
    intenționat în stilul unei echipe IT foarte neglijente: servicii
    greșit documentate, texte de eroare emfatice, jurnale de debug pe
    limba română presărate în locuri nepotrivite, un "exploit" cu
