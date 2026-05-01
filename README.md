@@ -1,6 +1,6 @@
 # Legacy IDE 2001
 
-> Un mediu de dezvoltare web **strict conform** cu programa analitică de
+> Un mediu de dezvoltare web strict conform cu programa analitică de
 > Tehnologia Informației și a Comunicațiilor (TIC) din anii 2000,
 > rulând pe un backend QNX simulat de o echipă IT la fel de în urmă.
 
