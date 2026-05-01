@@ -24,7 +24,7 @@ fără backend, fără build step) care simulează un IDE din jurul anului
    2001. Cu alte cuvinte, dacă scrieți `let`, `=>`, `fetch()`,
    `<section>` sau `placeholder=""`, linter-ul vă informează politicos
    (și în română) că nu sunteți conform cu programa TIC 2001.
-   Recomandările date utilizatorului imită serios sfaturile din
+   Recomandările date utilizatorului imită sfaturile din
    manualele și auxiliarele epocii: folosiți `<TABLE>` pentru layout,
    `<FONT color size face>`, `onclick=""` inline, `document.write()`,
    `document.cookie` pentru persistență.
