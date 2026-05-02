@@ -189,7 +189,7 @@ deschid. Se rulează manual din consola browserului.
 
 ## Licență
 
-MIT. Vedeți `LICENSE` în depozitul GitLab.
+MIT. Vedeți `LICENSE`.
 
 Fontul Cantarell este distribuit sub SIL Open Font License; a se
 vedea `cantarell/OFL.txt`.
