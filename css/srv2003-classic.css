@@ -1,7 +1,7 @@
 /* ============================================================
  WINDOWS SERVER 2003 CLASSIC THEME
- Imitation of the real Classic theme Server 2003 shipped with
- by default. Activated by body.srv2003-desktop.
+ Faithful to the real Classic theme Server 2003 shipped with
+ by default (Luna disabled). Activated by body.srv2003-desktop.
 
  Key palette values, matching the Win32 system colors:
  3D face #d4d0c8
@@ -2257,40 +2257,6 @@ body.srv2003-min .app { display: none; }
    pressed button per running window, with the IDE\'s entry
    pre-pinned so the user can minimize/restore the IDE.
    ============================================================ */
-.srv2k3-quicklaunch {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    padding: 0 4px;
-    border-right: 1px solid #808080;
-    box-shadow: inset -1px 0 0 #ffffff;
-    margin-right: 2px;
-}
-.srv2k3-ql-btn {
-    appearance: none;
-    background: transparent;
-    border: 0;
-    width: 22px;
-    height: 22px;
-    padding: 0;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    border-radius: 0;
-}
-.srv2k3-ql-btn:hover {
-    background: #d4d0c8;
-    box-shadow:
-        inset 1px 1px 0 #ffffff,
-        inset -1px -1px 0 #808080;
-}
-.srv2k3-ql-btn:active {
-    box-shadow:
-        inset 1px 1px 0 #808080,
-        inset -1px -1px 0 #ffffff;
-}
-.srv2k3-ql-btn svg { display: block; }
-
 .srv2k3-task-btn {
     appearance: none;
     background: #d4d0c8;
@@ -2781,6 +2747,28 @@ body.srv2003-min .app { display: none; }
         linear-gradient(-45deg, transparent 35%, #000000 35%, #000000 50%, transparent 50%) 5px 0 / 7px 8px no-repeat,
         #ffffff;
 }
+/* Horizontal button layout (used for Start/Stop pairs that don\'t need
+   the label/value grid the default .ra-form provides). */
+.srv2k3-roleadmin .ra-form.ra-form-row {
+    display: flex;
+    gap: 8px;
+    padding: 10px 4px 4px;
+    border-top: 1px solid #c0c0c0;
+    margin-top: 8px;
+    align-items: center;
+}
+.srv2k3-roleadmin .ra-form.ra-form-row button {
+    grid-column: auto;
+    justify-self: auto;
+    margin-top: 0;
+}
+/* Per-row Start/Stop buttons inside the sites table — narrower than
+   the general .btn so they fit in a tight table cell. */
+.srv2k3-roleadmin .ra-table .ra-row-btn {
+    padding: 1px 8px;
+    font-size: 11px;
+    min-width: 64px;
+}
 
 /* ============================================================
    LEGACY BIOS BUTTONS on the safe-to-turn-off screen.
@@ -2959,3 +2947,276 @@ body.srv2003-min .app { display: none; }
     text-align: center;
     font-size: 22px;
 }
+
+/* ============================================================
+   COMMAND PROMPT — inline buffer + caret
+   ============================================================ */
+.srv2k3-cmd .cmd-screen {
+    outline: none;
+}
+.srv2k3-cmd .cmd-screen:focus { outline: none; }
+.srv2k3-cmd .cmd-row { white-space: pre-wrap; word-break: break-all; }
+.srv2k3-cmd .cmd-line {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+.srv2k3-cmd .cmd-prompt,
+.srv2k3-cmd .cmd-buf {
+    color: #c0c0c0;
+    font-family: inherit;
+    font-size: inherit;
+}
+.srv2k3-cmd .cmd-buf { white-space: pre-wrap; word-break: break-all; }
+.srv2k3-cmd .cmd-caret {
+    display: inline-block;
+    width: 8px;
+    height: 13px;
+    background: #c0c0c0;
+    margin-left: 0;
+    vertical-align: text-bottom;
+    animation: cmdBlink 1s steps(2, start) infinite;
+}
+@keyframes cmdBlink { to { visibility: hidden; } }
+
+/* ============================================================
+   IDE SIDEBAR ADD / DELETE BUTTONS in Server 2003
+   The .icon-btn at the top of the file tree (Add / Delete) keeps
+   its rounded GNOME look without an override. In the Classic
+   theme it must be a square 3D-bevelled button like the rest of
+   the chrome.
+   ============================================================ */
+body.srv2003-desktop .icon-btn {
+    width: 22px;
+    height: 22px;
+    background: #d4d0c8;
+    color: #000000;
+    border-radius: 0;
+    box-shadow:
+        inset -1px -1px 0 #404040,
+        inset 1px 1px 0 #ffffff,
+        inset -2px -2px 0 #808080,
+        inset 2px 2px 0 #dfdfdf;
+}
+body.srv2003-desktop .icon-btn:hover {
+    background: #d4d0c8;
+    color: #000000;
+}
+body.srv2003-desktop .icon-btn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+body.srv2003-desktop .icon-btn svg {
+    width: 12px;
+    height: 12px;
+    color: #000000;
+}
+
+/* ============================================================
+   HIDE THE DARK THEME PREFERENCE ROW IN SERVER 2003.
+   The whole row vanishes — Server 2003 is a Classic-only OS, so
+   the toggle would be misleading. The IDE\'s headerbar theme
+   button is already display:none. This rule covers Preferinte.
+   ============================================================ */
+body.srv2003-desktop #prefDark { display: none; }
+body.srv2003-desktop #prefDark + .slider { display: none; }
+/* The pref row\'s parent has no id, so we hide it by checking that
+   its switch input is #prefDark. The :has selector handles this. */
+body.srv2003-desktop .pref-row:has(#prefDark) { display: none; }
+/* If the only pref-row in a group is hidden, hide the group and
+   its title block too. The "Aspect" group only contains Dark Theme. */
+body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
+
+/* ============================================================
+   TRAY INFO ICON FLASHING ANIMATION
+   When a non-network notification arrives, the dedicated info
+   tray icon pulses to draw the eye. Pulsing stops when the user
+   clicks the icon, even if the .flashing class is still on (the
+   handler removes it explicitly).
+   ============================================================ */
+.srv2k3-tray-info.flashing {
+    animation: srv2k3TrayInfoPulse 1.2s ease-in-out infinite;
+}
+@keyframes srv2k3TrayInfoPulse {
+    0%,100% { background: transparent; }
+    50%     { background: #ffe580; }
+}
+
+/* ============================================================
+   NOTIFICATION LOG POPUP
+   Anchored above the tray info icon. Lists the most recent
+   notifications with title, time, and body. "Golire" button in
+   the header clears the history. Click outside dismisses.
+   ============================================================ */
+.srv2k3-notif-log {
+    position: fixed;
+    z-index: 60002;
+    width: 320px;
+    max-height: 400px;
+    background: #d4d0c8;
+    color: #000000;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080,
+        2px 2px 4px rgba(0, 0, 0, 0.35);
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+}
+.srv2k3-notif-header {
+    background: linear-gradient(180deg, #0a246a 0%, #1a3a78 60%, #2a4a88 100%);
+    color: #ffffff;
+    padding: 3px 6px;
+    font-weight: 700;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.srv2k3-notif-clear {
+    appearance: none;
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080;
+    padding: 1px 8px;
+    font-family: inherit;
+    font-size: 11px;
+    cursor: pointer;
+}
+.srv2k3-notif-clear:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+.srv2k3-notif-body {
+    flex: 1;
+    overflow-y: auto;
+    background: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff;
+    margin: 4px;
+}
+.srv2k3-notif-row {
+    padding: 6px 8px;
+    border-bottom: 1px solid #e8e8e8;
+}
+.srv2k3-notif-row:last-child { border-bottom: 0; }
+.srv2k3-notif-row-head {
+    color: #0a246a;
+    margin-bottom: 2px;
+}
+.srv2k3-notif-row-body {
+    color: #000000;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+.srv2k3-notif-empty {
+    padding: 24px 8px;
+    text-align: center;
+    color: #606060;
+}
+
+
+/* ============================================================
+   HELP AND SUPPORT CENTER
+   Real Windows Help and Support has a teal banner at top with
+   the Windows flag and "Help and Support Center" wordmark, then
+   a 2-pane body with a left index and a scrollable right pane.
+   ============================================================ */
+.srv2k3-help .help-banner {
+    background: linear-gradient(180deg, #4a8fbf 0%, #2c6090 100%);
+    color: #ffffff;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid #1a4060;
+}
+.srv2k3-help .help-banner-flag {
+    display: inline-grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+}
+.srv2k3-help .help-banner-flag svg { display: block; }
+.srv2k3-help .help-banner-text {
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+.srv2k3-help .help-split {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    height: 380px;
+    background: #d4d0c8;
+}
+.srv2k3-help .help-nav {
+    background: #d4d0c8;
+    border-right: 1px solid #808080;
+    box-shadow: inset -1px 0 0 #ffffff;
+    padding: 6px 0;
+    overflow-y: auto;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+.srv2k3-help .help-nav-item {
+    padding: 4px 14px;
+    cursor: pointer;
+    color: #0a246a;
+    text-decoration: underline;
+}
+.srv2k3-help .help-nav-item:hover { background: #d6e8ff; }
+.srv2k3-help .help-nav-item.active {
+    background: #0a246a;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 700;
+}
+.srv2k3-help .help-pane {
+    background: #ffffff;
+    color: #000000;
+    padding: 16px 20px;
+    overflow-y: auto;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.srv2k3-help .help-heading {
+    font-size: 16px;
+    color: #0a246a;
+    font-weight: 700;
+    margin: 0 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #c0c0c0;
+}
+.srv2k3-help .help-body p { margin: 0 0 10px; }
+.srv2k3-help .help-body ul,
+.srv2k3-help .help-body ol {
+    margin: 0 0 10px 18px;
+    padding: 0;
+}
+.srv2k3-help .help-body li { margin-bottom: 4px; }
+.srv2k3-help .help-body code {
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 11px;
+    background: #f0f0f0;
+    padding: 1px 4px;
+}
+.srv2k3-help .help-body em { color: #404040; }
+.srv2k3-help .help-body strong { color: #0a246a; }

@@ -13,6 +13,15 @@ function runCode() {
     var runtimeText = resolved.text;
     var output = $('output');
     var fx = runtimeEffects();
+    // Backend re-validation override (Server 2003 only): if Curriculum
+    // Reporting site is up, the local bypass flags don\'t apply at run
+    // time either. The flag is set from File/App Server admin and is
+    // never set in the QNX session, so this stays scoped.
+    if (STATE.serverBackendOnline) {
+        fx = Object.assign({}, fx);
+        fx.bypassCurriculum = false;
+        fx.curriculumNonBlocking = false;
+    }
     switchOutputTab('console');
     output.innerHTML = '';
     if (fx.programBroken) {

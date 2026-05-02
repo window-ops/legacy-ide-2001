@@ -14,7 +14,15 @@ function getRules() {
     return [];
 }
 function lintCode(text) {
-    if (STATE.binaryPatches && STATE.binaryPatches.bypassCurriculum) return [];
+    // Backend re-validation override: when on Server 2003 and the
+    // Curriculum Reporting IIS site is Running, the local bypass flag
+    // does NOT take effect, validation falls through. Stopping that
+    // site from File/App Server admin makes the backend unreachable,
+    // so the local patch wins. The flag is only ever set on Server
+    // 2003, so the QNX kiosk session is unaffected.
+    var bypassed = !!(STATE.binaryPatches && STATE.binaryPatches.bypassCurriculum);
+    var backendOverrides = !!(STATE.serverBackendOnline);
+    if (bypassed && !backendOverrides) return [];
     var rules = getRules();
     var hits = [];
     // Track positions already claimed by a specific rule, so the generic

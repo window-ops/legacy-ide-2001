@@ -1,6 +1,6 @@
 # Defaultuser
 
-În această ramură s-a adăugat contul supervizor `defaultuser` peste sesiunea QNX
+A fost adăugat contul supervizor `defaultuser` peste sesiunea QNX
 existentă, un quiz de portare Windows Server 2003 bazat pe trivia de
 nivel power-user, o animație de instalare în CSS pur, și un backend
 Windows Server 2003 Classic care înlocuiește complet chrome-ul Photon
@@ -12,7 +12,7 @@ după migrare.
 
 ### Escaladare la `defaultuser` (tranșa 1)
 
-State machine completă în `js/exploit/defaultuser.js`, cu fazele
+Mecanism de stare complet în `js/exploit/defaultuser.js`, cu fazele
 `locked → unlocking → unlocked → migration → installing → server2003`.
 Fiecare tranziție apelează un hook `window.onDefaultUserPhase(prev, next)`
 astfel încât modulele ulterioare să se poată atașa fără a modifica
@@ -26,11 +26,10 @@ pe care debugger-ul îl producea deja pentru `bypassCurriculum`. Comanda
 `su defaultuser` validează cheia și declanșează tranziția.
 
 La escaladare reușită, o taskbar supervisor de 32 px apare lipită de
-partea de sus a ferestrei, deasupra tuturor layerelor IDE (inclusiv
-dialogurile modale). Stilul nu copiază Windows; este un session manager
-de tip Unix. Meniul Start afișează ca prima informație
-revelația narativă că IDE-ul este de fapt un client X11 streamat prin
-browser, nu o aplicație web.
+partea de sus a ferestrei, deasupra tuturor layer-elor IDE (inclusiv
+dialogurile modale). Este un session manager Unix. 
+Meniul Start afișează ca prima informație revelația narativă că IDE-ul 
+este de fapt un client X11 stremuit prin browser, nu o aplicație web.
 
 Scurtătura de dezvoltator `Ctrl+Shift+Alt+U` declanșează escaladarea fără
 a trece prin shell. Utilă pentru testare; calea canonică rămâne prin
@@ -45,7 +44,7 @@ aleator per sesiune, prag 7 din 10 pentru admis. Fiecare întrebare
 afișează sursa sub variantele de răspuns, astfel încât jucătorul să
 poată verifica materialul.
 
-Subiecte acoperite (sau care ar trebuii):
+Subiecte care ar trebui acoperite:
 
 - Nume de fișier rezervate DOS (CON, PRN, AUX, NUL) și bypass-ul prin
   namespace-ul Win32 `\\?\`. Sursă: FlyTech.
@@ -81,9 +80,8 @@ afișează răspunsul utilizatorului, răspunsul corect, și o explicație.
 După un quiz promovat, dialogul oferă alegerea de snapshot: curat (doar
 userspace utilitar) sau complet (include debugger-ul plus patch-urile
 `bypassCurriculum`, `curriculumNonBlocking`, `bypassOSCheck`). Alegerea
-este persistată în `STATE.defaultuser.migratedSnapshot`. La commit,
-tranziția este `unlocked → migration`, iar hook-ul
-`onDefaultUserPhase` este apelat.
+este persistată în `STATE.defaultuser.migratedSnapshot`. Tranziția
+este `unlocked → migration`, iar hook-ul `onDefaultUserPhase` este apelat.
 
 ### Animația de instalare (tranșa 3, partea 1)
 
@@ -125,6 +123,12 @@ tranziție explicită.
 activează la tranziția `migration → server2003` (sau direct la reload
 dacă faza stocată este deja `server2003`).
 
+Tema respectă paleta Win32 Classic. Fața 3D gri `#d4d0c8`,
+nu beige-ul Luna `#ece9d8`. Bevel-uri flat `#808080` / `#404040` /
+`#ffffff` / `#dfdfdf`. Titlebar cu gradient clasic `#0a246a → #a6caf0`.
+Taskbar gri, nu XP Luna blue. Start button gri cu drapel Windows, nu
+butonul verde italic de pe XP.
+
 Re-skin-ul acoperă:
 
 - Toate ferestrele QNX (terminal, file browser, process monitor,
@@ -137,6 +141,8 @@ Re-skin-ul acoperă:
   dezasamblare, log.
 - Terminalul devine cmd.exe (fundal negru, text `#c0c0c0`, font
   Lucida Console).
+- File browser primește header gradient și selecție albastru profund
+  `#0a246a` cu text alb, ca în Explorer Classic.
 
 Un nou taskbar este montat jos cu buton Start, listă de task-uri, tray
 cu iconițe de security și network, și ceas. Start menu-ul este
@@ -158,7 +164,9 @@ prin politica domeniului". Pentru tot restul, eroare standard
 
 About the system (winver) păstrează chrome-ul real Server 2003. Afișează
 „Microsoft Windows Server 2003 Standard Edition", versiunea 5.2 build
-3790, utilizatorul înregistrat, product ID, și memoria fizică.
+3790, utilizatorul înregistrat, product ID, și memoria fizică. Nu
+conține referințe la QNX, X11 sau kiosk; este o fereastră winver
+autentică.
 
 Dacă snapshot-ul ales la portare a fost curat, Dr. Watson (debugger-ul)
 nu se deschide și un toast explicativ apare: „Dr. Watson nu este
@@ -172,7 +180,7 @@ Server 2003, și întoarce jucătorul la faza `locked`.
 
 ---
 
-## Stare
+## State
 
 ```
 STATE.defaultuser = {

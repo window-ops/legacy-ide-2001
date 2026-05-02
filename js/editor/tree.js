@@ -61,7 +61,9 @@ function renderNode(node, container, depth) {
     act.onclick = function(e) {
         e.stopPropagation();
         var r = this.getBoundingClientRect();
-        openContextMenu(node.id, r.right, r.bottom);
+        // Nudge the popover 10 px closer to the button so it visually
+        // hugs the row instead of sitting in space to the right.
+        openContextMenu(node.id, r.right - 10, r.bottom);
     };
     row.appendChild(act);
 
