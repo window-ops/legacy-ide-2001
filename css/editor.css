@@ -322,6 +322,43 @@
     font-size: 13px;
     line-height: 1.45;
 }
+
+/* Backend scold — the school-IT rejection block. Distinct from a
+   normal lint traceback: red border on the left, italicized quoted
+   complaint at the top, fact list below. The whole block reads as
+   if the school server got annoyed at the user. */
+.traceback.backend-scold {
+    border-left: 3px solid var(--error);
+    background: rgba(192, 28, 40, 0.06);
+    margin-bottom: 12px;
+}
+.traceback.backend-scold .tb-title {
+    color: var(--error);
+}
+.traceback.backend-scold .scold-quote {
+    font-style: italic;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--fg);
+    padding: 6px 0 8px;
+    border-bottom: 1px dashed rgba(192, 28, 40, 0.35);
+    margin-bottom: 8px;
+}
+.traceback.backend-scold .scold-meta {
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    line-height: 1.55;
+}
+.traceback.backend-scold .scold-meta code {
+    color: var(--fg);
+    background: rgba(192, 28, 40, 0.1);
+}
+.traceback.backend-scold .scold-meta em {
+    color: var(--fg);
+    font-style: normal;
+    font-weight: 600;
+}
+
 .traceback code {
     color: var(--error); font-weight: 600;
     font-family: var(--font-mono);

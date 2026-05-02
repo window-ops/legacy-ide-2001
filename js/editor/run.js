@@ -58,10 +58,45 @@ function runCode() {
         return;
     }
     var hits = lintCode(text);
+    // Backend block: if Server 2003 backend is online AND the user has
+    // applied any bypass patch (Dr. Watson NOP / INVERT / EDIT), the
+    // school server rejects execution outright. The message mimics a
+    // retired-teacher / school-IT scolding tone, in line with the
+    // satire of the rest of the program. Stops execution before any
+    // traceback rendering so the user immediately sees the rejection.
+    var bp = STATE.binaryPatches || {};
+    var hasAnyBypass = !!(bp.bypassCurriculum || bp.curriculumNonBlocking || bp.bypassOSCheck);
+    var backendBlocking = !!(STATE.serverBackendOnline && hasAnyBypass);
+    if (backendBlocking) {
+        var msg = document.createElement('div');
+        msg.className = 'traceback backend-scold';
+        msg.innerHTML =
+            '<span class="tb-title">Backend curriculum.gdx-appliance: cerere respinsă</span>' +
+            '<div class="scold-quote">' +
+            '„Băi, tu n-ai voie să faci ce vrei tu pe calculatoarele școlii! Tu nu știi că programul nu rulează pe calculatorul tău, ci pe calculatorul școlii?!"' +
+            '</div>' +
+            '<div class="scold-meta">' +
+            '— Server: <code>curriculum.gdx-appliance</code> (10.0.0.42:80)<br>' +
+            '— Patch detectat la nivel local; revalidare server-side respinsă cu HTTP 451.<br>' +
+            (hits.length > 0 ? '— ' + hits.length + ' încălcare(i) raportate de programa analitică, agregate mai jos.<br>' : '') +
+            '— Pentru a rula codul fără revalidare, opriți site-ul „Curriculum Reporting" din <em>Administrare Server de Aplicații</em> &rarr; tabul <em>Web Sites</em>.' +
+            '</div>';
+        output.appendChild(msg);
+        // If the lint didn\'t flag anything but a patch is installed,
+        // stop execution here rather than letting the program run and
+        // confuse the user about whether the backend actually blocked.
+        if (hits.length === 0) {
+            $('outputStatus').innerHTML = '<span style="color: var(--error);">&#9679; Blocat de backend</span>';
+            return;
+        }
+    }
     if (fx.forceTraceback && hits.length === 0) {
         hits = [{ line: 1, col: 1, rule: { label: 'forced_traceback', year: 2001, standard: 'Patched branch', remedy: 'Revocați patch-ul NOP pe jz .clean pentru comportament normal.' } }];
     }
-    var curriculumNb = !!(fx.curriculumNonBlocking && !fx.bypassCurriculum);
+    // When the backend is online, force blocking display even if a
+    // patch had set curriculumNonBlocking. The school server doesn\'t
+    // care about the local non-blocking flag.
+    var curriculumNb = !!(fx.curriculumNonBlocking && !fx.bypassCurriculum) && !STATE.serverBackendOnline;
     if (hits.length > 0) {
         if (fx.suppressTraceback) {
             output.innerHTML = '<div class="traceback"><span class="tb-title">Traceback incomplet</span>emit_traceback() a fost NOP-at. Diagnosticul este parțial corupt.</div>';
@@ -274,12 +309,43 @@ function switchOutputTab(tab) {
         var hits = lintCode(STATE.fileContents[STATE.activeFile] || '');
         switchOutputTab('console');
         var output = $('output');
+        var bp = STATE.binaryPatches || {};
+        var hasAnyBypass = !!(bp.bypassCurriculum || bp.curriculumNonBlocking || bp.bypassOSCheck);
+        var backendBlocking = !!(STATE.serverBackendOnline && hasAnyBypass);
+        if (backendBlocking) {
+            output.innerHTML = '';
+            var msg = document.createElement('div');
+            msg.className = 'traceback backend-scold';
+            msg.innerHTML =
+                '<span class="tb-title">Backend curriculum.gdx-appliance: cerere respinsă</span>' +
+                '<div class="scold-quote">' +
+                '„Băi, tu n-ai voie să faci ce vrei tu pe calculatoarele școlii! Tu nu știi că programul nu rulează pe calculatorul tău, ci pe calculatorul școlii?!"' +
+                '</div>' +
+                '<div class="scold-meta">' +
+                '— Server: <code>curriculum.gdx-appliance</code> (10.0.0.42:80)<br>' +
+                '— Patch detectat la nivel local; revalidare server-side respinsă cu HTTP 451.<br>' +
+                (hits.length > 0 ? '— ' + hits.length + ' încălcare(i) raportate de programa analitică, agregate mai jos.<br>' : '') +
+                '— Pentru a rula codul fără revalidare, opriți site-ul „Curriculum Reporting" din <em>Administrare Server de Aplicații</em> &rarr; tabul <em>Web Sites</em>.' +
+                '</div>';
+            output.appendChild(msg);
+            showToast('Verificare respinsă de backend.');
+            if (hits.length === 0) return;
+            // Append the lint hits below as additional context.
+            var ro2 = STATE.prefs.romanian;
+            for (var k = 0; k < hits.length; k++) {
+                var pre2 = document.createElement('div');
+                pre2.className = 'traceback';
+                var t2 = ro2 ? 'Eroare #' + (k + 1) : 'Error #' + (k + 1);
+                pre2.innerHTML = '<span class="tb-title">' + t2 + '</span>' + formatTraceback(hits[k], node.name, {});
+                output.appendChild(pre2);
+            }
+            return;
+        }
         if (hits.length === 0) {
             output.innerHTML = '<div class="success-box"><b>&#10003; Verificare completă.</b>\n0 încălcări detectate.</div>';
             showToast('Verificare reușită.');
         } else {
             output.innerHTML = '';
-            var bp = STATE.binaryPatches || {};
             var lintNb = !!(bp.curriculumNonBlocking && !bp.bypassCurriculum);
             var ro = STATE.prefs.romanian;
             for (var j = 0; j < hits.length; j++) {

@@ -526,12 +526,3 @@ body.srv2003-installing #suStartMenu {
     height: 18px;
     display: block;
 }
-.srv-gui-brand {
-    font-family: "Tahoma", "MS Sans Serif", sans-serif;
-    font-style: italic;
-    font-weight: 700;
-    font-size: 14px;
-    color: #ffffff;
-    margin-right: 6px;
-    letter-spacing: -0.01em;
-}

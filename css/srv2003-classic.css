@@ -2542,7 +2542,7 @@ body.srv2003-min .app { display: none; }
 .srv2k3-balloon-arrow {
     position: absolute;
     bottom: -8px;
-    right: 60px;
+    right: var(--arrow-right, 60px);
     width: 0;
     height: 0;
     border-left: 8px solid transparent;
@@ -3220,3 +3220,30 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
 }
 .srv2k3-help .help-body em { color: #404040; }
 .srv2k3-help .help-body strong { color: #0a246a; }
+
+/* Disabled network icon — desaturates the icon and overlays a small
+   red X to mirror real Server 2003\'s "cable unplugged" state. */
+.srv2k3-tray-icon.disabled {
+    opacity: 0.45;
+    position: relative;
+}
+.srv2k3-tray-icon.disabled::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    right: -1px;
+    width: 7px;
+    height: 7px;
+    background: #c01c28;
+    border: 1px solid #ffffff;
+    border-radius: 50%;
+}
+
+/* Repairing — pulse-fade the icon while a Repair operation runs. */
+.srv2k3-tray-icon.repairing {
+    animation: srv2k3TrayRepair 0.6s ease-in-out infinite alternate;
+}
+@keyframes srv2k3TrayRepair {
+    0%   { opacity: 0.4; }
+    100% { opacity: 1;   }
+}
