@@ -142,7 +142,7 @@
           "<p>Câteva utilizări reale ale QNX:</p>" +
           "<ul>" +
           "<li><strong>Controale industriale.</strong> Centrale nucleare, rafinării, sisteme SCADA. Stabilitatea microkernel-ului este indispensabilă.</li>" +
-          "<li><strong>Automotive.</strong> QNX poate rulea în mașini ca sistem infotainment și navigație.</li>" +
+          "<li><strong>Automotive.</strong> QNX putea rula în mașini ca sistem infotainment și navigație.</li>" +
           "<li><strong>BlackBerry 10.</strong> Sistemul de operare al telefoanelor BlackBerry post-2013 era de fapt QNX cu un strat Cascades pe deasupra.</li>" +
           "<li><strong>Echipamente medicale.</strong> CT, RMN, monitoare de pacient.</li>" +
           "</ul>" +
