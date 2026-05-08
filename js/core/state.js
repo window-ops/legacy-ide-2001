@@ -15,7 +15,7 @@ var STATE = {
     prefs: {
         strict: true, romanian: true, inlineStyle: false,
         highlight: false, autoClose: false, osBanner: true, dark: false,
-        antiHang: true, allowTransitional: true
+        antiHang: true, allowTransitional: true, highContrast: false
     },
     os: 'unknown',
     bannerDismissed: false,
@@ -401,7 +401,7 @@ var ES3_RESERVED = {
     'else':1,'false':1,'finally':1,'for':1,'function':1,'if':1,'in':1,
     'instanceof':1,'new':1,'null':1,'return':1,'switch':1,'this':1,'throw':1,
     'true':1,'try':1,'typeof':1,'var':1,'void':1,'while':1,'with':1,
-    // Future reserved (ES3 section 7.5.3) — keywords but not constructs
+    // Future reserved (ES3 section 7.5.3), keywords but not constructs
     'abstract':1,'boolean':1,'byte':1,'char':1,'class':1,'const':1,'debugger':1,
     'double':1,'enum':1,'export':1,'extends':1,'final':1,'float':1,'goto':1,
     'implements':1,'import':1,'int':1,'interface':1,'long':1,'native':1,
@@ -471,7 +471,7 @@ var ES3_PROTOTYPE_METHODS = {
     // Object.prototype (15.2.4)
     'toString':1,'toLocaleString':1,'valueOf':1,'hasOwnProperty':1,
     'isPrototypeOf':1,'propertyIsEnumerable':1,'constructor':1,
-    // Array.prototype (15.4.4) — ES3 only, no forEach/map/filter/reduce
+    // Array.prototype (15.4.4), ES3 only, no forEach/map/filter/reduce
     'length':1,'concat':1,'join':1,'pop':1,'push':1,'reverse':1,'shift':1,
     'slice':1,'sort':1,'splice':1,'unshift':1,
     // String.prototype (15.5.4)
@@ -538,3 +538,23 @@ var ES3_PROTOTYPE_METHODS = {
     'cancelBubble':1
 };
 
+// Hydrate persisted accessibility prefs early so the visual state
+// matches the user\'s last choice before any UI renders. Only the
+// high-contrast toggle is persisted across reloads.
+(function() {
+    try {
+        var hc = sessionStorage.getItem('ide.access.highContrast.v1');
+        if (hc === '1') {
+            STATE.prefs.highContrast = true;
+            // document.body may not exist yet during early script
+            // execution; defer the class toggle until DOM is parsed.
+            if (document.body) {
+                document.body.classList.add('high-contrast');
+            } else {
+                document.addEventListener('DOMContentLoaded', function() {
+                    document.body.classList.add('high-contrast');
+                });
+            }
+        }
+    } catch (e) {}
+})();

@@ -140,7 +140,7 @@ body.srv2003-installing #suStartMenu {
     width: 100%;
     height: 100%;
     /* Body is a vertical gradient from medium gunmetal at top to a
-       darker steel-blue at bottom — matches the real Server 2003 setup
+       darker steel-blue at bottom, matches the real Server 2003 setup
        wallpaper that runs behind the wizard frames. */
     background: linear-gradient(180deg, #7e8a96 0%, #5c6772 100%);
     color: #ffffff;
@@ -512,7 +512,7 @@ body.srv2003-installing #suStartMenu {
     color: #707070;
 }
 
-/* Microsoft Windows wordmark in the setup title bar — italic-looking
+/* Microsoft Windows wordmark in the setup title bar, italic-looking
    sans-serif "Windows" next to the flag, with the actual setup title
    trailing on the right. Matches real Server 2003 setup screenshots. */
 .srv-gui-flag {

@@ -1410,6 +1410,21 @@ body.srv2003-desktop .hb-toggle.primary {
 }
 body.srv2003-desktop .hb-toggle svg { display: none; }
 body.srv2003-desktop .hb-toggle-label { font-size: 11px; }
+/* On mobile, the .hb-toggle-label is hidden by the global mobile
+   stylesheet (only the icons remain), so we have to bring the SVG
+   back inside Server 2003. Otherwise the Verifică / Execută buttons
+   collapse to empty squares. */
+@media (max-width: 720px) {
+    body.srv2003-desktop .hb-toggle svg {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        color: #000000;
+    }
+    body.srv2003-desktop .hb-toggle.primary svg {
+        color: #000000;
+    }
+}
 
 /* Output console (the bottom panel with Consolă / Previzualizare) */
 body.srv2003-desktop .output-panel {
@@ -1959,6 +1974,12 @@ body.srv2003-installing #srv2003StartMenu { display: none !important; }
     color: #000000;
 }
 .srv2k3-cpanel .cpanel-item:hover { background: #d6e8ff; }
+/* Items that actually open a window (data-cp-real / data-admin-real)
+   get a pointer cursor so the user knows they\'re clickable. */
+.srv2k3-cpanel .cpanel-item[data-cp-real],
+.srv2k3-cpanel .cpanel-item[data-admin-real] {
+    cursor: pointer;
+}
 .srv2k3-cpanel .cpanel-icon {
     flex: 0 0 28px;
     width: 28px;
@@ -2351,7 +2372,6 @@ body.srv2003-min .app { display: none; }
     font-size: 12px;
     border-top: 1px solid #4d8ea3;
 }
-
 .srv2k3-safe-actions {
     display: flex;
     gap: 14px;
@@ -2610,7 +2630,7 @@ body.srv2003-min .app { display: none; }
     line-height: 1.45;
 }
 
-/* Tray icon context menu — Classic gray popup pinned above the
+/* Tray icon context menu, Classic gray popup pinned above the
    tray icon, single column, no submenus. */
 .srv2k3-tray-menu {
     position: fixed;
@@ -2762,7 +2782,7 @@ body.srv2003-min .app { display: none; }
     justify-self: auto;
     margin-top: 0;
 }
-/* Per-row Start/Stop buttons inside the sites table — narrower than
+/* Per-row Start/Stop buttons inside the sites table, narrower than
    the general .btn so they fit in a tight table cell. */
 .srv2k3-roleadmin .ra-table .ra-row-btn {
     padding: 1px 8px;
@@ -2949,7 +2969,7 @@ body.srv2003-min .app { display: none; }
 }
 
 /* ============================================================
-   COMMAND PROMPT — inline buffer + caret
+   COMMAND PROMPT, inline buffer + caret
    ============================================================ */
 .srv2k3-cmd .cmd-screen {
     outline: none;
@@ -3019,7 +3039,7 @@ body.srv2003-desktop .icon-btn svg {
 
 /* ============================================================
    HIDE THE DARK THEME PREFERENCE ROW IN SERVER 2003.
-   The whole row vanishes — Server 2003 is a Classic-only OS, so
+   The whole row vanishes, Server 2003 is a Classic-only OS, so
    the toggle would be misleading. The IDE\'s headerbar theme
    button is already display:none. This rule covers Preferinte.
    ============================================================ */
@@ -3221,7 +3241,7 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
 .srv2k3-help .help-body em { color: #404040; }
 .srv2k3-help .help-body strong { color: #0a246a; }
 
-/* Disabled network icon — desaturates the icon and overlays a small
+/* Disabled network icon, desaturates the icon and overlays a small
    red X to mirror real Server 2003\'s "cable unplugged" state. */
 .srv2k3-tray-icon.disabled {
     opacity: 0.45;
@@ -3239,11 +3259,738 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
     border-radius: 50%;
 }
 
-/* Repairing — pulse-fade the icon while a Repair operation runs. */
+/* Repairing, pulse-fade the icon while a Repair operation runs. */
 .srv2k3-tray-icon.repairing {
     animation: srv2k3TrayRepair 0.6s ease-in-out infinite alternate;
 }
 @keyframes srv2k3TrayRepair {
     0%   { opacity: 0.4; }
     100% { opacity: 1;   }
+}
+
+/* ============================================================
+   MOBILE REFLOWS, narrow viewport adjustments for the most
+   problematic Server 2003 dialogs. The classic 3D bevel layout
+   doesn\'t take width well; these media queries collapse the
+   widest tables into stacked cards and let the BIOS Setup
+   stack vertically below 480 px.
+   ============================================================ */
+
+@media (max-width: 720px) {
+    /* Role admin Web Sites table: too many columns for narrow
+       viewports. Hide IP, port, and host header on mobile , 
+       the user\'s job here is just to identify and stop a site,
+       not audit network details. */
+    body.srv2003-desktop .ra-table th:nth-child(3),
+    body.srv2003-desktop .ra-table th:nth-child(4),
+    body.srv2003-desktop .ra-table th:nth-child(5),
+    body.srv2003-desktop .ra-table td:nth-child(3),
+    body.srv2003-desktop .ra-table td:nth-child(4),
+    body.srv2003-desktop .ra-table td:nth-child(5) {
+        display: none;
+    }
+    body.srv2003-desktop .ra-table {
+        font-size: 11px;
+    }
+    body.srv2003-desktop .ra-row-btn {
+        min-width: 56px;
+        font-size: 10px;
+    }
+
+    /* Role admin split: stack nav above pane on mobile so the
+       user can see the full content area instead of a 160 px
+       sidebar consuming half the dialog. */
+    body.srv2003-desktop .ra-split {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto 1fr;
+        height: auto;
+        max-height: 70vh;
+    }
+    body.srv2003-desktop .ra-nav {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-right: 0;
+        border-bottom: 1px solid #808080;
+        box-shadow: inset 0 -1px 0 #ffffff;
+        padding: 4px;
+        gap: 2px;
+    }
+    body.srv2003-desktop .ra-nav-item {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    /* Help Center: same vertical-stack treatment. */
+    body.srv2003-desktop .srv2k3-help .help-split {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: auto;
+        max-height: 65vh;
+    }
+    body.srv2003-desktop .srv2k3-help .help-nav {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        border-right: 0;
+        border-bottom: 1px solid #808080;
+        gap: 2px;
+        padding: 4px;
+    }
+    body.srv2003-desktop .srv2k3-help .help-nav-item {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 480px) {
+    /* BIOS Setup: real PhoenixBIOS uses two columns (settings on
+       left, help on right). On a narrow viewport, stack help
+       below settings so neither gets squeezed. */
+    body.srv2003-bios .srv2k3-bios-body {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto auto;
+    }
+    body.srv2003-bios .srv2k3-bios-help {
+        border-left: 0;
+        border-top: 1px solid #ffd34d;
+        max-height: 120px;
+        overflow-y: auto;
+    }
+    /* Dr. Watson Patch tab: the radio rows + Apply/Retrage row
+       overflow on narrow widths. Stack them vertically. */
+    body.srv2003-desktop .drw-patch-row,
+    .drw-patch-row {
+        flex-direction: column;
+        align-items: stretch !important;
+        gap: 4px;
+    }
+    .drw-patch-row label {
+        text-align: left;
+        padding-right: 0;
+    }
+}
+
+/* ============================================================
+   EVENT VIEWER
+   MMC-style snap-in: nav tree on left listing the three logs,
+   a six-column list view on the right, toolbar with Clear /
+   Refresh, and a properties dialog reachable via dblclick.
+   ============================================================ */
+.srv2k3-evtvwr .evt-toolbar {
+    background: #d4d0c8;
+    border-bottom: 1px solid #808080;
+    box-shadow: inset 0 -1px 0 #ffffff;
+    padding: 4px 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+.srv2k3-evtvwr .evt-toolbar-spacer { flex: 1; }
+.srv2k3-evtvwr .evt-toolbar-info { color: #404040; }
+.srv2k3-evtvwr .evt-split {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    height: 360px;
+    background: #ffffff;
+}
+.srv2k3-evtvwr .evt-nav {
+    background: #d4d0c8;
+    border-right: 1px solid #808080;
+    box-shadow: inset -1px 0 0 #ffffff;
+    padding: 4px 0;
+    overflow-y: auto;
+    font-size: 11px;
+}
+.srv2k3-evtvwr .evt-nav-root {
+    padding: 4px 12px;
+    font-weight: 700;
+    color: #0a246a;
+    border-bottom: 1px solid #c0c0c0;
+    margin-bottom: 4px;
+}
+.srv2k3-evtvwr .evt-nav-item {
+    padding: 3px 12px 3px 24px;
+    cursor: pointer;
+    color: #000000;
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+.srv2k3-evtvwr .evt-nav-item:hover { background: #d6e8ff; }
+.srv2k3-evtvwr .evt-nav-item.active {
+    background: #0a246a;
+    color: #ffffff;
+}
+.srv2k3-evtvwr .evt-nav-item.active .evt-nav-count { color: #c0c8d0; }
+.srv2k3-evtvwr .evt-nav-count { color: #707070; }
+.srv2k3-evtvwr .evt-pane {
+    background: #ffffff;
+    overflow: auto;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+.srv2k3-evtvwr .evt-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.srv2k3-evtvwr .evt-table th {
+    background: linear-gradient(180deg, #ffffff 0%, #d4d0c8 100%);
+    border-right: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+    text-align: left;
+    padding: 3px 6px;
+    font-weight: 400;
+    font-size: 11px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.srv2k3-evtvwr .evt-table td {
+    padding: 2px 6px;
+    border-bottom: 1px dotted #e0e0e0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+}
+.srv2k3-evtvwr .evt-table td.evt-msg-cell {
+    max-width: 320px;
+}
+.srv2k3-evtvwr .evt-row { cursor: pointer; }
+.srv2k3-evtvwr .evt-row:hover { background: #f0f4fa; }
+.srv2k3-evtvwr .evt-empty {
+    text-align: center;
+    color: #808080;
+    padding: 20px !important;
+    font-style: italic;
+}
+.srv2k3-evtvwr .evt-type-icon {
+    display: inline-grid;
+    place-items: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    margin-right: 2px;
+    vertical-align: middle;
+}
+
+/* Properties dialog */
+.srv2k3-evtvwr-props .evt-props-grid {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 4px 12px;
+    padding: 8px 4px;
+    font-size: 11px;
+    border-bottom: 1px solid #c0c0c0;
+    margin-bottom: 8px;
+}
+.srv2k3-evtvwr-props .evt-props-key { color: #404040; }
+.srv2k3-evtvwr-props .evt-props-msg-label {
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+.srv2k3-evtvwr-props .evt-props-msg {
+    background: #ffffff;
+    border: 1px solid #808080;
+    box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #ffffff;
+    padding: 8px 10px;
+    min-height: 60px;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* ============================================================
+   REGISTRY EDITOR (regedit)
+   Tree on the left, value list on the right. Tree uses simple
+   triangle twirls and folder icons. Value rows have an "ab"
+   icon for strings, the type column shows REG_DWORD / REG_SZ.
+   ============================================================ */
+.srv2k3-regedit .reg-toolbar {
+    background: #ffffff;
+    border-bottom: 1px solid #808080;
+    padding: 4px 8px;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+.srv2k3-regedit .reg-path {
+    color: #404040;
+    font-family: "Lucida Console", "Consolas", monospace;
+}
+.srv2k3-regedit .reg-split {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 360px;
+    background: #ffffff;
+}
+.srv2k3-regedit .reg-tree {
+    background: #ffffff;
+    border-right: 1px solid #808080;
+    box-shadow: inset -1px 0 0 #d4d0c8;
+    overflow: auto;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+    user-select: none;
+}
+.srv2k3-regedit .reg-tree-item {
+    padding: 2px 4px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.srv2k3-regedit .reg-tree-item:hover { background: #d6e8ff; }
+.srv2k3-regedit .reg-tree-item.active {
+    background: #0a246a;
+    color: #ffffff;
+}
+.srv2k3-regedit .reg-twirl {
+    font-size: 8px;
+    width: 12px;
+    text-align: center;
+    color: #404040;
+}
+.srv2k3-regedit .reg-tree-item.active .reg-twirl { color: #ffffff; }
+.srv2k3-regedit .reg-folder-icon { color: #c08020; }
+.srv2k3-regedit .reg-pane {
+    background: #ffffff;
+    overflow: auto;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 11px;
+}
+.srv2k3-regedit .reg-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.srv2k3-regedit .reg-table th {
+    background: linear-gradient(180deg, #ffffff 0%, #d4d0c8 100%);
+    border-right: 1px solid #808080;
+    border-bottom: 1px solid #808080;
+    text-align: left;
+    padding: 3px 6px;
+    font-weight: 400;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+.srv2k3-regedit .reg-table td {
+    padding: 2px 6px;
+    border-bottom: 1px dotted #e0e0e0;
+}
+.srv2k3-regedit .reg-value-row { cursor: pointer; }
+.srv2k3-regedit .reg-value-row:hover { background: #f0f4fa; }
+.srv2k3-regedit .reg-val-icon {
+    display: inline-block;
+    width: 18px;
+    height: 14px;
+    background: #d4d0c8;
+    border: 1px solid #808080;
+    color: #0a246a;
+    font-family: "Times New Roman", serif;
+    font-size: 10px;
+    text-align: center;
+    line-height: 12px;
+    margin-right: 4px;
+    vertical-align: middle;
+    box-shadow: inset 1px 1px 0 #ffffff;
+}
+.srv2k3-regedit .reg-val-data {
+    font-family: "Lucida Console", "Consolas", monospace;
+    color: #404040;
+}
+.srv2k3-regedit .reg-empty {
+    text-align: center;
+    color: #808080;
+    padding: 16px !important;
+    font-style: italic;
+}
+
+/* Edit dialog */
+.srv2k3-regedit-edit .reg-edit-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+.srv2k3-regedit-edit .reg-edit-row label { min-width: 100px; }
+.srv2k3-regedit-edit .reg-edit-row input {
+    flex: 1;
+    background: #ffffff;
+    border: 1px solid #808080;
+    box-shadow: inset 1px 1px 0 #404040, inset -1px -1px 0 #ffffff;
+    padding: 2px 4px;
+    font-family: "Lucida Console", "Consolas", monospace;
+}
+.srv2k3-regedit-edit .reg-edit-base {
+    display: flex;
+    gap: 12px;
+    margin-left: 108px;
+    font-size: 11px;
+}
+
+/* Mobile reflows for the two new windows. */
+@media (max-width: 720px) {
+    body.srv2003-desktop .srv2k3-evtvwr .evt-split,
+    body.srv2003-desktop .srv2k3-regedit .reg-split {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: auto;
+        max-height: 70vh;
+    }
+    body.srv2003-desktop .srv2k3-evtvwr .evt-nav,
+    body.srv2003-desktop .srv2k3-regedit .reg-tree {
+        max-height: 130px;
+        border-right: 0;
+        border-bottom: 1px solid #808080;
+    }
+    /* Hide the time and event-ID columns on narrow viewports, date
+       and source + message are enough to identify an entry. */
+    body.srv2003-desktop .srv2k3-evtvwr .evt-table th:nth-child(3),
+    body.srv2003-desktop .srv2k3-evtvwr .evt-table th:nth-child(5),
+    body.srv2003-desktop .srv2k3-evtvwr .evt-table td:nth-child(3),
+    body.srv2003-desktop .srv2k3-evtvwr .evt-table td:nth-child(5) {
+        display: none;
+    }
+}
+
+/* ============================================================
+   HELP CENTER TIMELINE
+   Used in the Windows history topic. A vertical list of rows,
+   each with a year column on the left, name in the middle,
+   short note on the right. The Server 2003 row gets a yellow
+   background highlight to mark its pivot position.
+   ============================================================ */
+.srv2k3-help .help-timeline {
+    margin: 8px 0 12px;
+    border: 1px solid #c0c0c0;
+    background: #fafafa;
+}
+.srv2k3-help .help-tl-row {
+    display: grid;
+    grid-template-columns: 78px 158px 1fr;
+    gap: 6px;
+    padding: 3px 8px;
+    border-bottom: 1px solid #e8e8e8;
+    font-size: 11px;
+    line-height: 1.32;
+}
+.srv2k3-help .help-tl-row:last-child { border-bottom: 0; }
+.srv2k3-help .help-tl-year {
+    font-weight: 700;
+    color: #0a246a;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 10.5px;
+}
+.srv2k3-help .help-tl-name {
+    font-weight: 700;
+    color: #000000;
+}
+.srv2k3-help .help-tl-note {
+    color: #404040;
+}
+.srv2k3-help .help-tl-row.help-tl-highlight {
+    background: #fff5d6;
+    border-left: 3px solid #f7a021;
+    padding-left: 5px;
+}
+.srv2k3-help .help-tl-row.help-tl-highlight .help-tl-name {
+    color: #b06a08;
+}
+
+@media (max-width: 720px) {
+    body.srv2003-desktop .srv2k3-help .help-timeline {
+        font-size: 11px;
+    }
+    body.srv2003-desktop .srv2k3-help .help-tl-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+        padding: 6px 8px;
+    }
+    body.srv2003-desktop .srv2k3-help .help-tl-year {
+        font-size: 10px;
+        color: #707070;
+    }
+}
+
+/* ============================================================
+   RECONNECT BADGE
+   Bottom-right floating panel shown only when a Server 2003
+   snapshot exists from this session\'s history. Uses a
+   semi-transparent dark background to feel like a system
+   notification rather than a standard modal.
+   ============================================================ */
+.reconnect-badge {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    width: 280px;
+    background: linear-gradient(180deg, #2a3340 0%, #1a2028 100%);
+    color: #ffffff;
+    border: 1px solid #4a8fbf;
+    border-radius: 6px;
+    padding: 12px 14px 14px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    z-index: 9000;
+    font-family: "Tahoma", "MS Sans Serif", sans-serif;
+    font-size: 12px;
+    line-height: 1.45;
+    animation: reconnect-badge-in 240ms ease-out;
+}
+@keyframes reconnect-badge-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.reconnect-badge-close {
+    position: absolute;
+    right: 6px;
+    top: 4px;
+    background: transparent;
+    border: 0;
+    color: #c0c8d0;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    padding: 2px 6px;
+}
+.reconnect-badge-close:hover { color: #ffffff; }
+.reconnect-badge-title {
+    font-weight: 700;
+    color: #ffd34d;
+    margin-bottom: 6px;
+    font-size: 12.5px;
+}
+.reconnect-badge-body {
+    color: #d8dde2;
+    margin-bottom: 10px;
+}
+.reconnect-badge-action {
+    width: 100%;
+    background: linear-gradient(180deg, #4a8fbf 0%, #2c6090 100%);
+    color: #ffffff;
+    border: 1px solid #1a4060;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 3px;
+}
+.reconnect-badge-action:hover {
+    background: linear-gradient(180deg, #5aa0d0 0%, #3870a0 100%);
+}
+.reconnect-badge-action:active {
+    background: linear-gradient(180deg, #2c6090 0%, #4a8fbf 100%);
+}
+
+@media (max-width: 720px) {
+    .reconnect-badge {
+        right: 8px;
+        bottom: 8px;
+        left: 8px;
+        width: auto;
+    }
+}
+
+/* ============================================================
+   QNX COLD BOOT
+   First-visit boot animation. Black background, monospace
+   text, runs <2s, ESC/click skips.
+   ============================================================ */
+.qnx-coldboot {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    color: #c0c0c0;
+    z-index: 99000;
+    display: grid;
+    place-items: center;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+}
+.qnx-coldboot-screen {
+    width: min(720px, 92vw);
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+.qnx-coldboot-banner {
+    background: #000080;
+    color: #ffffff;
+    padding: 6px 10px;
+    font-size: 13px;
+    text-align: center;
+    border: 1px solid #4080ff;
+}
+.qnx-coldboot-body {
+    background: #000000;
+    border: 1px solid #4080ff;
+    border-top: 0;
+    padding: 10px 12px;
+    height: 220px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.qnx-coldboot-line {
+    color: #c0c0c0;
+    animation: coldboot-line-in 100ms ease-out;
+}
+.qnx-coldboot-line:nth-last-child(-n+2) {
+    color: #80ff80;
+}
+@keyframes coldboot-line-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+.qnx-coldboot-status {
+    background: #000080;
+    color: #ffffff;
+    padding: 4px 10px;
+    font-size: 12px;
+    text-align: left;
+    border: 1px solid #4080ff;
+    border-top: 0;
+}
+.qnx-coldboot-hint {
+    margin-top: 10px;
+    text-align: center;
+    color: #707070;
+    font-size: 11px;
+}
+
+/* ============================================================
+   ACCESSIBILITY OPTIONS DIALOG
+   ============================================================ */
+.srv2k3-access .access-section {
+    border: 1px solid #c0c0c0;
+    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #d4d0c8;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    background: #ffffff;
+}
+.srv2k3-access .access-section-title {
+    font-weight: 700;
+    color: #0a246a;
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+.srv2k3-access .access-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ============================================================
+   HIGH CONTRAST THEME
+   Mirrors Windows Classic\'s "High Contrast Black" scheme:
+   pure black background, bright white text, fat yellow focus
+   rings. Affects everything (QNX kiosk + Server 2003).
+   When body.high-contrast is set, override the most-visible
+   surfaces with monochrome high-contrast equivalents.
+   ============================================================ */
+body.high-contrast {
+    background: #000000 !important;
+}
+body.high-contrast,
+body.high-contrast .app,
+body.high-contrast .editor-area,
+body.high-contrast .sidebar,
+body.high-contrast .output-panel,
+body.high-contrast .header,
+body.high-contrast .footer {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+body.high-contrast .code-editor,
+body.high-contrast .highlight-overlay,
+body.high-contrast .line-numbers,
+body.high-contrast .output {
+    background: #000000 !important;
+    color: #ffffff !important;
+}
+body.high-contrast .hb-btn,
+body.high-contrast .hb-toggle,
+body.high-contrast button {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 2px solid #ffffff !important;
+    box-shadow: none !important;
+}
+body.high-contrast .hb-btn:focus,
+body.high-contrast .hb-toggle:focus,
+body.high-contrast button:focus,
+body.high-contrast input:focus,
+body.high-contrast .row:focus {
+    outline: 3px solid #ffd34d !important;
+    outline-offset: 1px;
+}
+body.high-contrast .row.active {
+    background: #ffffff !important;
+    color: #000000 !important;
+}
+body.high-contrast .traceback {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-left: 3px solid #ff6060 !important;
+}
+body.high-contrast .traceback .tb-title {
+    color: #ff8080 !important;
+}
+body.high-contrast .traceback.backend-scold {
+    border-left: 3px solid #ffd34d !important;
+}
+body.high-contrast .traceback.backend-scold .tb-title {
+    color: #ffd34d !important;
+}
+body.high-contrast .success-box {
+    background: #000000 !important;
+    color: #80ff80 !important;
+    border-left: 3px solid #80ff80 !important;
+}
+/* In Server 2003 mode, the Classic theme already has high contrast
+   semantics, but we still need to elevate it. Active highlights
+   become bright yellow on black. */
+body.high-contrast.srv2003-desktop .dialog,
+body.high-contrast.srv2003-desktop .dialog-body,
+body.high-contrast.srv2003-desktop .dialog-header,
+body.high-contrast.srv2003-desktop .dialog-footer,
+body.high-contrast.srv2003-desktop .srv2k3-taskbar,
+body.high-contrast.srv2003-desktop .srv2k3-start-menu {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
+    box-shadow: none !important;
+}
+body.high-contrast.srv2003-desktop .dialog-header,
+body.high-contrast.srv2003-desktop .srv2k3-start-button.open,
+body.high-contrast.srv2003-desktop .ra-nav-item.active,
+body.high-contrast.srv2003-desktop .help-nav-item.active,
+body.high-contrast.srv2003-desktop .evt-nav-item.active,
+body.high-contrast.srv2003-desktop .reg-tree-item.active {
+    background: #ffd34d !important;
+    color: #000000 !important;
+}
+body.high-contrast.srv2003-desktop .srv2k3-dicon-label,
+body.high-contrast.srv2003-desktop .srv2k3-task-btn,
+body.high-contrast.srv2003-desktop .srv2k3-tray-icon,
+body.high-contrast.srv2003-desktop .srv2k3-clock {
+    color: #ffffff !important;
+}
+body.high-contrast.srv2003-desktop .help-banner,
+body.high-contrast.srv2003-desktop .evt-toolbar,
+body.high-contrast.srv2003-desktop .reg-toolbar {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border-color: #ffffff !important;
 }

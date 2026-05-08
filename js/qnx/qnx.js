@@ -96,7 +96,7 @@ function runApplianceCommand(raw, context) {
         out.clear = nested.clear;
         return out;
     }
-    // su defaultuser — the supervisor-account escalation. Requires the
+    // su defaultuser, the supervisor-account escalation. Requires the
     // "key" produced by the debugger after the check_curriculum bypass
     // patch (stage 3 binaryPatches.bypassCurriculum). Calls into the
     // defaultuser exploit module to switch the visible session.

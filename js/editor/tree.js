@@ -92,3 +92,23 @@ function renderNode(node, container, depth) {
     }
 }
 
+// F2 keyboard shortcut for renaming the active file. Mirrors the
+// "Redenumește" entry in the file context menu so the visible label
+// matches the actual binding. Capture phase so we win over any
+// in-textarea handler; we still ignore F2 when the user is typing
+// inside an editable element so it doesn\'t steal focus mid-edit.
+document.addEventListener('keydown', function(e) {
+    if (e.key !== 'F2') return;
+    if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+    var t = e.target;
+    // If a rename input is already open, let it handle Enter/Escape.
+    if (t && t.classList && t.classList.contains('rename-input')) return;
+    // Don\'t hijack F2 when typing inside a text field, textarea or
+    // contenteditable surface, F2 there might be meaningful for the
+    // user (e.g. cell-edit conventions, screen reader bindings).
+    var tag = t && t.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || (t && t.isContentEditable)) return;
+    if (!STATE.activeFile || STATE.activeFile === STATE.tree.id) return;
+    e.preventDefault();
+    if (typeof startRename === 'function') startRename(STATE.activeFile);
+}, true);

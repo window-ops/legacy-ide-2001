@@ -323,7 +323,7 @@
     line-height: 1.45;
 }
 
-/* Backend scold — the school-IT rejection block. Distinct from a
+/* Backend scold, the school-IT rejection block. Distinct from a
    normal lint traceback: red border on the left, italicized quoted
    complaint at the top, fact list below. The whole block reads as
    if the school server got annoyed at the user. */
@@ -405,3 +405,32 @@
     background: white;
 }
 
+
+/* Documentation table inside the GDX Debugger help pages. Compact
+   layout so the URL params reference fits comfortably in the
+   typically-narrow help pane. */
+.dbg-help-page .dbg-help-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px 0 10px;
+    font-size: 12px;
+}
+.dbg-help-page .dbg-help-table th,
+.dbg-help-page .dbg-help-table td {
+    text-align: left;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border, #d4d0c8);
+    vertical-align: top;
+}
+.dbg-help-page .dbg-help-table th {
+    background: rgba(255, 255, 255, 0.04);
+    font-weight: 600;
+}
+.dbg-help-page .dbg-help-table code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.06);
+    padding: 1px 4px;
+    border-radius: 3px;
+}

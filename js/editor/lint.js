@@ -16,7 +16,7 @@ function getRules() {
 function lintCode(text) {
     // Backend re-validation override: when on Server 2003 and the
     // Curriculum Reporting IIS site is Running, the local bypass flag
-    // does NOT take effect — validation falls through. Stopping that
+    // does NOT take effect, validation falls through. Stopping that
     // site from File/App Server admin makes the backend unreachable,
     // so the local patch wins. The flag is only ever set on Server
     // 2003, so the QNX kiosk session is unaffected.
@@ -185,7 +185,7 @@ function collectUnknownJsIdents(src, hits, claimed) {
             userSyms[t.value] = 1;
             continue;
         }
-        // catch (e) — identifier immediately follows `catch` `(`.
+        // catch (e), identifier immediately follows `catch` `(`.
         if (prev.kind === 'punct' && prev.value === '(') {
             var back = _prevCodeToken(tokens, _indexOfPrev(tokens, i));
             if (back && back.kind === 'id' && back.value === 'catch') {
@@ -422,7 +422,7 @@ function collectUnknownHtmlTokens(src, hits, claimed) {
 }
 
 function liveLintStatus() {
-    if (!STATE.activeFile) { $('stLint').textContent = 'Programa: —'; $('stLint').className = ''; return; }
+    if (!STATE.activeFile) { $('stLint').textContent = 'Programa: , '; $('stLint').className = ''; return; }
     var node = findNode(STATE.tree, STATE.activeFile);
     var lang = getLanguage(node.name);
     if (!lang.rules) { $('stLint').textContent = 'Programa: neverificat'; $('stLint').className = ''; return; }

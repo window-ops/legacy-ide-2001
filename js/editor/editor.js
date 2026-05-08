@@ -41,7 +41,7 @@ function mountEditor() {
             '</div></div>';
         $('stLine').textContent = '';
         $('langTag').textContent = '';
-        $('stLint').textContent = 'Programa: —';
+        $('stLint').textContent = 'Programa: , ';
         $('stLint').className = '';
         return;
     }

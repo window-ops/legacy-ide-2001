@@ -45,6 +45,7 @@ function ensureDebuggerDocsMounted() {
         '    <button class="dbg-help-tab" role="tab" aria-selected="false" data-help="qnx">Model backend QNX</button>' +
         '    <button class="dbg-help-tab" role="tab" aria-selected="false" data-help="mobile">Accesibilitate mobil</button>' +
         '    <button class="dbg-help-tab" role="tab" aria-selected="false" data-help="limits">Limite simulare</button>' +
+        '    <button class="dbg-help-tab" role="tab" aria-selected="false" data-help="urlparams">Parametri URL</button>' +
         '  </nav>' +
         '  <div class="dbg-help-main">' +
         '    <article class="dbg-help-page active" data-help-page="quick">' +
@@ -105,7 +106,7 @@ function ensureDebuggerDocsMounted() {
         '      <p>Jurnalul separă evenimentele: <code>patch</code> (modificare), <code>effect</code> (impact), <code>warn</code> (risc), <code>err</code> (stare invalidă). Într-un debugger real, acesta ar corespunde combinației dintre log-uri, tracepoints și observații asupra registrelor.</p>' +
         '      <h5>Workflow recomandat</h5>' +
         '      <ol>' +
-        '        <li><b>Stabilește “baseline”</b>: 2–3 <code>Step</code> și notează <code>rip</code>, ramura luată și orice schimbare în <code>rax</code>.</li>' +
+        '        <li><b>Stabilește “baseline”</b>: 2-3 <code>Step</code> și notează <code>rip</code>, ramura luată și orice schimbare în <code>rax</code>.</li>' +
         '        <li><b>Aplică patch minim</b>: de obicei <code>Invert</code> pe un <code>Jcc</code> imediat după un <code>test/cmp</code>.</li>' +
         '        <li><b>Re-rulează identic</b>: <code>Reset RIP</code>, apoi repetă pașii. Diferența trebuie să fie locală (ramura) și vizibilă în <code>effect</code>.</li>' +
         '      </ol>' +
@@ -158,6 +159,25 @@ function ensureDebuggerDocsMounted() {
         '      <ul>' +
         '        <li>Disassembly/patch-uri sunt modelate, nu executate pe binar real.</li>' +
         '        <li>Comenzile reușesc/esuază în funcție de stadiul exploit, nu de PAM/NET real.</li>' +
+        '      </ul>' +
+        '    </article>' +
+        '    <article class="dbg-help-page" data-help-page="urlparams">' +
+        '      <h4>Parametri URL acceptați</h4>' +
+        '      <p>Aplicația acceptă următorii parametri în query string pentru testare și depanare:</p>' +
+        '      <table class="dbg-help-table">' +
+        '        <thead><tr><th>Parametru</th><th>Efect</th></tr></thead>' +
+        '        <tbody>' +
+        '        <tr><td><code>?srv2k3=1</code></td><td>Sare peste fluxul defaultuser și migrarea, montează direct ecranul Server 2003 cu snapshot complet (depanator + bypass-uri).</td></tr>' +
+        '        <tr><td><code>?srv2k3=full</code></td><td>Identic cu <code>?srv2k3=1</code>, sintaxa explicită.</td></tr>' +
+        '        <tr><td><code>?srv2k3=clean</code></td><td>Montează Server 2003 cu snapshot curat (fără patch-uri, fără cache de credențiale).</td></tr>' +
+        '        <tr><td><code>?smoke=1</code></td><td>Rulează suita de teste smoke a IDE-ului. Verifică debuggerul, lint-ul, persistența, jurnalul de evenimente, matricea backend × programă.</td></tr>' +
+        '        <tr><td><code>?debug=1</code></td><td>Activează panoul de depanare în colțul din dreapta jos. Conținutul se adaptează contextului: GDX Debugger, dialogurile Server 2003, sesiunea QNX, BIOS Setup.</td></tr>' +
+        '        </tbody>' +
+        '      </table>' +
+        '      <h5>Combinații utile</h5>' +
+        '      <ul>' +
+        '        <li><code>?srv2k3=1&debug=1</code>: jump direct la Server 2003 cu overlay-ul de debug activ. Util pentru a urmări <code>STATE.serverBackendOnline</code> când oprești site-ul Curriculum Reporting.</li>' +
+        '        <li><code>?smoke=1&debug=1</code>: rulează testele smoke cu overlay-ul vizibil pentru a urmări trecerea prin contexte.</li>' +
         '      </ul>' +
         '    </article>' +
         '  </div>' +

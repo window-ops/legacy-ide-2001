@@ -45,6 +45,19 @@
         } else if (action === 'edit') {
             store[flag] = true;
         }
+        // Write a System log entry so the patch is auditable in Event
+        // Viewer. eventID 1023 is Microsoft\'s "Application failed to
+        // initialize", apt for a postmortem-debugger writing patches.
+        if (window.SRV2K3_EVENTLOG) {
+            window.SRV2K3_EVENTLOG.write({
+                log: 'System',
+                source: 'Dr. Watson',
+                type: 'Warning',
+                eventID: 1023,
+                message: 'Patch postmortem aplicat: funcția „' + t.fn + '" la offset ' + t.idx +
+                    ' (acțiune: ' + action + ', flag: ' + flag + ').'
+            });
+        }
         return true;
     }
 
@@ -57,6 +70,15 @@
         var flag = t.effect || 'bypassCurriculum';
         delete store[flag];
         delete store[flag === 'bypassCurriculum' ? 'curriculumNonBlocking' : flag];
+        if (window.SRV2K3_EVENTLOG) {
+            window.SRV2K3_EVENTLOG.write({
+                log: 'System',
+                source: 'Dr. Watson',
+                type: 'Information',
+                eventID: 1024,
+                message: 'Patch postmortem retras: funcția „' + t.fn + '" la offset ' + t.idx + '.'
+            });
+        }
         return true;
     }
 

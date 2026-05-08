@@ -1,5 +1,5 @@
 /* ============================================================
-   DbgBackend — facade (simulated QNX procnto + legacy-ide.so attach)
+   DbgBackend, facade (simulated QNX procnto + legacy-ide.so attach)
    ============================================================ */
 var DbgBackend = {
     _attached: false,

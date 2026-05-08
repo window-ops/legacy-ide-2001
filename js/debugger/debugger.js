@@ -1,5 +1,5 @@
 /* ============================================================
-   DEBUGGER — disassembly + patches + step simulator
+   DEBUGGER, disassembly + patches + step simulator
    ============================================================ */
 var CPU = {
     rax: 0, rbx: 0x7ffeeaab0040, rcx: 0, rdx: 1,

@@ -5,7 +5,7 @@
    esi, edi, eip, esp, ebp, plus EFLAGS), and a small disassembly
    window centered on EIP.
 
-   This is purely cosmetic — the values come from the fault\'s
+   This is purely cosmetic, the values come from the fault\'s
    details block (matched against a small parser). It exists so
    the View pane on a fault feels like a real postmortem CPU
    state, not just a text dump.
