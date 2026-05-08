@@ -806,7 +806,7 @@ button, input, textarea {
     flex-wrap: wrap;
 }
 
-.pref-group { margin-bottom: 22px; }
+.pref-group { margin-bottom: 12px; }
 .pref-group:last-child { margin-bottom: 0; }
 .pref-group-title {
     font-size: 11px;
