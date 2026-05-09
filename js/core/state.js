@@ -15,7 +15,8 @@ var STATE = {
     prefs: {
         strict: true, romanian: true, inlineStyle: false,
         highlight: false, autoClose: false, osBanner: true, dark: false,
-        antiHang: true, allowTransitional: true, highContrast: false
+        antiHang: true, allowTransitional: true,
+        startMenuStyle: 'modern'
     },
     os: 'unknown',
     bannerDismissed: false,
@@ -538,23 +539,17 @@ var ES3_PROTOTYPE_METHODS = {
     'cancelBubble':1
 };
 
-// Hydrate persisted accessibility prefs early so the visual state
-// matches the user\'s last choice before any UI renders. Only the
-// high-contrast toggle is persisted across reloads.
+// Hydrate persisted UI prefs early so the visual state matches the
+// user's last choice before any UI renders.
 (function() {
+    // Start menu style: 'modern' (real Server 2003 default, two-column
+    // with username banner) or 'classic' (single-column, looks more
+    // like Windows 2000). Mountainbar in srv2003-desktop.js reads this
+    // before rendering. Persisted under ide.srv2k3.startMenuStyle.v1.
     try {
-        var hc = sessionStorage.getItem('ide.access.highContrast.v1');
-        if (hc === '1') {
-            STATE.prefs.highContrast = true;
-            // document.body may not exist yet during early script
-            // execution; defer the class toggle until DOM is parsed.
-            if (document.body) {
-                document.body.classList.add('high-contrast');
-            } else {
-                document.addEventListener('DOMContentLoaded', function() {
-                    document.body.classList.add('high-contrast');
-                });
-            }
+        var sms = sessionStorage.getItem('ide.srv2k3.startMenuStyle.v1');
+        if (sms === 'classic' || sms === 'modern') {
+            STATE.prefs.startMenuStyle = sms;
         }
     } catch (e) {}
 })();

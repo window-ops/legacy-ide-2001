@@ -25,31 +25,149 @@
    ============================================================ */
 (function() {
     var WIN_ID = 'regeditWin';
-    var STORAGE_KEY = 'ide.srv2k3.registry.v1';
+    var STORAGE_KEY = 'ide.srv2k3.registry.v2';
 
     // The registry shape: a tree of keys, each with `values` (a map of
     // value-name → {type, data}) and `children` (a map of subkey name → key).
+    // Helper to keep the literal tree shorter: build a "leaf" key with
+    // values but no children.
+    function leaf(values) { return { values: values, children: {} }; }
+
     function defaultTree() {
         return {
             'HKEY_LOCAL_MACHINE': {
                 values: {},
                 children: {
-                    'HARDWARE':  { values: {}, children: {} },
-                    'SAM':       { values: {}, children: {} },
-                    'SECURITY':  { values: {}, children: {} },
-                    'SOFTWARE': {
+                    'HARDWARE': {
                         values: {},
                         children: {
+                            'ACPI':     leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                            'DESCRIPTION': {
+                                values: {},
+                                children: {
+                                    'System': leaf({
+                                        '(Default)':            { type: 'REG_SZ', data: '' },
+                                        'Component Information': { type: 'REG_BINARY', data: '00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 ff ff ff ff' },
+                                        'Identifier':           { type: 'REG_SZ', data: 'AT/AT COMPATIBLE' },
+                                        'SystemBiosDate':       { type: 'REG_SZ', data: '08/14/02' },
+                                        'SystemBiosVersion':    { type: 'REG_MULTI_SZ', data: 'PhoenixBIOS 4.0 Release 6.0\\nGDX-APPLIANCE-A04' },
+                                        'VideoBiosVersion':     { type: 'REG_MULTI_SZ', data: 'NVIDIA RIVA TNT2 BIOS' }
+                                    })
+                                }
+                            },
+                            'DEVICEMAP': {
+                                values: {},
+                                children: {
+                                    'SERIALCOMM': leaf({
+                                        '\\Device\\Serial0': { type: 'REG_SZ', data: 'COM1' },
+                                        '\\Device\\Serial1': { type: 'REG_SZ', data: 'COM2' }
+                                    }),
+                                    'PARALLEL PORTS':  leaf({ '\\Device\\Parallel0': { type: 'REG_SZ', data: 'LPT1' } }),
+                                    'KeyboardClass': leaf({ '\\Device\\KeyboardClass0': { type: 'REG_SZ', data: '\\REGISTRY\\Machine\\System\\ControlSet001\\Services\\i8042prt' } })
+                                }
+                            },
+                            'RESOURCEMAP': leaf({ '(Default)': { type: 'REG_SZ', data: '' } })
+                        }
+                    },
+                    'SAM':      leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'SECURITY': leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'SOFTWARE': {
+                        values: {
+                            '(Default)': { type: 'REG_SZ', data: '' }
+                        },
+                        children: {
+                            'Classes': {
+                                values: {},
+                                children: {
+                                    '.txt':      leaf({ '(Default)': { type: 'REG_SZ', data: 'txtfile' } }),
+                                    '.html':     leaf({ '(Default)': { type: 'REG_SZ', data: 'htmlfile' } }),
+                                    '.js':       leaf({ '(Default)': { type: 'REG_SZ', data: 'JSFile' } }),
+                                    '.exe':      leaf({ '(Default)': { type: 'REG_SZ', data: 'exefile' } }),
+                                    'txtfile':   leaf({ '(Default)': { type: 'REG_SZ', data: 'Text Document' }, 'FriendlyTypeName': { type: 'REG_SZ', data: 'Text Document' } }),
+                                    'htmlfile':  leaf({ '(Default)': { type: 'REG_SZ', data: 'HTML Document' } })
+                                }
+                            },
                             'GDX': {
                                 values: {
                                     '(Default)':         { type: 'REG_SZ', data: 'GDX School Appliance' },
                                     'AllowTransitional': { type: 'REG_DWORD', data: 0 },
-                                    'InstallVersion':    { type: 'REG_SZ', data: '2.0.1.847' }
+                                    'InstallVersion':    { type: 'REG_SZ', data: '2.0.1.847' },
+                                    'InstallDate':       { type: 'REG_SZ', data: '15/09/2003' },
+                                    'Vendor':            { type: 'REG_SZ', data: 'GDX Education Systems Romania SRL' },
+                                    'SchoolBranch':      { type: 'REG_SZ', data: 'CT-Constanta-3' },
+                                    'CurriculumYear':    { type: 'REG_DWORD', data: 2001 }
                                 },
-                                children: {}
+                                children: {
+                                    'Curriculum': leaf({
+                                        '(Default)':       { type: 'REG_SZ', data: '' },
+                                        'EnforcementMode': { type: 'REG_SZ', data: 'strict' },
+                                        'RuleCount':       { type: 'REG_DWORD', data: 174 },
+                                        'LastSyncDate':    { type: 'REG_SZ', data: '12/04/2026' }
+                                    }),
+                                    'Photon': leaf({
+                                        '(Default)': { type: 'REG_SZ', data: '' },
+                                        'KioskMode': { type: 'REG_DWORD', data: 1 }
+                                    })
+                                }
                             },
-                            'Microsoft': { values: {}, children: {} },
-                            'ODBC':      { values: {}, children: {} }
+                            'Microsoft': {
+                                values: {},
+                                children: {
+                                    'Internet Explorer': leaf({
+                                        '(Default)': { type: 'REG_SZ', data: '' },
+                                        'Version':   { type: 'REG_SZ', data: '6.0.3790.0' },
+                                        'Build':     { type: 'REG_SZ', data: '63790' },
+                                        'IVer':      { type: 'REG_SZ', data: '603' }
+                                    }),
+                                    'Windows': {
+                                        values: {},
+                                        children: {
+                                            'CurrentVersion': leaf({
+                                                'ProgramFilesDir':   { type: 'REG_SZ', data: 'C:\\Program Files' },
+                                                'CommonFilesDir':    { type: 'REG_SZ', data: 'C:\\Program Files\\Common Files' },
+                                                'DevicePath':        { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\inf' }
+                                            })
+                                        }
+                                    },
+                                    'Windows NT': {
+                                        values: {},
+                                        children: {
+                                            'CurrentVersion': leaf({
+                                                'CurrentBuild':       { type: 'REG_SZ', data: '3790' },
+                                                'CurrentVersion':     { type: 'REG_SZ', data: '5.2' },
+                                                'ProductName':        { type: 'REG_SZ', data: 'Microsoft Windows Server 2003' },
+                                                'ProductId':          { type: 'REG_SZ', data: '69763-OEM-0000007-00101' },
+                                                'RegisteredOrganization': { type: 'REG_SZ', data: 'gdx-appliance' },
+                                                'RegisteredOwner':    { type: 'REG_SZ', data: 'defaultuser' },
+                                                'CSDVersion':         { type: 'REG_SZ', data: 'Service Pack 1' },
+                                                'PathName':           { type: 'REG_SZ', data: 'C:\\WINDOWS' },
+                                                'SystemRoot':         { type: 'REG_SZ', data: 'C:\\WINDOWS' }
+                                            })
+                                        }
+                                    }
+                                }
+                            },
+                            'ODBC': {
+                                values: {},
+                                children: {
+                                    'ODBC.INI':   leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                                    'ODBCINST.INI': {
+                                        values: {},
+                                        children: {
+                                            'SQL Server': leaf({
+                                                'Driver':      { type: 'REG_SZ', data: 'C:\\WINDOWS\\System32\\sqlsrv32.dll' },
+                                                'APILevel':    { type: 'REG_SZ', data: '2' }
+                                            })
+                                        }
+                                    }
+                                }
+                            },
+                            'Policies': {
+                                values: {},
+                                children: {
+                                    'Microsoft': leaf({ '(Default)': { type: 'REG_SZ', data: '' } })
+                                }
+                            }
                         }
                     },
                     'SYSTEM': {
@@ -58,30 +176,179 @@
                             'CurrentControlSet': {
                                 values: {},
                                 children: {
+                                    'Control': {
+                                        values: {},
+                                        children: {
+                                            'ComputerName': {
+                                                values: {},
+                                                children: {
+                                                    'ComputerName': leaf({
+                                                        'ComputerName': { type: 'REG_SZ', data: 'GDX-APPLIANCE' }
+                                                    }),
+                                                    'ActiveComputerName': leaf({
+                                                        'ComputerName': { type: 'REG_SZ', data: 'GDX-APPLIANCE' }
+                                                    })
+                                                }
+                                            },
+                                            'Print': leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                                            'Session Manager': leaf({
+                                                'BootExecute':       { type: 'REG_MULTI_SZ', data: 'autocheck autochk *' },
+                                                'PendingFileRenameOperations': { type: 'REG_MULTI_SZ', data: '' }
+                                            }),
+                                            'TimeZoneInformation': leaf({
+                                                'StandardName': { type: 'REG_SZ', data: 'GTB Standard Time' },
+                                                'DaylightName': { type: 'REG_SZ', data: 'GTB Daylight Time' },
+                                                'Bias':         { type: 'REG_DWORD', data: -120 }
+                                            })
+                                        }
+                                    },
                                     'Services': {
                                         values: {},
                                         children: {
-                                            'CurriculumReporting': {
-                                                values: {
-                                                    '(Default)':   { type: 'REG_SZ', data: '' },
-                                                    'DisplayName': { type: 'REG_SZ', data: 'Curriculum Reporting Service' },
-                                                    'ImagePath':   { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\System32\\svchost.exe -k netsvcs' },
-                                                    'Start':       { type: 'REG_DWORD', data: 2 },
-                                                    'Type':        { type: 'REG_DWORD', data: 16 }
-                                                },
-                                                children: {}
-                                            },
+                                            'BITS': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Background Intelligent Transfer Service' },
+                                                'ImagePath':   { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\System32\\svchost.exe -k netsvcs' },
+                                                'Start':       { type: 'REG_DWORD', data: 3 },
+                                                'Type':        { type: 'REG_DWORD', data: 32 }
+                                            }),
+                                            'CurriculumReporting': leaf({
+                                                '(Default)':   { type: 'REG_SZ', data: '' },
+                                                'DisplayName': { type: 'REG_SZ', data: 'Curriculum Reporting Service' },
+                                                'Description': { type: 'REG_SZ', data: 'Verifică conformitatea programei analitice 2001 a codului trimis de utilizatori.' },
+                                                'ImagePath':   { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\System32\\svchost.exe -k netsvcs' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 },
+                                                'Type':        { type: 'REG_DWORD', data: 16 },
+                                                'ObjectName':  { type: 'REG_SZ', data: 'NT AUTHORITY\\NetworkService' }
+                                            }),
+                                            'Dhcp': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'DHCP Client' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 },
+                                                'Type':        { type: 'REG_DWORD', data: 32 }
+                                            }),
+                                            'EventLog': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Event Log' },
+                                                'ImagePath':   { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\System32\\services.exe' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 }
+                                            }),
+                                            'IISADMIN': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'IIS Admin Service' },
+                                                'ImagePath':   { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\System32\\inetsrv\\inetinfo.exe' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 }
+                                            }),
+                                            'lanmanserver': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Server' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 }
+                                            }),
+                                            'lanmanworkstation': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Workstation' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 }
+                                            }),
+                                            'RpcSs': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Remote Procedure Call (RPC)' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 },
+                                                'Type':        { type: 'REG_DWORD', data: 32 }
+                                            }),
+                                            'Spooler': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Print Spooler' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 }
+                                            }),
                                             'Tcpip': {
+                                                values: {
+                                                    'DisplayName': { type: 'REG_SZ', data: 'TCP/IP Protocol Driver' },
+                                                    'Start':       { type: 'REG_DWORD', data: 1 }
+                                                },
+                                                children: {
+                                                    'Parameters': leaf({
+                                                        'EnableSecurityFilters': { type: 'REG_DWORD', data: 1 },
+                                                        'Hostname':              { type: 'REG_SZ', data: 'GDX-APPLIANCE' },
+                                                        'Domain':                { type: 'REG_SZ', data: 'gdx.local' },
+                                                        'NameServer':            { type: 'REG_SZ', data: '10.0.0.1' },
+                                                        'EnableICMPRedirect':    { type: 'REG_DWORD', data: 1 },
+                                                        'KeepAliveTime':         { type: 'REG_DWORD', data: 7200000 }
+                                                    })
+                                                }
+                                            },
+                                            'TermService': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Terminal Services' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 }
+                                            }),
+                                            'W3SVC': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'World Wide Web Publishing Service' },
+                                                'Start':       { type: 'REG_DWORD', data: 2 },
+                                                'ImagePath':   { type: 'REG_EXPAND_SZ', data: '%SystemRoot%\\System32\\svchost.exe -k iissvcs' }
+                                            }),
+                                            'WinDefend': leaf({
+                                                'DisplayName': { type: 'REG_SZ', data: 'Windows Defender' },
+                                                'Start':       { type: 'REG_DWORD', data: 4 }
+                                            })
+                                        }
+                                    }
+                                }
+                            },
+                            'Setup': leaf({
+                                'OsLoaderPath':       { type: 'REG_SZ', data: '\\' },
+                                'SystemPartition':    { type: 'REG_SZ', data: '\\Device\\Harddisk0\\Partition1' }
+                            }),
+                            'WPA': leaf({ '(Default)': { type: 'REG_SZ', data: '' } })
+                        }
+                    }
+                }
+            },
+            'HKEY_CURRENT_USER': {
+                values: {},
+                children: {
+                    'AppEvents':         leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'Console': leaf({
+                        'CursorSize':     { type: 'REG_DWORD', data: 25 },
+                        'FaceName':       { type: 'REG_SZ', data: 'Lucida Console' },
+                        'FontFamily':     { type: 'REG_DWORD', data: 54 },
+                        'FontSize':       { type: 'REG_DWORD', data: 786432 },
+                        'HistoryBufferSize': { type: 'REG_DWORD', data: 50 }
+                    }),
+                    'Control Panel': {
+                        values: {},
+                        children: {
+                            'Desktop':  leaf({
+                                'Wallpaper':       { type: 'REG_SZ', data: '' },
+                                'TileWallpaper':   { type: 'REG_SZ', data: '0' },
+                                'ScreenSaveActive': { type: 'REG_SZ', data: '0' }
+                            }),
+                            'Mouse':    leaf({
+                                'DoubleClickSpeed': { type: 'REG_SZ', data: '500' },
+                                'MouseSpeed':       { type: 'REG_SZ', data: '1' }
+                            }),
+                            'International': leaf({
+                                'Locale':            { type: 'REG_SZ', data: '00000418' },
+                                'LocaleName':        { type: 'REG_SZ', data: 'ro-RO' },
+                                's1159':             { type: 'REG_SZ', data: 'AM' },
+                                's2359':             { type: 'REG_SZ', data: 'PM' },
+                                'sCurrency':         { type: 'REG_SZ', data: 'lei' },
+                                'sDecimal':          { type: 'REG_SZ', data: ',' },
+                                'sShortDate':        { type: 'REG_SZ', data: 'dd.MM.yyyy' }
+                            })
+                        }
+                    },
+                    'Environment': leaf({
+                        'TEMP':  { type: 'REG_EXPAND_SZ', data: '%USERPROFILE%\\Local Settings\\Temp' },
+                        'TMP':   { type: 'REG_EXPAND_SZ', data: '%USERPROFILE%\\Local Settings\\Temp' }
+                    }),
+                    'Software': {
+                        values: {},
+                        children: {
+                            'Microsoft': {
+                                values: {},
+                                children: {
+                                    'Windows': {
+                                        values: {},
+                                        children: {
+                                            'CurrentVersion': {
                                                 values: {},
                                                 children: {
-                                                    'Parameters': {
-                                                        values: {
-                                                            'EnableSecurityFilters': { type: 'REG_DWORD', data: 1 },
-                                                            'Hostname':              { type: 'REG_SZ', data: 'GDX-APPLIANCE' },
-                                                            'Domain':                { type: 'REG_SZ', data: 'gdx.local' }
-                                                        },
-                                                        children: {}
-                                                    }
+                                                    'Run':       leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                                                    'RunOnce':   leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                                                    'Explorer':  leaf({
+                                                        'ShellState':      { type: 'REG_BINARY', data: '24 00 00 00' }
+                                                    })
                                                 }
                                             }
                                         }
@@ -92,10 +359,32 @@
                     }
                 }
             },
-            'HKEY_CURRENT_USER': { values: {}, children: { 'Software': { values: {}, children: {} }, 'Console': { values: {}, children: {} } } },
-            'HKEY_CLASSES_ROOT': { values: {}, children: {} },
-            'HKEY_USERS':        { values: {}, children: {} },
-            'HKEY_CURRENT_CONFIG': { values: {}, children: {} }
+            'HKEY_CLASSES_ROOT': {
+                values: {},
+                children: {
+                    '.txt':     leaf({ '(Default)': { type: 'REG_SZ', data: 'txtfile' } }),
+                    '.html':    leaf({ '(Default)': { type: 'REG_SZ', data: 'htmlfile' } }),
+                    'CLSID':    leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'txtfile':  leaf({ '(Default)': { type: 'REG_SZ', data: 'Text Document' } }),
+                    'htmlfile': leaf({ '(Default)': { type: 'REG_SZ', data: 'HTML Document' } })
+                }
+            },
+            'HKEY_USERS': {
+                values: {},
+                children: {
+                    '.DEFAULT':    leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'S-1-5-18':    leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'S-1-5-19':    leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'S-1-5-20':    leaf({ '(Default)': { type: 'REG_SZ', data: '' } })
+                }
+            },
+            'HKEY_CURRENT_CONFIG': {
+                values: {},
+                children: {
+                    'Software':  leaf({ '(Default)': { type: 'REG_SZ', data: '' } }),
+                    'System':    leaf({ '(Default)': { type: 'REG_SZ', data: '' } })
+                }
+            }
         };
     }
 
@@ -206,6 +495,14 @@
             'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet': true,
             'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Services': true
         };
+        // Persisted tree-pane width chosen by the user via the
+        // resizable divider. Loaded once at open and re-saved by the
+        // drag handler. NaN/0 means "use the CSS default (220px)".
+        var treeWidth = 0;
+        try {
+            var saved = parseInt(sessionStorage.getItem('ide.srv2k3.regedit.treeW.v1'), 10);
+            if (!isNaN(saved) && saved >= 120) treeWidth = saved;
+        } catch (e) {}
 
         var bd = document.createElement('div');
         bd.id = WIN_ID;
@@ -245,8 +542,9 @@
                 '<div class="reg-toolbar">' +
                 '<span class="reg-path">' + esc(activePath) + '</span>' +
                 '</div>' +
-                '<div class="reg-split">' +
+                '<div class="reg-split" id="regSplit">' +
                 '<div class="reg-tree" id="regTree">' + renderTree(tree, '', 0) + '</div>' +
+                '<div class="reg-divider" id="regDivider" role="separator" aria-orientation="vertical" aria-label="Redimensionează panoul" tabindex="0"></div>' +
                 '<div class="reg-pane">' +
                 '<table class="reg-table">' +
                 '<thead><tr><th>Nume</th><th>Tip</th><th>Date</th></tr></thead>' +
@@ -311,6 +609,66 @@
                     editValue(row.getAttribute('data-reg-name'));
                 });
             });
+
+            // Pane resizer: drag the .reg-divider to retune how much
+            // width the tree gets vs. the value pane. Persists to
+            // sessionStorage so the choice survives a re-render. The
+            // divider is also keyboard-accessible: Left/Right arrows
+            // nudge the width by 16 px steps.
+            var divider = bd.querySelector('#regDivider');
+            var split   = bd.querySelector('#regSplit');
+            if (divider && split) {
+                var MIN_W = 120;
+                var startX, startW;
+
+                function applyWidth(w) {
+                    var rect = split.getBoundingClientRect();
+                    var max  = Math.max(MIN_W, rect.width - 200);
+                    if (w < MIN_W) w = MIN_W;
+                    if (w > max)   w = max;
+                    split.style.setProperty('--reg-tree-w', w + 'px');
+                    treeWidth = w;
+                    try { sessionStorage.setItem('ide.srv2k3.regedit.treeW.v1', String(w)); } catch (e) {}
+                }
+
+                function onMove(e) {
+                    var x = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                    applyWidth(startW + (x - startX));
+                }
+                function onUp() {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('touchmove', onMove);
+                    document.removeEventListener('mouseup',   onUp);
+                    document.removeEventListener('touchend',  onUp);
+                    document.body.classList.remove('srv2k3-regedit-dragging');
+                    divider.classList.remove('dragging');
+                }
+                function onDown(e) {
+                    e.preventDefault();
+                    var rect = bd.querySelector('#regTree').getBoundingClientRect();
+                    startW = rect.width;
+                    startX = (e.touches && e.touches[0]) ? e.touches[0].clientX : e.clientX;
+                    document.addEventListener('mousemove', onMove);
+                    document.addEventListener('touchmove', onMove, { passive: false });
+                    document.addEventListener('mouseup',   onUp);
+                    document.addEventListener('touchend',  onUp);
+                    document.body.classList.add('srv2k3-regedit-dragging');
+                    divider.classList.add('dragging');
+                }
+                divider.addEventListener('mousedown',  onDown);
+                divider.addEventListener('touchstart', onDown, { passive: false });
+
+                divider.addEventListener('keydown', function(e) {
+                    var rect = bd.querySelector('#regTree').getBoundingClientRect();
+                    if (e.key === 'ArrowLeft')  { e.preventDefault(); applyWidth(rect.width - 16); }
+                    if (e.key === 'ArrowRight') { e.preventDefault(); applyWidth(rect.width + 16); }
+                });
+
+                // Restore persisted width.
+                if (treeWidth) {
+                    split.style.setProperty('--reg-tree-w', treeWidth + 'px');
+                }
+            }
         }
 
         function editValue(name) {

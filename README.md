@@ -115,7 +115,7 @@ script-uri.
   `HTML401_STRICT_ATTRS`, `HTML401_TRANSITIONAL_ATTRS`, `ES3_RESERVED`,
   `ES3_GLOBALS`, `ES3_PROTOTYPE_METHODS`.
 - `POST2001_IDENT_HINTS`: mapare nume → standard, folosită de
-  linter-ul JavaScript ca rețea de siguranță pentru identificatori
+  linter-ul JavaScript ca element de siguranță pentru identificatori
   post-2001 care nu sunt prinși de o regulă specifică.
 
 ### Cum adaug o regulă nouă
@@ -189,7 +189,7 @@ deschid. Se rulează manual din consola browserului.
 
 ## Licență
 
-MIT. Vedeți `LICENSE`.
+MIT. Vedeți `LICENSE` în depozitul GitLab.
 
 Fontul Cantarell este distribuit sub SIL Open Font License; a se
 vedea `cantarell/OFL.txt`.

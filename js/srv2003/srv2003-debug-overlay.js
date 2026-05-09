@@ -140,8 +140,15 @@
                 if (st && st.sites) {
                     var c = st.sites.find(function(s) { return s.desc === 'Curriculum Reporting'; });
                     if (c) lines.push(row('CurriculumReporting',  c.state));
+                    var def = st.sites.find(function(s) { return s.desc === 'Default Web Site'; });
+                    if (def) lines.push(row('DefaultWebSite', def.state));
                 }
             }
+        } else if (name === 'mys') {
+            // Manage Your Server wizard, the launcher for role admin.
+            lines.push(row('serverBackendOnline', STATE.serverBackendOnline));
+            lines.push(row('networkUp',           STATE.networkUp !== false));
+            lines.push(row('rolesShown',          'File Server, Application Server'));
         } else if (name === 'evtvwr') {
             if (window.SRV2K3_EVENTLOG) {
                 var sys = window.SRV2K3_EVENTLOG.read('System').length;
@@ -151,25 +158,60 @@
                 lines.push(row('Application log', app + ' entries'));
                 lines.push(row('Security log',    sec + ' entries'));
             }
+        } else if (name === 'evtvwr-props') {
+            lines.push('<div style="color:' + COLOR_DIM + '">event properties (read-only)</div>');
         } else if (name === 'regedit') {
             try {
-                var raw = sessionStorage.getItem('ide.srv2k3.registry.v1');
+                var raw = sessionStorage.getItem('ide.srv2k3.registry.v2') ||
+                          sessionStorage.getItem('ide.srv2k3.registry.v1');
                 lines.push(row('registry persisted', raw ? 'yes' : 'no'));
                 if (raw) lines.push(row('registry size',  raw.length + ' bytes'));
             } catch (e) {}
+            try {
+                var w = sessionStorage.getItem('ide.srv2k3.regedit.treeW.v1');
+                lines.push(row('tree pane width',  w ? w + ' px' : 'default (220 px)'));
+            } catch (e) {}
             lines.push(row('curriculumNonBlocking', !!(STATE.binaryPatches && STATE.binaryPatches.curriculumNonBlocking)));
+        } else if (name === 'regedit-edit') {
+            lines.push('<div style="color:' + COLOR_DIM + '">editing a registry value</div>');
         } else if (name === 'cmd') {
-            lines.push('<div style="color:' + COLOR_DIM + '">no persisted state</div>');
+            lines.push('<div style="color:' + COLOR_DIM + '">cmd.exe (no persisted state)</div>');
+            lines.push(row('hostname', 'GDX-APPLIANCE'));
         } else if (name === 'taskmgr') {
             lines.push(row('idle CPU%',  Math.floor(Math.random() * 5)));
+            lines.push(row('processCount',  '~24 processes'));
         } else if (name === 'help') {
             lines.push('<div style="color:' + COLOR_DIM + '">read-only docs</div>');
         } else if (name === 'drwatson' || name === 'drwatson-details') {
             lines.push(row('patches',  patchSummary(STATE.binaryPatches)));
             var effects = STATE.binaryPatches && STATE.binaryPatches.effects;
             if (effects) lines.push(row('faults patched', Object.keys(effects).length));
+            var snap = STATE.defaultuser && STATE.defaultuser.migratedSnapshot;
+            if (snap) lines.push(row('snapshot.dbg',  snap.includesDebugger));
+        } else if (name === 'mycomp') {
+            lines.push('<div style="color:' + COLOR_DIM + '">drives: C: D: A: E:</div>');
+        } else if (name === 'recycle') {
+            lines.push('<div style="color:' + COLOR_DIM + '">empty (always)</div>');
+        } else if (name === 'notepad') {
+            lines.push('<div style="color:' + COLOR_DIM + '">notepad.exe</div>');
+        } else if (name === 'cpanel') {
+            lines.push('<div style="color:' + COLOR_DIM + '">control panel</div>');
+            lines.push(row('startMenuStyle', (STATE.prefs && STATE.prefs.startMenuStyle) || 'modern'));
+        } else if (name === 'taskbar-props') {
+            lines.push('<div style="color:' + COLOR_DIM + '">taskbar & start menu props</div>');
+            lines.push(row('startMenuStyle', (STATE.prefs && STATE.prefs.startMenuStyle) || 'modern'));
+        } else if (name === 'about-dialog') {
+            lines.push('<div style="color:' + COLOR_DIM + '">winver / about</div>');
+            lines.push(row('build', '5.2 (3790)'));
+        } else if (name === 'run-dialog') {
+            lines.push('<div style="color:' + COLOR_DIM + '">Start, Run prompt</div>');
+        } else if (name === 'shutdown') {
+            lines.push(row('phase', STATE.defaultuser && STATE.defaultuser.phase));
+            lines.push('<div style="color:' + COLOR_DIM + '">shutdown dialog</div>');
         } else {
-            return renderHeader(name) + renderSrv2003Desktop();
+            // Genuinely unknown class. Show the desktop summary, but
+            // do NOT re-prepend the header (the caller already did).
+            return renderSrv2003Desktop();
         }
         return lines.join('');
     }
@@ -201,9 +243,6 @@
             lines.push(row('lastSnapshot',  'present'));
         }
         lines.push(row('patches',      patchSummary(STATE.binaryPatches)));
-        if (STATE.prefs && STATE.prefs.highContrast) {
-            lines.push('<div style="color:' + COLOR_WARN + '">high-contrast: on</div>');
-        }
         return lines.join('');
     }
 

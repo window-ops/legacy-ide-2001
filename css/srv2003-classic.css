@@ -3526,9 +3526,30 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
 }
 .srv2k3-regedit .reg-split {
     display: grid;
-    grid-template-columns: 280px 1fr;
+    /* Tree, divider, pane. Tree default 220 px so the value pane gets
+       more room out of the box; user can drag the divider to retune. */
+    grid-template-columns: var(--reg-tree-w, 220px) 4px 1fr;
     height: 360px;
     background: #ffffff;
+}
+.srv2k3-regedit .reg-divider {
+    background: #d4d0c8;
+    cursor: col-resize;
+    border-left: 1px solid #808080;
+    border-right: 1px solid #ffffff;
+    user-select: none;
+    transition: background 80ms ease;
+}
+.srv2k3-regedit .reg-divider:hover,
+.srv2k3-regedit .reg-divider.dragging {
+    background: #b8d0e8;
+}
+/* During an active drag, swap the cursor and disable text selection
+   on the whole document so the user gets a clean feel. */
+.srv2k3-regedit-dragging,
+.srv2k3-regedit-dragging * {
+    cursor: col-resize !important;
+    user-select: none !important;
 }
 .srv2k3-regedit .reg-tree {
     background: #ffffff;
@@ -3538,6 +3559,7 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
     font-family: "Tahoma", "MS Sans Serif", sans-serif;
     font-size: 11px;
     user-select: none;
+    min-width: 0;
 }
 .srv2k3-regedit .reg-tree-item {
     padding: 2px 4px;
@@ -3638,12 +3660,22 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
 
 /* Mobile reflows for the two new windows. */
 @media (max-width: 720px) {
-    body.srv2003-desktop .srv2k3-evtvwr .evt-split,
-    body.srv2003-desktop .srv2k3-regedit .reg-split {
+    body.srv2003-desktop .srv2k3-evtvwr .evt-split {
         grid-template-columns: 1fr;
         grid-template-rows: auto 1fr;
         height: auto;
         max-height: 70vh;
+    }
+    body.srv2003-desktop .srv2k3-regedit .reg-split {
+        /* On mobile, drop the divider entirely (it can't be dragged
+           comfortably with a finger anyway) and stack tree above pane. */
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto 1fr;
+        height: auto;
+        max-height: 70vh;
+    }
+    body.srv2003-desktop .srv2k3-regedit .reg-divider {
+        display: none;
     }
     body.srv2003-desktop .srv2k3-evtvwr .evt-nav,
     body.srv2003-desktop .srv2k3-regedit .reg-tree {
@@ -3867,130 +3899,249 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
 }
 
 /* ============================================================
-   ACCESSIBILITY OPTIONS DIALOG
+   MODERN START MENU (Windows Server 2003 / XP default style)
+   Two-column layout. Left column for pinned applications, right
+   column for system places + tools, footer strip with All
+   Programs / Log Off / Shut Down. Header strip carries the user
+   avatar and italic username on a Luna-blue gradient. Selectable
+   from right-click on Start, Properties, "Stil meniu Start".
    ============================================================ */
-.srv2k3-access .access-section {
-    border: 1px solid #c0c0c0;
-    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #d4d0c8;
-    padding: 8px 10px;
-    margin-bottom: 8px;
+.srv2k3-start-menu--modern {
+    /* Override the classic 230px width and sidebar layout. */
+    width: 396px;
+    flex-direction: column;
+    padding: 0;
+    /* Replace the inset chiseled border with a softer rounded
+       shell that matches the screenshot reference. */
+    background: #ffffff;
+    border: 1px solid #1f3578;
+    box-shadow:
+        inset 0 0 0 1px #6a8ad0,
+        3px 3px 8px rgba(0, 0, 0, 0.4);
+    border-radius: 0 8px 0 0;
+}
+/* The classic .srv2k3-menu-sidebar is added by buildClassicStartMenu;
+   the modern layout doesn\'t use it, so hide just in case. */
+.srv2k3-start-menu--modern .srv2k3-menu-sidebar {
+    display: none;
+}
+
+/* Header bar with user avatar + italic username. */
+.srv2k3-mm-header {
+    background: linear-gradient(180deg,
+        #245edb 0%, #2c66e0 28%, #1c50bd 60%, #1442a0 100%);
+    color: #ffffff;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 0 7px 0 0;
+    border-bottom: 1px solid #ffd34d;
+    box-shadow: inset 0 -1px 0 #76a8f0;
+}
+.srv2k3-mm-avatar {
+    flex: 0 0 36px;
+    width: 36px;
+    height: 36px;
+    background: #ffffff;
+    border: 1px solid #ffd34d;
+    box-shadow: inset 0 0 0 1px #ffffff;
+    border-radius: 2px;
+    display: grid;
+    place-items: center;
+}
+.srv2k3-mm-avatar svg { display: block; }
+.srv2k3-mm-username {
+    font-family: "Trebuchet MS", "Tahoma", sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    font-style: italic;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    text-shadow: 1px 1px 1px rgba(0, 0, 30, 0.4);
+}
+
+/* Two-column body. Light-blue gradient on the right column to
+   match the reference; left column stays plain white. */
+.srv2k3-mm-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     background: #ffffff;
 }
-.srv2k3-access .access-section-title {
+.srv2k3-mm-col {
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.srv2k3-mm-col-left {
+    background: #ffffff;
+    border-right: 1px solid #6a8ad0;
+}
+.srv2k3-mm-col-right {
+    background: linear-gradient(180deg, #d6e4ff 0%, #e8effe 60%, #ffffff 100%);
+}
+
+/* Items: large icon left, label right. The bold variant is used
+   for pinned apps in the left column and the My Computer entry
+   in the right column, mirroring the screenshot. */
+.srv2k3-mm-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px 5px 6px;
+    border: 0;
+    background: transparent;
+    text-align: left;
+    color: #000000;
+    font: 11.5px "Tahoma", "MS Sans Serif", sans-serif;
+    cursor: pointer;
+    border-radius: 2px;
+    width: 100%;
+    min-height: 30px;
+}
+.srv2k3-mm-item:hover {
+    background: linear-gradient(180deg, #4a8fdc 0%, #1a4aa8 100%);
+    color: #ffffff;
+}
+.srv2k3-mm-item:active {
+    background: linear-gradient(180deg, #1a4aa8 0%, #4a8fdc 100%);
+}
+.srv2k3-mm-ic {
+    flex: 0 0 22px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+}
+.srv2k3-mm-ic svg { width: 22px; height: 22px; }
+.srv2k3-mm-label {
+    flex: 1;
+    line-height: 1.2;
+}
+.srv2k3-mm-item-bold .srv2k3-mm-label {
+    font-weight: 700;
+}
+.srv2k3-mm-arrow {
+    flex: 0 0 auto;
+    font-size: 9px;
+    color: #404060;
+    margin-left: 4px;
+}
+.srv2k3-mm-item:hover .srv2k3-mm-arrow {
+    color: #ffffff;
+}
+/* Hairline separator between item groups, matching the screenshot. */
+.srv2k3-mm-sep {
+    border-bottom: 1px solid #c0d0e8;
+    margin: 4px 8px;
+}
+
+/* Footer strip: All Programs left, Log Off + Shut Down right. */
+.srv2k3-mm-footer {
+    background: linear-gradient(180deg, #ffffff 0%, #d4e0f4 100%);
+    border-top: 1px solid #6a8ad0;
+    padding: 6px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+.srv2k3-mm-allprog {
+    border: 0;
+    background: transparent;
+    color: #000000;
+    font: 11.5px "Tahoma", "MS Sans Serif", sans-serif;
+    padding: 4px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 2px;
+}
+.srv2k3-mm-allprog:hover {
+    background: linear-gradient(180deg, #4a8fdc 0%, #1a4aa8 100%);
+    color: #ffffff;
+}
+.srv2k3-mm-power {
+    display: flex;
+    gap: 4px;
+}
+.srv2k3-mm-pwr-btn {
+    border: 0;
+    background: transparent;
+    color: #000000;
+    font: 11.5px "Tahoma", "MS Sans Serif", sans-serif;
+    padding: 4px 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 2px;
+}
+.srv2k3-mm-pwr-btn:hover {
+    background: linear-gradient(180deg, #4a8fdc 0%, #1a4aa8 100%);
+    color: #ffffff;
+}
+.srv2k3-mm-pwr-ic {
+    width: 18px;
+    height: 18px;
+    display: grid;
+    place-items: center;
+}
+.srv2k3-mm-pwr-ic svg { width: 18px; height: 18px; }
+
+/* Mobile reflow: stack columns vertically, narrow the menu so it
+   fits in a 380 px viewport with a small left/right margin. */
+@media (max-width: 720px) {
+    body.srv2003-desktop .srv2k3-start-menu--modern {
+        width: calc(100vw - 16px);
+        max-width: 360px;
+    }
+    body.srv2003-desktop .srv2k3-start-menu--modern .srv2k3-mm-body {
+        grid-template-columns: 1fr;
+    }
+    body.srv2003-desktop .srv2k3-start-menu--modern .srv2k3-mm-col-left {
+        border-right: 0;
+        border-bottom: 1px solid #6a8ad0;
+    }
+}
+
+/* ============================================================
+   TASKBAR & START MENU PROPERTIES DIALOG
+   Reached via right-click on Start, Properties. Lets the user
+   pick between the two Start menu styles. Future: add tabs for
+   actual taskbar properties (auto-hide, lock, group similar
+   buttons). For now it\'s a single section, single tab.
+   ============================================================ */
+.srv2k3-taskbar-props .tb-props-section {
+    border: 1px solid #c0c0c0;
+    box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 #d4d0c8;
+    padding: 10px 12px;
+    background: #ffffff;
+}
+.srv2k3-taskbar-props .tb-props-section-title {
     font-weight: 700;
     color: #0a246a;
     font-size: 12px;
     margin-bottom: 4px;
 }
-.srv2k3-access .access-check {
+.srv2k3-taskbar-props .tb-props-radio {
     display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 6px 4px;
     cursor: pointer;
-    user-select: none;
+    font-size: 12px;
+    line-height: 1.4;
 }
-
-/* ============================================================
-   HIGH CONTRAST THEME
-   Mirrors Windows Classic\'s "High Contrast Black" scheme:
-   pure black background, bright white text, fat yellow focus
-   rings. Affects everything (QNX kiosk + Server 2003).
-   When body.high-contrast is set, override the most-visible
-   surfaces with monochrome high-contrast equivalents.
-   ============================================================ */
-body.high-contrast {
-    background: #000000 !important;
+.srv2k3-taskbar-props .tb-props-radio:hover {
+    background: #f0f4fa;
 }
-body.high-contrast,
-body.high-contrast .app,
-body.high-contrast .editor-area,
-body.high-contrast .sidebar,
-body.high-contrast .output-panel,
-body.high-contrast .header,
-body.high-contrast .footer {
-    background: #000000 !important;
-    color: #ffffff !important;
+.srv2k3-taskbar-props .tb-props-radio input {
+    margin-top: 2px;
 }
-body.high-contrast .code-editor,
-body.high-contrast .highlight-overlay,
-body.high-contrast .line-numbers,
-body.high-contrast .output {
-    background: #000000 !important;
-    color: #ffffff !important;
-}
-body.high-contrast .hb-btn,
-body.high-contrast .hb-toggle,
-body.high-contrast button {
-    background: #000000 !important;
-    color: #ffffff !important;
-    border: 2px solid #ffffff !important;
-    box-shadow: none !important;
-}
-body.high-contrast .hb-btn:focus,
-body.high-contrast .hb-toggle:focus,
-body.high-contrast button:focus,
-body.high-contrast input:focus,
-body.high-contrast .row:focus {
-    outline: 3px solid #ffd34d !important;
-    outline-offset: 1px;
-}
-body.high-contrast .row.active {
-    background: #ffffff !important;
-    color: #000000 !important;
-}
-body.high-contrast .traceback {
-    background: #000000 !important;
-    color: #ffffff !important;
-    border-left: 3px solid #ff6060 !important;
-}
-body.high-contrast .traceback .tb-title {
-    color: #ff8080 !important;
-}
-body.high-contrast .traceback.backend-scold {
-    border-left: 3px solid #ffd34d !important;
-}
-body.high-contrast .traceback.backend-scold .tb-title {
-    color: #ffd34d !important;
-}
-body.high-contrast .success-box {
-    background: #000000 !important;
-    color: #80ff80 !important;
-    border-left: 3px solid #80ff80 !important;
-}
-/* In Server 2003 mode, the Classic theme already has high contrast
-   semantics, but we still need to elevate it. Active highlights
-   become bright yellow on black. */
-body.high-contrast.srv2003-desktop .dialog,
-body.high-contrast.srv2003-desktop .dialog-body,
-body.high-contrast.srv2003-desktop .dialog-header,
-body.high-contrast.srv2003-desktop .dialog-footer,
-body.high-contrast.srv2003-desktop .srv2k3-taskbar,
-body.high-contrast.srv2003-desktop .srv2k3-start-menu {
-    background: #000000 !important;
-    color: #ffffff !important;
-    border-color: #ffffff !important;
-    box-shadow: none !important;
-}
-body.high-contrast.srv2003-desktop .dialog-header,
-body.high-contrast.srv2003-desktop .srv2k3-start-button.open,
-body.high-contrast.srv2003-desktop .ra-nav-item.active,
-body.high-contrast.srv2003-desktop .help-nav-item.active,
-body.high-contrast.srv2003-desktop .evt-nav-item.active,
-body.high-contrast.srv2003-desktop .reg-tree-item.active {
-    background: #ffd34d !important;
-    color: #000000 !important;
-}
-body.high-contrast.srv2003-desktop .srv2k3-dicon-label,
-body.high-contrast.srv2003-desktop .srv2k3-task-btn,
-body.high-contrast.srv2003-desktop .srv2k3-tray-icon,
-body.high-contrast.srv2003-desktop .srv2k3-clock {
-    color: #ffffff !important;
-}
-body.high-contrast.srv2003-desktop .help-banner,
-body.high-contrast.srv2003-desktop .evt-toolbar,
-body.high-contrast.srv2003-desktop .reg-toolbar {
-    background: #000000 !important;
-    color: #ffffff !important;
-    border-color: #ffffff !important;
+.srv2k3-taskbar-props .tb-props-radio small {
+    color: #404040;
+    font-size: 11px;
 }

@@ -337,18 +337,6 @@
             '<path d="M7 14 Q5 10 8 8 Q9 11 11 9 Q12 13 9 14 Z" fill="#ffd34d" stroke="#dc3535" stroke-width="0.4"/>'
         );
     }
-    function iconCpAccessibility() {
-        // Stylized human figure (the standard "person in motion" glyph)
-        // matching the Windows accessibility-options icon.
-        return svg(
-            '<circle cx="8" cy="3.5" r="1.6" fill="#3578d8" stroke="#1a3a78" stroke-width="0.4"/>' +
-            // Body
-            '<path d="M5.5 6 L10.5 6 L10 11 L8.7 11 L8.7 14 L7.3 14 L7.3 11 L6 11 Z" fill="#3578d8" stroke="#1a3a78" stroke-width="0.4"/>' +
-            // Outstretched arms suggesting motion
-            '<path d="M5.5 6 L3 8 L3.5 9 L6 7" fill="#3578d8" stroke="#1a3a78" stroke-width="0.4"/>' +
-            '<path d="M10.5 6 L13 8 L12.5 9 L10 7" fill="#3578d8" stroke="#1a3a78" stroke-width="0.4"/>'
-        );
-    }
     function iconDocument() {
         return svg(
             '<path d="M3 1 L10 1 L13 4 L13 15 L3 15 Z" fill="#ffffff" stroke="#000000" stroke-width="0.7"/>' +
@@ -357,6 +345,58 @@
             '<line x1="5" y1="8" x2="11" y2="8" stroke="#000000" stroke-width="0.5"/>' +
             '<line x1="5" y1="10" x2="11" y2="10" stroke="#000000" stroke-width="0.5"/>' +
             '<line x1="5" y1="12" x2="9" y2="12" stroke="#000000" stroke-width="0.5"/>'
+        );
+    }
+    // Notepad: blue spiral-bound pad. The spiral binding on the
+    // left distinguishes it from the generic Document glyph used
+    // by Legacy IDE.
+    function iconNotepad() {
+        return svg(
+            // Pad body
+            '<rect x="3" y="2" width="11" height="13" fill="#ffffff" stroke="#000000" stroke-width="0.7"/>' +
+            // Top blue strip (the metal binding edge)
+            '<rect x="3" y="2" width="11" height="2.2" fill="#4a8fdc" stroke="#1a4aa8" stroke-width="0.4"/>' +
+            // Spiral rings, four small white ovals on the binding
+            '<ellipse cx="5"  cy="3.1" rx="0.55" ry="0.85" fill="#ffffff" stroke="#1a4aa8" stroke-width="0.3"/>' +
+            '<ellipse cx="7"  cy="3.1" rx="0.55" ry="0.85" fill="#ffffff" stroke="#1a4aa8" stroke-width="0.3"/>' +
+            '<ellipse cx="9"  cy="3.1" rx="0.55" ry="0.85" fill="#ffffff" stroke="#1a4aa8" stroke-width="0.3"/>' +
+            '<ellipse cx="11" cy="3.1" rx="0.55" ry="0.85" fill="#ffffff" stroke="#1a4aa8" stroke-width="0.3"/>' +
+            // Lined rules
+            '<line x1="4.5" y1="6"  x2="12.5" y2="6"  stroke="#a0b0d0" stroke-width="0.4"/>' +
+            '<line x1="4.5" y1="8"  x2="12.5" y2="8"  stroke="#a0b0d0" stroke-width="0.4"/>' +
+            '<line x1="4.5" y1="10" x2="12.5" y2="10" stroke="#a0b0d0" stroke-width="0.4"/>' +
+            '<line x1="4.5" y1="12" x2="11"   y2="12" stroke="#a0b0d0" stroke-width="0.4"/>'
+        );
+    }
+    // Search: magnifying glass over a faint document hint. Standard
+    // glyph the user expects for any "search" / "find" action.
+    function iconSearch() {
+        return svg(
+            // Document hint behind
+            '<rect x="2" y="3" width="7" height="9" fill="#ffffff" stroke="#a0a0a0" stroke-width="0.4"/>' +
+            '<line x1="3.5" y1="6" x2="7.5" y2="6" stroke="#c0c0c0" stroke-width="0.3"/>' +
+            '<line x1="3.5" y1="8" x2="7.5" y2="8" stroke="#c0c0c0" stroke-width="0.3"/>' +
+            // Magnifier lens
+            '<circle cx="10" cy="9" r="3.6" fill="#a8d8ff" fill-opacity="0.55" stroke="#0a3a7a" stroke-width="0.9"/>' +
+            // Lens glare
+            '<path d="M8 7.5 Q9 6.5 10.5 7" fill="none" stroke="#ffffff" stroke-width="0.6"/>' +
+            // Handle
+            '<line x1="12.7" y1="11.7" x2="14.5" y2="13.5" stroke="#0a3a7a" stroke-width="1.4" stroke-linecap="round"/>'
+        );
+    }
+    // Printer: classic Server 2003 inkjet/laser silhouette.
+    function iconPrinter() {
+        return svg(
+            // Top paper sticking out
+            '<rect x="4" y="2" width="8" height="3" fill="#ffffff" stroke="#000000" stroke-width="0.5"/>' +
+            // Printer body
+            '<rect x="2" y="5" width="12" height="6" fill="#d4d0c8" stroke="#000000" stroke-width="0.6"/>' +
+            // Front panel highlight
+            '<rect x="2.5" y="5.5" width="11" height="1.2" fill="#ffffff" fill-opacity="0.6"/>' +
+            // Status LED
+            '<circle cx="12.5" cy="8" r="0.55" fill="#3aab3a" stroke="#1a6a1a" stroke-width="0.2"/>' +
+            // Output tray
+            '<rect x="3.5" y="11" width="9" height="2.5" fill="#ffffff" stroke="#000000" stroke-width="0.5"/>'
         );
     }
     function iconCmd() {
@@ -512,8 +552,10 @@
     window.iconCpSystem = iconCpSystem;
     window.iconCpUserAccounts = iconCpUserAccounts;
     window.iconCpFirewall = iconCpFirewall;
-    window.iconCpAccessibility = iconCpAccessibility;
     window.iconDocument = iconDocument;
+    window.iconNotepad = iconNotepad;
+    window.iconSearch = iconSearch;
+    window.iconPrinter = iconPrinter;
     window.iconCmd = iconCmd;
     window.iconDoctor = iconDoctor;
     window.iconChart = iconChart;
