@@ -1,7 +1,22 @@
 /* ============================================================
    DIALOGS / SIDEBAR / NEW FILE
    ============================================================ */
-function openDialog(id) { $(id).classList.add('open'); }
+
+function scaleDialogToViewport(backdrop) {
+    if (!document.body.classList.contains('srv2003-desktop')) return;
+    var dialog = backdrop && backdrop.querySelector ? backdrop.querySelector('.dialog') : null;
+    if (!dialog) return;
+    dialog.style.transform = '';
+    var rect = dialog.getBoundingClientRect();
+    var maxW = window.innerWidth - 24;
+    var maxH = window.innerHeight - 24;
+    var scale = Math.min(maxW / rect.width, maxH / rect.height, 1);
+    if (scale < 1) {
+        dialog.style.transform = 'scale(' + Math.max(scale, 0.72).toFixed(3) + ')';
+    }
+}
+
+function openDialog(id) { var el=$(id); el.classList.add('open'); requestAnimationFrame(function(){ scaleDialogToViewport(el); }); }
 function closeDialog(id) { $(id).classList.remove('open'); }
 
 document.querySelectorAll('[data-close]').forEach(function(el) {
@@ -117,3 +132,5 @@ $('newFileBaseInput').addEventListener('keydown', function(e) {
     if (e.key === 'Enter') $('newFileOK').click();
     else if (e.key === 'Escape') $('newFileCancel').click();
 });
+
+window.scaleDialogToViewport = scaleDialogToViewport;

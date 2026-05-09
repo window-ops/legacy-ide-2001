@@ -34,8 +34,8 @@
             '</div>' +
             '</div>' +
             '<div class="mys-content">' +
-            '<p style="margin: 0 0 10px;">Folosiți instrumentele și informațiile de aici pentru a adăuga sau elimina roluri și pentru a efectua sarcinile administrative zilnice.</p>' +
-            '<p style="margin: 0 0 14px;">Serverul a fost configurat cu următoarele roluri:</p>' +
+            '<p class="mys-desc">Folosiți instrumentele și informațiile de aici pentru a adăuga sau elimina roluri și pentru a efectua sarcinile administrative zilnice.</p>' +
+            '<p class="mys-desc mys-desc-spaced">Serverul a fost configurat cu următoarele roluri:</p>' +
             '<div class="mys-role">' +
             '<div class="mys-role-title">Server de fișiere</div>' +
             '<div class="mys-role-desc">Serverele de fișiere furnizează și gestionează accesul la fișiere. <a href="#" data-mys-role="file">Administrați acest server de fișiere</a></div>' +
@@ -51,6 +51,7 @@
             '</div>' +
             '</div>';
         document.body.appendChild(bd);
+        if (window.scaleDialogToViewport) requestAnimationFrame(function(){ window.scaleDialogToViewport(bd); });
         bd.addEventListener('click', function(e) {
             if (e.target === bd || (e.target.getAttribute && e.target.getAttribute('data-run-close') != null)) {
                 bd.remove();
@@ -198,7 +199,7 @@
                         '</table>';
                 }
                 if (state.activeTab === 'quotas') {
-                    return '<p style="font-size:11px; margin-bottom:10px;">Cotele de spațiu nu sunt activate pe niciun volum.</p>' +
+                    return '<p class="ra-section-desc">Cotele de spațiu nu sunt activate pe niciun volum.</p>' +
                         '<div class="ra-form">' +
                         '<label class="ra-check"><input type="checkbox" id="raQuotaEnable"> Activează gestionarea cotelor pe C:</label>' +
                         '<label>Limită implicită:</label><input type="text" class="srv2k3-run-input" value="100 MB" disabled>' +
@@ -207,7 +208,7 @@
                         '</div>';
                 }
                 if (state.activeTab === 'replication') {
-                    return '<p style="font-size:11px; margin-bottom:10px;">Replicarea DFS nu este configurată pe acest server.</p>' +
+                    return '<p class="ra-section-desc">Replicarea DFS nu este configurată pe acest server.</p>' +
                         '<div class="ra-form">' +
                         '<label>Nume grup de replicare:</label><input type="text" class="srv2k3-run-input" id="raRepName" placeholder="StudentWork-Replicate">' +
                         '<label>Program:</label><select class="srv2k3-run-input"><option>Continuu</option><option>La fiecare oră</option><option>Zilnic</option></select>' +
@@ -244,7 +245,7 @@
                         '</tbody></table>';
                 }
                 if (state.activeTab === 'ftp') {
-                    return '<p style="font-size:11px; margin-bottom:10px;">Serviciul FTP nu este pornit.</p>' +
+                    return '<p class="ra-section-desc">Serviciul FTP nu este pornit.</p>' +
                         '<div class="ra-form">' +
                         '<label class="ra-check"><input type="checkbox" id="raFtpEnable"> Activează serverul FTP pe portul 21</label>' +
                         '<label>Acces anonim:</label><select class="srv2k3-run-input"><option>Dezactivat</option><option>Doar citire</option></select>' +
@@ -262,7 +263,7 @@
                         '</div>';
                 }
                 if (state.activeTab === 'aspnet') {
-                    return '<div class="ra-form">' +
+                    return '<div class="ra-form ra-form-compact">' +
                         '<label>Versiune ASP.NET:</label>' +
                         '<select class="srv2k3-run-input" id="raAspVer">' +
                         ['v1.1.4322', 'v1.1.4322 SP1'].map(function(v) {
