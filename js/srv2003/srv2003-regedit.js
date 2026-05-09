@@ -6,19 +6,19 @@
 
    FUNCTIONAL KEYS (user can change values, system observes them):
 
-   HKLM\\SOFTWARE\\GDX\\AllowTransitional (DWORD)
+   HKLM\SOFTWARE\GDX\AllowTransitional (DWORD)
      0 = strict programa enforcement (default)
      1 = alternate bypass route, even when the backend is up, the
          lint runs in non-blocking mode. Same effect as setting
          curriculumNonBlocking via Dr. Watson, but persisted in
          the registry so it survives reloads.
 
-   HKLM\\SYSTEM\\CurrentControlSet\\Services\\CurriculumReporting\\Start (DWORD)
+   HKLM\SYSTEM\CurrentControlSet\Services\CurriculumReporting\Start (DWORD)
      2 = Auto (service running, backend reachable when network up)
      4 = Disabled (service stopped, backend unreachable)
      Mirrors the Curriculum Reporting site state in IIS.
 
-   HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\EnableSecurityFilters (DWORD)
+   HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableSecurityFilters (DWORD)
      Cosmetic. Demonstrates the UI works on arbitrary keys.
 
    Storage key: 'ide.srv2k3.registry.v1'

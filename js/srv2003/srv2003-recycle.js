@@ -1,7 +1,7 @@
 /* ============================================================
    RECYCLE BIN
-   Recycle Bin window. Empty by default; the empty state is
-   the joke. Single-file module, no external dependencies
+   Recycle Bin window. Empty by default.
+   Single-file module, no external dependencies
    beyond iconRecycle from the icons module.
    ============================================================ */
 (function() {
