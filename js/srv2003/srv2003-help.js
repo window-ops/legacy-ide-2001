@@ -164,6 +164,43 @@
           "<p>Includerea acestui mediu în satiră adresează o întrebare reală: <em>cum păstrăm acces la software vechi când companiile care l-au făcut nu mai vor să-l mențină?</em> Server 2003 a primit ultimele patch-uri de securitate în 2015. Soluția pe termen lung este fie emulare (DOSBox, 86Box), fie reimplementare (ReactOS, Wine).</p>" +
           "<p>Acest IDE este un al treilea drum: simulare. Nu rulează cod Windows real, ci doar reproduce experiența vizuală și comportamentală suficient pentru o satiră de două decenii.</p>",
       },
+      {
+        id: "coreboot",
+        label: "Actualizare firmware",
+        heading: "Actualizare firmware GDX (coreboot)",
+        body:
+          "<p>Aparatura GDX-APPLIANCE-A04 acceptă o procedură de actualizare a firmware-ului prin rețea (PXE) către un BIOS alternativ <strong>coreboot</strong>. Procedura este destinată tehnicienilor de service, dar este accesibilă oricui are credențialele complete pe contul Administrator (sesiune <em>full snapshot</em>).</p>" +
+          "<p><strong>ATENȚIE.</strong> Această operațiune este ireversibilă. Imaginea Phoenix BIOS originală este ștearsă din SPI flash și nu poate fi recuperată prin această interfață. După flash, aparatul nu mai poate rula Windows Server 2003 sau QNX Photon, iar funcția <em>Reset</em> nu mai are efect.</p>" +
+          "<h3>Cum se intră în BIOS Setup</h3>" +
+          "<ol>" +
+          "<li>Deschideți meniul Start și alegeți <em>Închidere</em>.</li>" +
+          "<li>Selectați <em>Închidere</em> sau <em>Repornire</em>. Apare ecranul „Acum puteți opri în siguranță\".</li>" +
+          "<li>Pe acel ecran, apăsați butonul <strong>F2 Setup</strong>. Se deschide PhoenixBIOS Setup Utility.</li>" +
+          "</ol>" +
+          "<h3>Pasul 1: ștergeți parola supervizor</h3>" +
+          "<ol>" +
+          "<li>Navigați la tab-ul <strong>Security</strong>.</li>" +
+          "<li>Selectați linia <strong>Supervisor Password</strong> și apăsați Enter (sau dați click).</li>" +
+          "<li>Tastați parola din fabrică, scrisă pe autocolantul OEM galben de pe partea inferioară a șasiului. Pentru această imagine, parola este <code>GDX2001</code> și este vizibilă și pe linia <em>Service Tag</em> din tab-ul Main.</li>" +
+          "<li>OK. Câmpul Supervisor Password trece în starea <em>Not Installed</em>.</li>" +
+          "</ol>" +
+          "<h3>Pasul 2: dezactivați protecția la scriere</h3>" +
+          "<ol>" +
+          "<li>Navigați la tab-ul <strong>Advanced</strong>.</li>" +
+          "<li>Coborâți la secțiunea <em>OEM Service</em>, la linia <strong>Flash Write Protect</strong>.</li>" +
+          "<li>Click sau Enter pentru a comuta valoarea de la <em>Enabled</em> la <em>Disabled</em>.</li>" +
+          "</ol>" +
+          "<h3>Pasul 3: tab-ul Firmware apare</h3>" +
+          "<p>Imediat ce ambele condiții de mai sus sunt îndeplinite, un nou tab numit <strong>Firmware</strong> apare în partea dreaptă a barei de meniuri, înainte de tab-ul Exit. Acest tab afișează identitatea hardware (mainboard, JEDEC ID al chip-ului SPI, dimensiunea regiunii BIOS) și starea curentă a deblocării.</p>" +
+          "<h3>Pasul 4: lansați flash-ul prin PXE</h3>" +
+          "<ol>" +
+          "<li>Pe tab-ul Firmware, navigați la linia <strong>Flash via PXE...</strong> și apăsați Enter.</li>" +
+          "<li>BIOS Setup se închide și se deschide GDX-APPLIANCE Remote Firmware Flasher.</li>" +
+          "<li>Procedura se desfășoară în 8 etape. Așteptați finalizarea fiecăreia, apoi confirmați la pașii care cer click. La etapa 3 (verificare SHA-256) este normal să apară o eroare la prima încercare; urmați instrucțiunile afișate și retrimiteți de la stadiul 1.</li>" +
+          "</ol>" +
+          "<h3>După flash</h3>" +
+          "<p>După etapa 8 (hot-reset), apare ecranul SeaBIOS POST. Aparatul este acum complet eliberat de programa analitică, dar imaginea de recuperare a fost pierdută. Este responsabilitatea utilizatorului să încarce un sistem de operare alternativ.</p>",
+      },
     ];
     var activeIdx = 0;
 

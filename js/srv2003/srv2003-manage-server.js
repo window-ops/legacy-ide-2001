@@ -35,7 +35,7 @@
             '</div>' +
             '<div class="mys-content">' +
             '<p class="mys-desc">Folosiți instrumentele și informațiile de aici pentru a adăuga sau elimina roluri și pentru a efectua sarcinile administrative zilnice.</p>' +
-            '<p class="mys-desc mys-desc-spaced">Serverul a fost configurat cu următoarele roluri:</p>' +
+            '<p class="mys-desc mys-desc-spaced" style="margin-bottom:10px">Serverul a fost configurat cu următoarele roluri:</p>' +
             '<div class="mys-role">' +
             '<div class="mys-role-title">Server de fișiere</div>' +
             '<div class="mys-role-desc">Serverele de fișiere furnizează și gestionează accesul la fișiere. <a href="#" data-mys-role="file">Administrați acest server de fișiere</a></div>' +

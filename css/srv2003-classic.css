@@ -696,8 +696,8 @@ body.srv2003-desktop .dialog-header .dialog-header-title {
    injector below adds this to every Server 2003 dialog. */
 body.srv2003-desktop .dialog-header .dialog-x {
     flex: 0 0 auto;
-    width: 22px;
-    height: 20px;
+    width: 18px;
+    height: 16px;
     padding: 0;
     margin: 0;
     border: 0;
@@ -709,7 +709,7 @@ body.srv2003-desktop .dialog-header .dialog-x {
         inset -2px -2px 0 #808080;
     color: #000000;
     font-family: "Marlett", "Tahoma", sans-serif;
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
     line-height: 1;
     cursor: pointer;
@@ -725,6 +725,18 @@ body.srv2003-desktop .dialog-header .dialog-x:active {
         inset -1px -1px 0 #ffffff,
         inset 2px 2px 0 #808080,
         inset -2px -2px 0 #dfdfdf;
+}
+/* Frame-mode side effect: when the title bar [X] is the only
+   close affordance the user needs, a footer that contains nothing
+   but a close-equivalent button adds no information. The
+   srv2003-titlebar-x.js injector tags such footers; this rule
+   hides them and trims the body's bottom padding so the dialog
+   doesn't keep an empty band of chrome at the bottom. */
+body.srv2003-desktop .dialog-footer.srv2k3-footer-redundant {
+    display: none;
+}
+body.srv2003-desktop .dialog-body:has(+ .dialog-footer.srv2k3-footer-redundant) {
+    padding-bottom: 12px;
 }
 
 body.srv2003-desktop .dialog-body {
@@ -2962,6 +2974,22 @@ body.srv2003-min .app { display: none; }
 .bios-setup .bios-field-block {
     margin: 4px 0 8px 24px;
 }
+.bios-setup .bios-field-sep {
+    /* Section header inside a tab. Gray on Phoenix-blue, no
+       selection state (skipped by arrow navigation). The leading
+       ">" character mimics how real Phoenix Setup labels its
+       collapsible sub-menus on screen. */
+    color: #ffff80;
+    font-weight: 700;
+    padding: 5px 4px 1px;
+    border-top: 1px dotted #404080;
+    margin-top: 3px;
+}
+.bios-setup .bios-fields > .bios-field-sep:first-child {
+    border-top: 0;
+    margin-top: 0;
+    padding-top: 1px;
+}
 .bios-setup .bios-order {
     background: #000080;
     color: #ffff80;
@@ -4259,4 +4287,1137 @@ body.srv2003-desktop .dialog-footer {
 .ra-pane > p:first-child,
 .ra-form > p:first-child {
     margin-top: 0;
+}
+
+/* ============================================================
+   COREBOOT FLASH OVERLAY
+   Full-screen modal that owns the screen for the duration of
+   the eight flash stages. Two panes side-by-side: the live
+   schematic on the left and the rolling stage log on the
+   right with a stage-title strip and an action area for the
+   button(s) the user has to confirm. Style is intentionally
+   not Server 2003 / Phoenix BIOS, this is a different
+   utility ("GDX-APPLIANCE Remote Firmware Flasher").
+   ============================================================ */
+/* ============================================================
+   COREBOOT REMOTE FIRMWARE FLASHER
+   Low-level firmware utility look: pure black background,
+   monospace, no decorative chrome, single-pixel borders.
+   Schematic pane uses the same dark palette so the whole
+   surface reads as one terminal-like environment instead of
+   a layered XP application. Active blocks light up in cyan;
+   ok/warn/err log lines stay in the standard ANSI palette
+   (green/yellow/red). The titlebar is a thin status strip
+   not a chunky branded bar.
+   ============================================================ */
+.coreboot-flash {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    color: #c0c0c0;
+    z-index: 99500;
+    display: flex;
+    flex-direction: column;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-size: 13px;
+    line-height: 1.45;
+}
+.coreboot-flash .cb-shell {
+    width: 100%;
+    height: 100%;
+    background: #000000;
+    border: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.coreboot-flash .cb-titlebar {
+    background: #000000;
+    color: #c0c0c0;
+    padding: 6px 14px;
+    border-bottom: 1px solid #404040;
+    font-weight: 400;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.coreboot-flash .cb-titlebar::before {
+    content: ">";
+    color: #80df80;
+    font-weight: 700;
+}
+.coreboot-flash .cb-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    flex: 1;
+    min-height: 0;
+}
+.coreboot-flash .cb-pane {
+    padding: 14px 16px;
+    overflow: auto;
+    min-width: 0;
+}
+.coreboot-flash .cb-arch-pane {
+    background: #000000;
+    color: #c0c0c0;
+    border-right: 1px solid #404040;
+}
+.coreboot-flash .cb-arch-title {
+    font-weight: 400;
+    font-size: 12px;
+    color: #80df80;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.coreboot-flash .cb-arch-svg { width: 100%; }
+.coreboot-flash .cb-arch-svg svg { width: 100%; height: auto; }
+/* Schematic SVG uses a dark base color. Override the cream PCB
+   fill rendered by srv2003-coreboot.js via attribute selector
+   so we don't have to touch the JS. */
+.coreboot-flash .cb-arch-svg svg rect[fill="#f6f1e1"] {
+    fill: #0a0a0a;
+}
+.coreboot-flash .cb-arch-svg svg rect[stroke="#000"],
+.coreboot-flash .cb-arch-svg svg line[stroke="#000"],
+.coreboot-flash .cb-arch-svg svg path[stroke="#000"] {
+    stroke: #80df80;
+}
+.coreboot-flash .cb-arch-svg svg text { fill: #c0c0c0; }
+.coreboot-flash .cb-arch-legend {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #707070;
+    border-top: 1px dashed #404040;
+    padding-top: 8px;
+}
+.coreboot-flash .cb-log-pane {
+    background: #000000;
+    color: #c0c0c0;
+    display: flex;
+    flex-direction: column;
+}
+.coreboot-flash .cb-stage-title {
+    color: #80df80;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 4px 0 8px;
+    border-bottom: 1px solid #404040;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.coreboot-flash .cb-log {
+    flex: 1;
+    overflow: auto;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.coreboot-flash .cb-log-line {
+    color: #b0b0b0;
+    white-space: pre-wrap;
+}
+.coreboot-flash .cb-log-line.cb-ok   { color: #80df80; }
+.coreboot-flash .cb-log-line.cb-warn { color: #ffd34d; }
+.coreboot-flash .cb-log-line.cb-err  { color: #f08070; }
+.coreboot-flash .cb-action {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #404040;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+/* Buttons read as terminal prompts: monospace, single border,
+   no rounded corners, no fill. Default action highlights with
+   green stroke + green text, matching the ANSI ok color. */
+.coreboot-flash .cb-btn {
+    background: transparent;
+    color: #c0c0c0;
+    border: 1px solid #707070;
+    padding: 5px 14px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    border-radius: 0;
+    text-transform: none;
+}
+.coreboot-flash .cb-btn:hover {
+    background: #1a1a1a;
+    border-color: #c0c0c0;
+}
+.coreboot-flash .cb-btn-default {
+    border-color: #80df80;
+    color: #80df80;
+    background: transparent;
+    font-weight: 400;
+}
+.coreboot-flash .cb-btn-default:hover {
+    background: #0a1a0a;
+    color: #a0ff80;
+}
+
+/* Active schematic blocks light up cyan instead of brown. */
+.coreboot-flash .arch-block.arch-active rect,
+.coreboot-flash .arch-block.arch-active line,
+.coreboot-flash .cb-arch-svg .arch-block.arch-active rect,
+.coreboot-flash .cb-arch-svg .arch-block.arch-active line {
+    stroke: #80dfff;
+    stroke-width: 2;
+}
+.coreboot-flash .arch-block.arch-active text,
+.coreboot-flash .cb-arch-svg .arch-block.arch-active text {
+    fill: #80dfff;
+    font-weight: 700;
+}
+.coreboot-flash .arch-bus.arch-active line,
+.coreboot-flash .cb-arch-svg .arch-bus.arch-active line {
+    stroke: #80dfff;
+    stroke-width: 2;
+}
+.coreboot-flash .arch-bus.arch-active text,
+.coreboot-flash .cb-arch-svg .arch-bus.arch-active text {
+    fill: #80dfff;
+    font-weight: 700;
+}
+.coreboot-flash .arch-block.arch-active,
+.coreboot-flash .arch-bus.arch-active {
+    animation: arch-pulse 1.4s ease-in-out infinite;
+}
+@keyframes arch-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
+}
+
+/* SeaBIOS POST screen at end of flash. Pure VGA-text-mode
+   look: white-on-black, monospace, no UI chrome at all. */
+.coreboot-flash .cb-postscreen {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    color: #c8c8c8;
+    padding: 24px 32px;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    overflow: auto;
+}
+.coreboot-flash .cb-postscreen-text {
+    margin: 0;
+    white-space: pre-wrap;
+    color: #c8c8c8;
+}
+
+/* ============================================================
+   POST-FLASH SPLASH
+   Brief placeholder shown only when the takeover handler is
+   not yet registered (rarely; the waterboard module registers
+   one at script-load). Same low-level look as the flash
+   overlay so there is no jarring style break.
+   ============================================================ */
+.coreboot-splash {
+    position: fixed;
+    inset: 0;
+    background: #000000;
+    color: #c0c0c0;
+    z-index: 99000;
+    display: grid;
+    place-items: center;
+    font-family: "Lucida Console", "Consolas", monospace;
+    overflow: auto;
+}
+.coreboot-splash .cb-splash-inner {
+    max-width: 880px;
+    padding: 32px;
+}
+.coreboot-splash .cb-splash-banner {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: #80df80;
+    margin-bottom: 4px;
+    text-transform: lowercase;
+}
+.coreboot-splash .cb-splash-sub {
+    font-size: 12px;
+    color: #707070;
+    margin-bottom: 28px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.coreboot-splash .cb-splash-arch {
+    background: #000000;
+    border: 1px solid #404040;
+    padding: 12px;
+    margin-bottom: 24px;
+}
+.coreboot-splash .cb-splash-arch svg {
+    width: 100%;
+    height: auto;
+}
+.coreboot-splash .cb-splash-arch svg rect[fill="#f6f1e1"] { fill: #0a0a0a; }
+.coreboot-splash .cb-splash-arch svg rect[stroke="#000"],
+.coreboot-splash .cb-splash-arch svg line[stroke="#000"],
+.coreboot-splash .cb-splash-arch svg path[stroke="#000"] {
+    stroke: #80df80;
+}
+.coreboot-splash .cb-splash-arch svg text { fill: #c0c0c0; }
+.coreboot-splash .cb-splash-msg {
+    font-size: 13px;
+    line-height: 1.55;
+    color: #c0c0c0;
+    border: 1px solid #404040;
+    padding: 14px 18px;
+}
+
+/* ============================================================
+   BIOS Supervisor Password prompt (anchored over BIOS Setup)
+   ============================================================ */
+.bios-prompt-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 64, 0.55);
+    display: grid;
+    place-items: center;
+    z-index: 10;
+}
+.bios-prompt {
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080;
+    width: 320px;
+    font-family: "Tahoma", sans-serif;
+    font-size: 12px;
+}
+.bios-prompt-title {
+    background: #0a246a;
+    color: #ffffff;
+    padding: 4px 8px;
+    font-weight: 700;
+}
+.bios-prompt-body {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.bios-prompt-input {
+    width: 100%;
+    padding: 3px 5px;
+    border: 0;
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+    background: #ffffff;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+.bios-prompt-footer {
+    padding: 8px 12px 10px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+.bios-prompt-btn {
+    min-width: 72px;
+    padding: 4px 12px;
+    background: #d4d0c8;
+    color: #000000;
+    border: 0;
+    box-shadow:
+        inset 1px 1px 0 #ffffff,
+        inset -1px -1px 0 #404040,
+        inset 2px 2px 0 #dfdfdf,
+        inset -2px -2px 0 #808080;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+}
+.bios-prompt-btn:active {
+    box-shadow:
+        inset 1px 1px 0 #404040,
+        inset -1px -1px 0 #ffffff,
+        inset 2px 2px 0 #808080,
+        inset -2px -2px 0 #dfdfdf;
+}
+
+/* Mobile reflow for the flash overlay, the primary UX surface. */
+@media (max-width: 720px) {
+    .coreboot-flash .cb-shell {
+        width: 100vw;
+        max-height: 100vh;
+        height: 100vh;
+        border-width: 0;
+    }
+    .coreboot-flash .cb-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(180px, 40vh) minmax(0, 1fr);
+        height: auto;
+        flex: 1;
+    }
+    .coreboot-flash .cb-arch-pane {
+        border-right: 0;
+        border-bottom: 1px solid #c0a060;
+    }
+    .coreboot-splash .cb-splash-banner {
+        font-size: 40px;
+    }
+}
+
+/* ============================================================
+   STOP-screen (BSOD) overlay used when an unbootable BIOS
+   change is saved, currently APIC Mode = Disabled. Authentic
+   Win32 BSOD palette: blue background, monospace, white text,
+   no chrome. Click anywhere to return to BIOS Setup. The
+   markup is .srv2k3-bsod > .srv2k3-bsod-inner > .srv2k3-bsod-line*.
+   Used both by the BIOS effect dispatcher and by the safe-off
+   Power On handler.
+   ============================================================ */
+.srv2k3-bsod {
+    position: fixed;
+    inset: 0;
+    background: #0028a8;
+    color: #ffffff;
+    z-index: 100000;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 13px;
+    padding: 24px 28px;
+    overflow: auto;
+    cursor: pointer;
+}
+.srv2k3-bsod-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    line-height: 1.45;
+}
+.srv2k3-bsod-line {
+    color: #ffffff;
+    white-space: pre-wrap;
+}
+
+/* ============================================================
+   WATERBOARD CONSOLE SATIRE
+   Owned by js/srv2003/srv2003-waterboard.js. Three layers: the
+   picker (post-coreboot chooser), the install animation
+   (~6 second simulated payload flash), and the OS shells with
+   game library + game frames + W4 friction dialogs. Aesthetic
+   leans on real console UIs: dark backgrounds with strong
+   accent gradients, oversized typography, full-bleed game
+   tiles, a hero feature on the home screen, a sleek HUD bar
+   with online state and a live clock. W3 reads as desaturated
+   retro, W4 as over-saturated marketing-deck.
+   ============================================================ */
+.wb-root {
+    position: fixed;
+    inset: 0;
+    background: #050508;
+    color: #e8e8f0;
+    z-index: 99800;
+    font-family: "Segoe UI", "Tahoma", system-ui, sans-serif;
+    overflow: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- BRAND MARKS (stacked WB + number) ---------- */
+.wb-brand-mark {
+    width: 64px;
+    height: 64px;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    font-style: italic;
+    font-weight: 800;
+    border: 2px solid currentColor;
+    border-radius: 6px;
+    flex: 0 0 64px;
+    padding: 6px 0 4px;
+    box-sizing: border-box;
+}
+.wb-brand-mark .wb-brand-wb {
+    font-size: 22px;
+    letter-spacing: 0.04em;
+}
+.wb-brand-mark .wb-brand-num {
+    font-size: 16px;
+    margin-top: 1px;
+    opacity: 0.85;
+}
+.wb-brand-mini {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    border-width: 1.5px;
+    border-radius: 4px;
+    padding: 3px 0 2px;
+}
+.wb-brand-mini .wb-brand-wb { font-size: 12px; }
+.wb-brand-mini .wb-brand-num { font-size: 9px; margin-top: 0; }
+
+.wb-brand-w3 {
+    background: linear-gradient(160deg, #1a3a5a 0%, #0a1a2a 100%);
+    color: #a0d0ff;
+    border-color: #6090c0;
+}
+.wb-brand-w4 {
+    background: linear-gradient(160deg, #2a1a4a 0%, #0a0a18 100%);
+    color: #ffd34d;
+    border-color: #ffd34d;
+    box-shadow: 0 0 12px rgba(255, 211, 77, 0.3);
+}
+
+/* ---------- PICKER ---------- */
+.wb-picker {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 24px 32px;
+}
+.wb-picker-header {
+    text-align: center;
+    margin-bottom: 36px;
+}
+.wb-picker-title {
+    font-size: 36px;
+    font-weight: 200;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+}
+.wb-picker-title::before {
+    content: "// ";
+    color: #80df80;
+    font-family: "Lucida Console", monospace;
+    font-size: 28px;
+}
+.wb-picker-sub {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #8090a0;
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.55;
+}
+.wb-picker-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+.wb-card {
+    background: #0e0e18;
+    border: 1px solid #202030;
+    border-radius: 6px;
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+.wb-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.04), transparent 50%);
+    pointer-events: none;
+}
+.wb-card:hover {
+    transform: translateY(-3px);
+}
+.wb-card-w3 {
+    border-top: 4px solid #6090c0;
+}
+.wb-card-w3:hover {
+    border-color: #6090c0;
+    box-shadow: 0 0 28px rgba(96, 144, 192, 0.3);
+}
+.wb-card-w4 {
+    border-top: 4px solid #ffd34d;
+}
+.wb-card-w4:hover {
+    border-color: #ffd34d;
+    box-shadow: 0 0 28px rgba(255, 211, 77, 0.3);
+}
+.wb-card-brand {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+.wb-brand-name {
+    font-size: 26px;
+    font-weight: 300;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+    flex: 1;
+}
+.wb-brand-tag {
+    width: 100%;
+    margin-top: 4px;
+    font-size: 12.5px;
+    color: #8090a0;
+    flex-basis: 100%;
+    line-height: 1.5;
+}
+.wb-card-body { flex: 1; }
+.wb-card-section-title {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #c0a060;
+    margin: 18px 0 8px;
+    font-weight: 700;
+}
+.wb-card-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.55;
+}
+.wb-card-list li {
+    padding: 5px 0 5px 22px;
+    position: relative;
+    color: #d0d0d8;
+}
+.wb-card-list li::before {
+    position: absolute;
+    left: 4px;
+    top: 5px;
+    font-weight: 700;
+    font-family: "Lucida Console", monospace;
+}
+.wb-good li::before { content: "+"; color: #80df80; }
+.wb-meh  li::before { content: "~"; color: #c0a060; }
+.wb-bad  li::before { content: "x"; color: #df6060; }
+.wb-card-btn {
+    margin-top: 20px;
+    padding: 12px 16px;
+    background: #ffd34d;
+    color: #1a1410;
+    border: 0;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    transition: background 120ms;
+}
+.wb-card-btn:hover { background: #ffe082; }
+.wb-card-w3 .wb-card-btn {
+    background: #6090c0;
+    color: #ffffff;
+}
+.wb-card-w3 .wb-card-btn:hover { background: #80a8d0; }
+.wb-picker-footer {
+    margin-top: 28px;
+    padding-top: 18px;
+    border-top: 1px solid #202030;
+    text-align: center;
+    font-size: 11px;
+    color: #606070;
+    letter-spacing: 0.04em;
+}
+
+/* ---------- INSTALL ANIMATION ---------- */
+.wb-install {
+    max-width: 760px;
+    margin: 80px auto 0;
+    padding: 24px;
+}
+.wb-install-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+.wb-install-title {
+    font-size: 22px;
+    font-weight: 200;
+    color: #ffffff;
+    letter-spacing: 0.02em;
+}
+.wb-install-progress-wrap {
+    height: 4px;
+    background: #14141e;
+    border: 0;
+    overflow: hidden;
+    margin-bottom: 18px;
+    border-radius: 2px;
+}
+.wb-install-progress {
+    height: 100%;
+    width: 0;
+    background: linear-gradient(90deg, #6090c0, #80dfff);
+    transition: width 200ms linear;
+}
+.wb-install-log {
+    background: #000000;
+    color: #80df80;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 12px;
+    padding: 14px 16px;
+    height: 320px;
+    overflow: auto;
+    border: 1px solid #202030;
+    line-height: 1.5;
+    border-radius: 3px;
+}
+.wb-install-line { white-space: pre-wrap; }
+
+/* ---------- OS SHELLS (W3 / W4) ---------- */
+.wb-shell {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+.wb-shell-w3 {
+    background:
+        radial-gradient(ellipse at 20% 0%, rgba(96,144,192,0.12), transparent 60%),
+        radial-gradient(ellipse at 80% 100%, rgba(96,144,192,0.06), transparent 60%),
+        #0a1828;
+}
+.wb-shell-w4 {
+    background:
+        radial-gradient(ellipse at 0% 0%, rgba(255,211,77,0.08), transparent 50%),
+        radial-gradient(ellipse at 100% 100%, rgba(255,211,77,0.04), transparent 60%),
+        #06060e;
+}
+
+/* HUD-style top bar */
+.wb-statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 24px;
+    border-bottom: 1px solid #1a1a28;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(10px);
+}
+.wb-statusbar-left, .wb-statusbar-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+.wb-statusbar-name {
+    font-weight: 300;
+    color: #ffffff;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+    font-style: italic;
+}
+.wb-status-pill {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #c0c0d0;
+    padding: 4px 12px;
+    border-radius: 14px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
+.wb-pill-on  {
+    background: rgba(128, 223, 128, 0.15);
+    border-color: rgba(128, 223, 128, 0.5);
+    color: #80df80;
+}
+.wb-pill-off {
+    background: rgba(223, 96, 96, 0.15);
+    border-color: rgba(223, 96, 96, 0.5);
+    color: #df8080;
+}
+.wb-status-clock {
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    color: #ffffff;
+    font-weight: 300;
+    letter-spacing: 0.02em;
+}
+
+/* W4 nag banner */
+.wb-nag-banner {
+    background: linear-gradient(90deg, rgba(255,211,77,0.12), rgba(255,211,77,0.02));
+    border-bottom: 1px solid rgba(255,211,77,0.4);
+    color: #ffd34d;
+    padding: 10px 24px;
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+.wb-nag-cta {
+    background: #ffd34d;
+    color: #1a1410;
+    border: 0;
+    padding: 6px 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 3px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.wb-nag-cta:hover { background: #ffe082; }
+
+/* Hero featured-game banner above the library */
+.wb-hero {
+    position: relative;
+    margin: 24px auto 0;
+    max-width: 1100px;
+    padding: 0 24px;
+    box-sizing: border-box;
+}
+.wb-hero-card {
+    position: relative;
+    height: 240px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0a3a4a 0%, #1a1a3a 100%);
+    border: 1px solid #1a1a28;
+    display: flex;
+    align-items: flex-end;
+    padding: 24px 28px;
+    cursor: pointer;
+    transition: transform 160ms;
+}
+.wb-hero-card:hover { transform: translateY(-2px); }
+.wb-hero-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 70% 50%, rgba(128,223,255,0.18), transparent 60%);
+    pointer-events: none;
+}
+.wb-hero-meta { position: relative; z-index: 1; max-width: 60%; }
+.wb-hero-tag {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #80dfff;
+    margin-bottom: 8px;
+    font-weight: 700;
+}
+.wb-hero-title {
+    font-size: 32px;
+    font-weight: 200;
+    color: #ffffff;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
+    margin-bottom: 6px;
+}
+.wb-hero-sub {
+    font-size: 13px;
+    color: #c0c0d0;
+    line-height: 1.5;
+}
+.wb-hero-art {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 50%;
+    z-index: 0;
+}
+.wb-hero-art svg { width: 100%; height: 100%; display: block; opacity: 0.85; }
+
+/* Library + tiles */
+.wb-library {
+    flex: 1;
+    padding: 28px 24px 32px;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+.wb-library-title {
+    font-size: 12px;
+    color: #8090a0;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+.wb-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 18px;
+}
+.wb-tile {
+    background: #0e0e18;
+    border: 1px solid #202030;
+    cursor: pointer;
+    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+    overflow: hidden;
+    border-radius: 6px;
+    position: relative;
+}
+.wb-tile:hover {
+    transform: scale(1.03);
+    border-color: #80dfff;
+    box-shadow: 0 4px 24px rgba(128, 223, 255, 0.2);
+}
+.wb-tile-art {
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+}
+.wb-tile-art::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6));
+}
+.wb-tile-art svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+.wb-tile-title {
+    padding: 12px 14px 4px;
+    font-weight: 600;
+    color: #ffffff;
+    font-size: 15px;
+    letter-spacing: 0.01em;
+}
+.wb-tile-sub {
+    padding: 0 14px 14px;
+    color: #8090a0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+}
+.wb-footer {
+    padding: 18px 24px;
+    border-top: 1px solid #1a1a28;
+    color: #606070;
+    font-size: 11px;
+    text-align: center;
+    letter-spacing: 0.04em;
+}
+
+/* ---------- FRICTION DIALOGS (W4 only) ---------- */
+.wb-friction-bd {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(6px);
+    z-index: 99900;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+}
+.wb-friction {
+    background: #0e0e18;
+    border: 1px solid rgba(255,211,77,0.5);
+    color: #e8e8f0;
+    width: min(560px, 100%);
+    padding: 26px 28px;
+    font-family: inherit;
+    box-shadow: 0 0 40px rgba(255, 211, 77, 0.25);
+    border-radius: 6px;
+}
+.wb-friction-art {
+    text-align: center;
+    margin-bottom: 12px;
+}
+.wb-friction-art svg {
+    width: 88px;
+    height: 88px;
+}
+.wb-friction-title {
+    font-size: 22px;
+    font-weight: 300;
+    color: #ffd34d;
+    margin-bottom: 14px;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+.wb-friction-body {
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: #c0c0d0;
+}
+.wb-friction-body p { margin: 8px 0; }
+.wb-friction-body ul {
+    margin: 10px 0;
+    padding-left: 24px;
+}
+.wb-friction-body li { margin: 6px 0; }
+.wb-friction-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+.wb-btn {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.16);
+    color: #e8e8f0;
+    padding: 9px 16px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+.wb-btn:hover { background: rgba(255,255,255,0.12); border-color: #ffd34d; }
+.wb-btn-primary {
+    background: #ffd34d;
+    color: #1a1410;
+    border-color: #ffd34d;
+    font-weight: 700;
+}
+.wb-btn-primary:hover { background: #ffe082; }
+.wb-sub-tiers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin: 14px 0 6px;
+}
+.wb-sub-tier {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 12px 10px;
+    text-align: center;
+    font-size: 11.5px;
+    color: #c0c0d0;
+    border-radius: 4px;
+    line-height: 1.5;
+}
+
+/* ---------- GAME FRAMES ---------- */
+.wb-game-bd {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.94);
+    z-index: 99950;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+.wb-game-frame {
+    background: #0a0a14;
+    border: 1px solid rgba(255,255,255,0.16);
+    border-radius: 4px;
+    width: auto;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.wb-game-titlebar {
+    display: flex;
+    align-items: center;
+    background: rgba(255,255,255,0.04);
+    color: #ffffff;
+    padding: 8px 8px 8px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.wb-game-title {
+    flex: 1;
+    font-weight: 300;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+}
+.wb-game-close {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+    border: 1px solid rgba(255,255,255,0.2);
+    width: 24px;
+    height: 22px;
+    line-height: 1;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    border-radius: 2px;
+}
+.wb-game-close:hover { background: rgba(223, 96, 96, 0.4); border-color: #df6060; }
+.wb-game-area {
+    background: #000000;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+}
+.wb-game-hint {
+    background: rgba(0,0,0,0.45);
+    color: #8090a0;
+    padding: 10px 16px;
+    font-size: 11.5px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    line-height: 1.5;
+}
+.wb-canvas {
+    display: block;
+    image-rendering: pixelated;
+}
+
+/* Tank stub (online-only fake) */
+.wb-tank-stub {
+    color: #d0d0d8;
+    padding: 36px 32px;
+    max-width: 540px;
+}
+.wb-tank-status {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+.wb-tank-spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid rgba(255,255,255,0.1);
+    border-top-color: #80dfff;
+    border-radius: 50%;
+    animation: wb-spin 1s linear infinite;
+    flex: 0 0 36px;
+}
+@keyframes wb-spin {
+    to { transform: rotate(360deg); }
+}
+.wb-tank-meta { font-size: 13px; line-height: 1.6; color: #c0c0d0; }
+.wb-tank-meta strong { color: #ffd34d; }
+
+/* ---------- MOBILE REFLOW ---------- */
+@media (max-width: 720px) {
+    .wb-picker-cards { grid-template-columns: 1fr; }
+    .wb-tiles { grid-template-columns: 1fr 1fr; gap: 12px; }
+    .wb-sub-tiers { grid-template-columns: 1fr; }
+    .wb-friction-actions { justify-content: stretch; }
+    .wb-friction-actions .wb-btn { flex: 1; }
+    .wb-hero-card { height: 200px; padding: 20px; }
+    .wb-hero-title { font-size: 24px; }
+    .wb-hero-meta { max-width: 100%; }
+    .wb-hero-art { display: none; }
+    .wb-statusbar { padding: 10px 16px; gap: 8px; }
+    .wb-statusbar-name { font-size: 14px; }
+    .wb-status-clock { display: none; }
 }

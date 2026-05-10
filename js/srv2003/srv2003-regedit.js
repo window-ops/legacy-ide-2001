@@ -6,19 +6,19 @@
 
    FUNCTIONAL KEYS (user can change values, system observes them):
 
-   HKLM\SOFTWARE\GDX\AllowTransitional (DWORD)
+   HKLM\\SOFTWARE\\GDX\\AllowTransitional (DWORD)
      0 = strict programa enforcement (default)
      1 = alternate bypass route, even when the backend is up, the
          lint runs in non-blocking mode. Same effect as setting
          curriculumNonBlocking via Dr. Watson, but persisted in
          the registry so it survives reloads.
 
-   HKLM\SYSTEM\CurrentControlSet\Services\CurriculumReporting\Start (DWORD)
+   HKLM\\SYSTEM\\CurrentControlSet\\Services\\CurriculumReporting\\Start (DWORD)
      2 = Auto (service running, backend reachable when network up)
      4 = Disabled (service stopped, backend unreachable)
      Mirrors the Curriculum Reporting site state in IIS.
 
-   HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\EnableSecurityFilters (DWORD)
+   HKLM\\SYSTEM\\CurrentControlSet\\Services\\Tcpip\\Parameters\\EnableSecurityFilters (DWORD)
      Cosmetic. Demonstrates the UI works on arbitrary keys.
 
    Storage key: 'ide.srv2k3.registry.v1'
@@ -399,6 +399,24 @@
     }
     function save(tree) {
         try { sessionStorage.setItem(STORAGE_KEY, JSON.stringify(tree)); } catch (e) {}
+        // Honor BIOS Security > Boot Sector Virus Check. With it
+        // Enabled, a balloon fires every time the registry hive is
+        // written; the satire frames it as a false-positive boot-
+        // sector heuristic that fires on any HKLM modification.
+        // This is throttled by a session flag so the balloon shows
+        // only once per BIOS Setup session.
+        try {
+            var bios = (typeof window.STATE !== 'undefined' && window.STATE.bios) || {};
+            if (bios.virusCheck === 'Enabled' && !window.__regeditVirusWarned) {
+                window.__regeditVirusWarned = true;
+                if (typeof window.srv2k3Notify === 'function') {
+                    window.srv2k3Notify(
+                        'Modificare detectată în zona protejată a regiștrilor. Boot Sector Virus Check a înregistrat evenimentul (fals pozitiv tipic pe scrieri HKLM).',
+                        'Boot Sector Virus Check'
+                    );
+                }
+            }
+        } catch (e) {}
     }
     function clear() {
         try { sessionStorage.removeItem(STORAGE_KEY); } catch (e) {}

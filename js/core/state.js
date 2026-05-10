@@ -16,7 +16,13 @@ var STATE = {
         strict: true, romanian: true, inlineStyle: false,
         highlight: false, autoClose: false, osBanner: true, dark: false,
         antiHang: true, allowTransitional: true,
-        startMenuStyle: 'modern'
+        startMenuStyle: 'modern',
+        // 'bar' shows close affordance only in the existing dialog
+        // footer (Cancel/OK/Close buttons). 'frame' additionally
+        // injects a small [X] in every Server 2003 dialog title bar.
+        // Default is 'bar' since most Win32 dialogs already have
+        // footer buttons and the title bar X is a compact addition.
+        dialogCloseStyle: 'bar'
     },
     os: 'unknown',
     bannerDismissed: false,
@@ -550,6 +556,17 @@ var ES3_PROTOTYPE_METHODS = {
         var sms = sessionStorage.getItem('ide.srv2k3.startMenuStyle.v1');
         if (sms === 'classic' || sms === 'modern') {
             STATE.prefs.startMenuStyle = sms;
+        }
+    } catch (e) {}
+    // Dialog close button placement: 'bar' (footer only, default)
+    // or 'frame' (also inject [X] in every title bar). Read by
+    // srv2003-titlebar-x.js at observe-time so the choice takes
+    // effect on the next dialog opened. Properties dialog also
+    // re-applies retroactively on already-open dialogs.
+    try {
+        var dcs = sessionStorage.getItem('ide.srv2k3.dialogCloseStyle.v1');
+        if (dcs === 'bar' || dcs === 'frame') {
+            STATE.prefs.dialogCloseStyle = dcs;
         }
     } catch (e) {}
 })();

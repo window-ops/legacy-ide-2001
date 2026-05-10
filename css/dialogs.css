@@ -197,6 +197,19 @@
 
 .about-title-bar { font-weight: 700; font-size: 14px; }
 
+/* The About dialog\'s header buttons (back arrow + close X) are
+   slightly larger than the default .hb-btn so they read clearly
+   against the centered, larger title text. The icon SVG inside
+   scales up to match. */
+.about-dialog .dialog-header .hb-btn {
+    width: 38px;
+    height: 38px;
+}
+.about-dialog .dialog-header .hb-btn svg {
+    width: 19px;
+    height: 19px;
+}
+
 /* Identity block: app icon, name, developer, version (centered) */
 .about-identity {
     display: flex;
