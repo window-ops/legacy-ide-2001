@@ -4334,22 +4334,27 @@ body.srv2003-desktop .dialog-footer {
     overflow: hidden;
 }
 .coreboot-flash .cb-titlebar {
-    background: #000000;
-    color: #c0c0c0;
-    padding: 6px 14px;
-    border-bottom: 1px solid #404040;
-    font-weight: 400;
-    font-size: 12px;
-    letter-spacing: 0.02em;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    padding: 8px 16px;
+    border-bottom: 2px solid #404040;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
     display: flex;
     align-items: center;
     gap: 12px;
+    font-family: "Lucida Console", "Consolas", monospace;
 }
 .coreboot-flash .cb-titlebar::before {
-    content: ">";
-    color: #80df80;
-    font-weight: 700;
+    content: "";
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    background: #80df80;
+    border-radius: 50%;
+    box-shadow: 0 0 6px #80df80;
 }
 .coreboot-flash .cb-body {
     display: grid;
@@ -5156,19 +5161,19 @@ body.srv2003-desktop .dialog-footer {
     flex: 1;
     display: flex;
     flex-direction: column;
-    padding: 60px 28px 28px 28px;
+    padding: 80px 56px 40px 56px;
     overflow: hidden;
 }
 .wb4-row {
     display: flex;
-    gap: 14px;
+    gap: 22px;
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 16px;
 }
 .wb4-tile {
-    width: 132px;
-    height: 132px;
+    width: 200px;
+    height: 200px;
     flex-shrink: 0;
     background: rgba(0, 0, 0, 0.25);
     border: 1px solid rgba(255, 255, 255, 0.10);
@@ -5185,24 +5190,27 @@ body.srv2003-desktop .dialog-footer {
 .wb4-tile-active {
     transform: scale(1.06);
     box-shadow:
-        0 0 0 3px #5ad8ff,
-        0 0 22px 4px rgba(90, 216, 255, 0.55);
+        0 0 0 4px #5ad8ff,
+        0 0 32px 6px rgba(90, 216, 255, 0.55);
     z-index: 3;
 }
 .wb4-tile-system .wb4-art-system { width: 100%; height: 100%; }
 .wb4-active-meta {
-    margin-top: 16px;
+    margin-top: 26px;
     color: #ffffff;
 }
 .wb4-active-title {
-    font-size: 28px;
+    font-size: 38px;
     font-weight: 300;
     letter-spacing: 0.5px;
+    line-height: 1.15;
 }
 .wb4-active-sub {
-    font-size: 13px;
+    font-size: 16px;
     color: rgba(255, 255, 255, 0.65);
-    margin-top: 4px;
+    margin-top: 6px;
+    max-width: 720px;
+    line-height: 1.5;
 }
 
 /* ------------------------------------------------------------
@@ -5278,22 +5286,22 @@ body.srv2003-desktop .dialog-footer {
 }
 .wb5-content {
     flex: 1;
-    padding: 16px 24px 24px 24px;
+    padding: 28px 48px 32px 48px;
     overflow: auto;
 }
 .wb5-tile-row {
     display: flex;
-    gap: 10px;
+    gap: 16px;
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 8px;
 }
 .wb5-tile {
-    width: 88px;
-    height: 88px;
+    width: 140px;
+    height: 140px;
     flex-shrink: 0;
     background: rgba(0, 0, 0, 0.10);
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     cursor: pointer;
     position: relative;
@@ -5302,54 +5310,55 @@ body.srv2003-desktop .dialog-footer {
 .wb5-tile-art {
     width: 100%;
     height: 100%;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     position: relative;
 }
 .wb5-tile-art svg { display: block; width: 100%; height: 100%; }
 .wb5-tile-active {
-    transform: scale(1.05);
+    transform: scale(1.06);
     box-shadow:
-        0 0 0 2px rgba(255, 255, 255, 0.85),
-        0 4px 18px rgba(0, 0, 0, 0.35);
+        0 0 0 3px rgba(255, 255, 255, 0.92),
+        0 8px 28px rgba(0, 0, 0, 0.35);
     z-index: 3;
 }
 .wb5-tile-system .wb5-art-system { width: 100%; height: 100%; }
 .wb5-region-lock {
     position: absolute;
-    top: 4px;
-    right: 4px;
+    top: 6px;
+    right: 6px;
     background: rgba(0, 0, 0, 0.75);
     color: #ffffff;
-    padding: 2px 6px;
+    padding: 3px 8px;
     border-radius: 4px;
-    font-size: 11px;
+    font-size: 12px;
     line-height: 1;
 }
 .wb5-tile-locked {
     opacity: 0.85;
 }
 .wb5-active-meta {
-    margin-top: 24px;
+    margin-top: 36px;
     color: #1a1a1a;
 }
 .wb5-active-tag {
-    font-size: 11px;
+    font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 1.5px;
     color: rgba(26, 26, 26, 0.65);
     font-weight: 600;
 }
 .wb5-active-title {
-    font-size: 26px;
+    font-size: 36px;
     font-weight: 400;
-    margin-top: 4px;
+    margin-top: 6px;
+    line-height: 1.15;
 }
 .wb5-active-sub {
-    font-size: 13px;
+    font-size: 15px;
     color: rgba(26, 26, 26, 0.65);
-    margin-top: 4px;
-    max-width: 640px;
+    margin-top: 6px;
+    max-width: 720px;
     line-height: 1.5;
 }
 
@@ -5787,11 +5796,198 @@ body.srv2003-desktop .dialog-footer {
 .wb-tank-meta strong { color: #ffd34d; }
 
 /* ------------------------------------------------------------
+   STAR GALAXY VII  (RPG combat arena)
+   This is the only game that lays out with HTML divs rather
+   than canvas (turn-based combat reads better as discrete UI
+   pieces than as a pixel-rendered scene). Three-column layout:
+   enemy portrait/bars on the left, scrolling combat log in the
+   middle, player portrait/bars + action buttons on the right.
+   The whole arena sits inside the standard .wb-game-frame.
+   ------------------------------------------------------------ */
+.rpg-arena {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 14px;
+    width: 100%;
+    max-width: 720px;
+    background: #0a0e1a;
+    color: #e8e8e8;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+}
+.rpg-side {
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid #2a3040;
+    background: linear-gradient(180deg, #15203a 0%, #0a1428 100%);
+    border-radius: 4px;
+}
+.rpg-side-enemy {
+    border-color: #5a2020;
+    background: linear-gradient(180deg, #2a1020 0%, #1a0810 100%);
+}
+.rpg-side-player {
+    border-color: #205a40;
+    background: linear-gradient(180deg, #102a1c 0%, #081810 100%);
+}
+.rpg-portrait {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 2px solid #2a3040;
+    background: #0a0e1a;
+    position: relative;
+}
+.rpg-portrait-enemy {
+    background:
+        radial-gradient(circle at 35% 35%, #df40a0 0%, #401050 60%, #100020 100%);
+    box-shadow: 0 0 18px rgba(223, 64, 160, 0.35);
+}
+.rpg-portrait-enemy::before {
+    content: "";
+    position: absolute;
+    left: 24px; top: 32px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #ffd34d;
+    box-shadow: 28px 0 #ffd34d;
+}
+.rpg-portrait-enemy::after {
+    content: "";
+    position: absolute;
+    left: 28px; bottom: 24px;
+    width: 36px; height: 6px;
+    border-radius: 6px;
+    background: #1a0010;
+}
+.rpg-portrait-player {
+    background:
+        radial-gradient(circle at 50% 35%, #d8b890 0%, #a87830 60%, #402810 100%);
+    box-shadow: 0 0 18px rgba(255, 211, 77, 0.30);
+}
+.rpg-portrait-player::before {
+    content: "";
+    position: absolute;
+    left: 32px; top: 32px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    box-shadow: 20px 0 #1a1a1a;
+}
+.rpg-portrait-player::after {
+    content: "";
+    position: absolute;
+    left: 36px; bottom: 28px;
+    width: 24px; height: 4px;
+    border-radius: 4px;
+    background: #5a2010;
+}
+.rpg-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+}
+.rpg-bars {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.rpg-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #a0b0c0;
+    font-family: "Lucida Console", monospace;
+}
+.rpg-bar > span:first-child {
+    width: 22px;
+    flex-shrink: 0;
+    color: #ffffff;
+    font-weight: 600;
+}
+.rpg-bar > span:last-child {
+    width: 56px;
+    flex-shrink: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.rpg-bar-track {
+    flex: 1;
+    height: 10px;
+    background: #050810;
+    border: 1px solid #2a3040;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.rpg-bar-fill {
+    height: 100%;
+    transition: width 200ms ease-out;
+}
+.rpg-bar-hp { background: linear-gradient(90deg, #df4040 0%, #ff8060 100%); }
+.rpg-bar-mp { background: linear-gradient(90deg, #4080df 0%, #60a8ff 100%); }
+.rpg-log {
+    padding: 12px;
+    background: #050810;
+    border: 1px solid #2a3040;
+    border-radius: 4px;
+    height: 260px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.rpg-log-line {
+    margin-bottom: 4px;
+    color: #c0c8d0;
+}
+.rpg-log-line:last-child { margin-bottom: 0; }
+.rpg-log-win {
+    color: #80df80;
+    font-weight: 600;
+}
+.rpg-log-lose {
+    color: #df6060;
+    font-weight: 600;
+}
+.rpg-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 4px;
+}
+.rpg-btn {
+    padding: 8px 10px;
+    background: #1a2a3a;
+    border: 1px solid #3a4050;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-align: left;
+}
+.rpg-btn:hover:not([disabled]) {
+    background: #2a3a4a;
+    border-color: #5a6a8a;
+    color: #ffffff;
+}
+.rpg-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------
    RESPONSIVE
    The console shells are designed for desktop-ish widths but
    should still be usable on a narrow viewport. Mostly: drop
-   the W3 system column, stack the W4 row tighter, shrink W5
-   tile sizes.
+   the W3 system column, scale down the W4 tile row, give the
+   W5 tiles a more reasonable mobile footprint, stack the RPG
+   arena vertically so portraits and the log all fit.
    ------------------------------------------------------------ */
 @media (max-width: 720px) {
     .wbp-inner { padding: 18px 14px; }
@@ -5803,18 +5999,52 @@ body.srv2003-desktop .dialog-footer {
         padding: 8px 0;
     }
     .wb3-columns { flex-direction: column; }
-    .wb4-content { padding: 28px 14px 14px 14px; }
-    .wb4-tile { width: 100px; height: 100px; }
-    .wb4-active-title { font-size: 22px; }
+    .wb4-content { padding: 28px 14px 18px 14px; }
+    .wb4-row { gap: 12px; }
+    .wb4-tile { width: 140px; height: 140px; }
+    .wb4-active-meta { margin-top: 18px; }
+    .wb4-active-title { font-size: 26px; }
+    .wb4-active-sub { font-size: 13px; }
     .wb4-topbar { padding: 0 14px; }
     .wb4-top-center { display: none; }
     .wb5-topbar { padding: 0 14px; }
-    .wb5-content { padding: 12px 14px; }
-    .wb5-tile { width: 70px; height: 70px; }
-    .wb5-active-title { font-size: 20px; }
+    .wb5-content { padding: 16px 14px; }
+    .wb5-tile-row { gap: 10px; }
+    .wb5-tile { width: 110px; height: 110px; }
+    .wb5-active-meta { margin-top: 20px; }
+    .wb5-active-title { font-size: 24px; }
+    .wb5-active-sub { font-size: 13px; }
     .wb-friction-actions .wb-btn { flex: 1; }
     .wb-game-bd { padding: 12px; }
     .wb-about-body { padding: 14px 16px; }
+    /* RPG arena drops from 3 columns to a stacked layout: log
+       comes last so the action buttons stay near the bottom of
+       the viewport where the user's thumb can reach them. */
+    .rpg-arena {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .rpg-side {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+    }
+    .rpg-portrait { width: 64px; height: 64px; flex-shrink: 0; }
+    .rpg-portrait-enemy::before { left: 16px; top: 22px; width: 8px; height: 8px; box-shadow: 18px 0 #ffd34d; }
+    .rpg-portrait-enemy::after { left: 18px; bottom: 16px; width: 24px; height: 4px; }
+    .rpg-portrait-player::before { left: 20px; top: 22px; box-shadow: 14px 0 #1a1a1a; }
+    .rpg-portrait-player::after { left: 22px; bottom: 18px; width: 18px; }
+    .rpg-name { text-align: left; flex-shrink: 0; min-width: 88px; }
+    .rpg-bars { flex: 1; }
+    .rpg-log { height: 180px; }
+    .rpg-side-player {
+        flex-wrap: wrap;
+    }
+    .rpg-actions {
+        order: 3;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
 }
 
 /* When the coreboot flash sequence is running, every other surface
@@ -5824,38 +6054,6 @@ body.srv2003-desktop .dialog-footer {
    (.coreboot-flash) is exempt. */
 body.coreboot-flashing > *:not(.coreboot-flash):not(script):not(style) {
     display: none !important;
-}
-
-/* Post-flash confirmation screen: styled like the existing
-   srv2k3-shut-screen safe-off, but without the F12 Reset button
-   and with text framed as a flash-commit confirmation. Lives
-   inside the .coreboot-flash root so it inherits the black
-   background; only the layout differs. */
-.coreboot-flash .cb-confirm {
-    position: fixed;
-    inset: 0;
-    background: #000000;
-    color: #d8d8d8;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 28px;
-    padding: 32px;
-    text-align: center;
-}
-.coreboot-flash .cb-confirm-text {
-    max-width: 640px;
-    font-family: "Tahoma", "Segoe UI", sans-serif;
-    font-size: 14px;
-    line-height: 1.6;
-    color: #e8e8e8;
-}
-.coreboot-flash .cb-confirm-controls {
-    display: flex;
-    gap: 14px;
-    flex-wrap: wrap;
-    justify-content: center;
 }
 
 /* Avoid widow words: a single dangling word on the last line
@@ -5875,7 +6073,6 @@ body.coreboot-flashing > *:not(.coreboot-flash):not(script):not(style) {
 .wb5-active-sub,
 .wb4-active-sub,
 .wb3-game-sub,
-.wb-game-hint,
-.cb-confirm-text {
+.wb-game-hint {
     text-wrap: pretty;
 }

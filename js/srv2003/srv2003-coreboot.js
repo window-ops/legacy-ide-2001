@@ -287,7 +287,7 @@
       root.innerHTML =
         '<div class="cb-shell">' +
         '<div class="cb-titlebar">' +
-        "gdx-net.local : remote-flash 0.4 : tty0" +
+        "GDX-APPLIANCE-A04 / FLASH FIRMWARE / coreboot 4.22-gdx" +
         "</div>" +
         '<div class="cb-body">' +
         '<div class="cb-pane cb-arch-pane" id="cbArchPane">' +
@@ -688,48 +688,12 @@
       }
       next();
       function finish() {
-        // After the SeaBIOS POST animation, present a confirmation
-        // screen styled like the safe-off screen but ONLY with
-        // Power On + Cancel (no Reset). Powering on commits the
-        // flash and hands off to the post-flash takeover. Cancelling
-        // clears the flash flag, restores BIOS settings to factory
-        // defaults, and reloads, returning the user to the original
-        // Server 2003 environment as if the flash never happened.
-        renderFlashConfirm();
-      }
-
-      function renderFlashConfirm() {
-        root.innerHTML =
-          '<div class="cb-confirm">' +
-          '<div class="cb-confirm-text">' +
-          'Payload-ul nou este pregătit. Confirmați pornirea pentru a încărca noul firmware, sau anulați pentru a restaura BIOS-ul la setările din fabrică.' +
-          '</div>' +
-          '<div class="cb-confirm-controls">' +
-          '<button class="srv2k3-bios-btn" id="cbConfirmPower"><span class="srv2k3-bios-btn-key">F1</span><span class="srv2k3-bios-btn-label">Power On</span></button>' +
-          '<button class="srv2k3-bios-btn" id="cbConfirmCancel"><span class="srv2k3-bios-btn-key">Esc</span><span class="srv2k3-bios-btn-label">Cancel</span></button>' +
-          "</div>" +
-          "</div>";
-        var powerBtn = document.getElementById("cbConfirmPower");
-        var cancelBtn = document.getElementById("cbConfirmCancel");
-        powerBtn.addEventListener("click", confirmPowerOn);
-        cancelBtn.addEventListener("click", confirmCancel);
-        function onKey(e) {
-          if (!document.getElementById("cbConfirmPower")) {
-            document.removeEventListener("keydown", onKey, true);
-            return;
-          }
-          if (e.key === "F1") {
-            e.preventDefault();
-            confirmPowerOn();
-          } else if (e.key === "Escape") {
-            e.preventDefault();
-            confirmCancel();
-          }
-        }
-        document.addEventListener("keydown", onKey, true);
-      }
-      function confirmPowerOn() {
-        // Persist the flash and hand off to the takeover.
+        // After SeaBIOS finishes POST, commit the flash and hand
+        // off directly to the post-flash takeover. We deliberately
+        // do NOT insert a safe-off-style confirmation screen here:
+        // the flash is complete, there is no Phoenix BIOS to
+        // return to, and the new firmware boots straight into the
+        // payload selector. The takeover is mandatory.
         markFlashed();
         if (typeof window.SRV2K3_COREBOOT_TAKEOVER === "function") {
           try {
@@ -738,21 +702,6 @@
           } catch (e) {}
         }
         renderPostFlashSplash();
-      }
-      function confirmCancel() {
-        // Restore BIOS to factory defaults and revert to the
-        // original Server 2003 environment. We clear the saved
-        // BIOS overrides so the next boot sees the factory
-        // configuration, and explicitly DO NOT call markFlashed()
-        // so the takeover never runs.
-        try {
-          sessionStorage.removeItem("ide.bios.v1");
-          sessionStorage.removeItem("ide.coreboot.v1");
-        } catch (e) {}
-        document.body.classList.remove("coreboot-flashing");
-        // Reload the page to bring back the original chrome from
-        // a clean slate.
-        location.reload();
       }
     }
   }
