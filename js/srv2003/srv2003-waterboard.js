@@ -204,21 +204,30 @@
   // rendering. Idempotent and safe to call repeatedly.
   // ============================================================
   function teardownAll() {
-    document.body.classList.remove("srv2003-desktop");
-    document.body.classList.remove("srv2003-installing");
-    document.body.classList.remove("has-su-taskbar");
-    document.body.classList.remove("srv2003-min");
-    document.body.classList.remove("coreboot-flashing");
+    // Remove DOM elements FIRST. If we drop the
+    // `coreboot-flashing` body class before the safe-off
+    // screen (srv2k3ShutScreen) is gone, that screen briefly
+    // becomes visible between the flash overlay disappearing
+    // and the wb-root mounting — exactly the "It is now safe
+    // to turn off your computer" leak we want to suppress.
     var ids = [
       "srv2003Taskbar", "srv2003StartMenu", "srv2003Icons",
       "srv2003InstallRoot", "suTaskbar", "suStartMenu",
-      "biosSetup", "corebootFlashRoot", "corebootSplash", "wbRoot"
+      "biosSetup", "corebootFlashRoot", "corebootSplash", "wbRoot",
+      "srv2k3ShutScreen"
     ];
     ids.forEach(function (id) {
       var el = document.getElementById(id);
       if (el) el.remove();
     });
     document.querySelectorAll(".dialog-backdrop").forEach(function (el) { el.remove(); });
+    // Now safely drop the body classes that were hiding the
+    // background.
+    document.body.classList.remove("srv2003-desktop");
+    document.body.classList.remove("srv2003-installing");
+    document.body.classList.remove("has-su-taskbar");
+    document.body.classList.remove("srv2003-min");
+    document.body.classList.remove("coreboot-flashing");
   }
   function makeRoot() {
     var r = document.createElement("div");
@@ -303,7 +312,7 @@
       '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / coreboot 4.22-gdx / SELECTOR SISTEM</div>' +
       '<div class="wbp-inner">' +
       '<pre class="wbp-banner">' +
-      "Mainboard:         via/epia-ln, BIOS region 524288 bytes\n" +
+      "Mainboard:         via/epia-ln, BIOS region 8 MB (128 sectoare x 64 KB)\n" +
       "SPI write-protect: dezactivat (jumper J3)\n" +
       "Supervisor:        nu este setat\n" +
       brickLine + "\n\n" +
@@ -318,6 +327,9 @@
       '<div class="wbp-footer">' +
       "Selecția va instala Sistemul de Operare ales pe partiția /storage. Generațiile W4 și W5 ard variabila NVRAM la prima pornire." +
       "</div>" +
+      '<div class="wbp-keys">' +
+      '<button class="wbp-key-btn" data-wbp-action="setup"><kbd>F2</kbd> Setup coreboot</button>' +
+      "</div>" +
       "</div>" +
       "</div>";
 
@@ -328,6 +340,127 @@
         installVariant(v);
       });
     });
+    var setupBtn = root.querySelector('[data-wbp-action="setup"]');
+    if (setupBtn) {
+      setupBtn.addEventListener("click", showCorebootSetup);
+    }
+    // F2 keyboard shortcut, matches the on-screen hint.
+    function onPickerKey(e) {
+      if (!document.getElementById("wbRoot")) {
+        window.removeEventListener("keydown", onPickerKey, true);
+        return;
+      }
+      if (e.key === "F2") {
+        e.preventDefault();
+        showCorebootSetup();
+      }
+    }
+    window.addEventListener("keydown", onPickerKey, true);
+  }
+
+  // ============================================================
+  // COREBOOT SETUP UTILITY
+  // Simplified counterpart to the Phoenix BIOS Setup utility:
+  // single screen, no tabs, mostly read-only because coreboot
+  // bakes its choices in at compile time. The only user-editable
+  // entries are the boot timeout, the default-OS hint, and the
+  // POST verbosity. Everything else is exposed for inspection
+  // and marked as compiled-in. Reached from the picker via F2
+  // or the on-screen [F2] Setup button.
+  // ============================================================
+  var COREBOOT_SETUP_KEY = "ide.coreboot.setup.v1";
+  function loadCorebootSetup() {
+    try {
+      var raw = sessionStorage.getItem(COREBOOT_SETUP_KEY);
+      var s = raw ? JSON.parse(raw) : null;
+      return s || { defaultOs: "none", bootTimeout: "10", verbosePost: "off" };
+    } catch (e) { return { defaultOs: "none", bootTimeout: "10", verbosePost: "off" }; }
+  }
+  function saveCorebootSetup(s) {
+    try { sessionStorage.setItem(COREBOOT_SETUP_KEY, JSON.stringify(s)); } catch (e) {}
+  }
+  function showCorebootSetup() {
+    teardownAll();
+    var root = makeRoot();
+    var cfg = loadCorebootSetup();
+    var brick = getBrick();
+    var brickRow = brick
+      ? brick.toUpperCase() + " (arsă, permanentă)"
+      : "neatinsă";
+    root.innerHTML =
+      '<div class="wbp">' +
+      '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / coreboot 4.22-gdx / SETUP UTILITY</div>' +
+      '<div class="wbp-inner">' +
+      '<pre class="wbp-banner">' +
+      "coreboot 4.22-gdx, compilat 2024-09-12\n" +
+      "Mainboard: via/epia-ln, ROM: 8 MB (128 sectoare x 64 KB)\n" +
+      "Cele mai multe setări coreboot sunt compilate în firmware și NU pot fi modificate la rulare. Doar câteva opțiuni de boot pot fi schimbate aici." +
+      "</pre>" +
+      '<table class="wbs-table">' +
+      '<tr class="wbs-row-edit">' +
+      '<td class="wbs-label">Sistem implicit la pornire</td>' +
+      '<td class="wbs-value">' +
+      '<select id="wbsDefaultOs" class="wbs-select">' +
+      '<option value="none"' + (cfg.defaultOs === "none" ? " selected" : "") + '>(niciunul, afișează selectorul)</option>' +
+      '<option value="last"' + (cfg.defaultOs === "last" ? " selected" : "") + '>Ultimul OS pornit</option>' +
+      '<option value="w3"' + (cfg.defaultOs === "w3" ? " selected" : "") + '>Waterboard 3</option>' +
+      '<option value="w4"' + (cfg.defaultOs === "w4" ? " selected" : "") + '>Waterboard 4</option>' +
+      '<option value="w5"' + (cfg.defaultOs === "w5" ? " selected" : "") + '>Waterboard 5</option>' +
+      "</select>" +
+      "</td></tr>" +
+      '<tr class="wbs-row-edit">' +
+      '<td class="wbs-label">Timeout selector (secunde)</td>' +
+      '<td class="wbs-value">' +
+      '<select id="wbsTimeout" class="wbs-select">' +
+      '<option value="5"' + (cfg.bootTimeout === "5" ? " selected" : "") + '>5</option>' +
+      '<option value="10"' + (cfg.bootTimeout === "10" ? " selected" : "") + '>10</option>' +
+      '<option value="30"' + (cfg.bootTimeout === "30" ? " selected" : "") + '>30</option>' +
+      '<option value="0"' + (cfg.bootTimeout === "0" ? " selected" : "") + '>oprit</option>' +
+      "</select>" +
+      "</td></tr>" +
+      '<tr class="wbs-row-edit">' +
+      '<td class="wbs-label">POST detaliat</td>' +
+      '<td class="wbs-value">' +
+      '<select id="wbsVerbose" class="wbs-select">' +
+      '<option value="off"' + (cfg.verbosePost === "off" ? " selected" : "") + '>oprit</option>' +
+      '<option value="on"' + (cfg.verbosePost === "on" ? " selected" : "") + '>pornit</option>' +
+      "</select>" +
+      "</td></tr>" +
+      '<tr><td colspan="2" class="wbs-divider">Informații compilate (read-only)</td></tr>' +
+      '<tr><td class="wbs-label">Versiune coreboot</td><td class="wbs-value-ro">4.22-gdx</td></tr>' +
+      '<tr><td class="wbs-label">Payload</td><td class="wbs-value-ro">SeaBIOS 1.16.3 + wb-selector 0.4</td></tr>' +
+      '<tr><td class="wbs-label">Romstage</td><td class="wbs-value-ro">via/c7</td></tr>' +
+      '<tr><td class="wbs-label">Ramstage</td><td class="wbs-value-ro">x86_32</td></tr>' +
+      '<tr><td class="wbs-label">Verificare integritate</td><td class="wbs-value-ro">SHA-256 (compilată în firmware)</td></tr>' +
+      '<tr><td class="wbs-label">SPI write-protect</td><td class="wbs-value-ro">dezactivat (jumper J3)</td></tr>' +
+      '<tr><td class="wbs-label">Siguranță NVRAM</td><td class="wbs-value-ro">' + brickRow + "</td></tr>" +
+      "</table>" +
+      '<div class="wb-poff-actions" style="justify-content: space-between;">' +
+      '<button class="wbp-btn" id="wbsBack">Înapoi (Esc)</button>' +
+      '<button class="wbp-btn wbp-btn-default" id="wbsSave">Salvează și ieși (F10)</button>' +
+      "</div>" +
+      "</div>" +
+      "</div>";
+    function save() {
+      saveCorebootSetup({
+        defaultOs: document.getElementById("wbsDefaultOs").value,
+        bootTimeout: document.getElementById("wbsTimeout").value,
+        verbosePost: document.getElementById("wbsVerbose").value
+      });
+      showConsolePicker();
+    }
+    function back() { showConsolePicker(); }
+    document.getElementById("wbsBack").addEventListener("click", back);
+    document.getElementById("wbsSave").addEventListener("click", save);
+    function onKey(e) {
+      if (!document.getElementById("wbRoot")) {
+        window.removeEventListener("keydown", onKey, true);
+        return;
+      }
+      if (e.key === "Escape") { e.preventDefault(); back(); }
+      else if (e.key === "F10") { e.preventDefault(); save(); }
+    }
+    window.addEventListener("keydown", onKey, true);
   }
 
   // ============================================================
@@ -555,24 +688,20 @@
       // earlier triangle/info/friends/trophies/username were
       // decorative only (no behaviour); they have been removed
       // so the chrome only shows things the user can act on.
+      // The previous substrip with the WB Plus nag has been
+      // replaced with a small pill in the top right so the
+      // blue gradient isn't broken by a black band.
       '<div class="wb4-topbar">' +
       '<div class="wb4-top-left">' +
       '<span class="wb4-brand">WATERBOARD 4</span>' +
       "</div>" +
       '<div class="wb4-top-right">' +
+      (!subscribed
+        ? '<span class="wb4-sub-pill" data-wb-action="subscribe" title="Activează abonamentul WB Plus" tabindex="0" role="button">WB Plus inactiv</span>'
+        : '<span class="wb4-sub-pill wb4-sub-pill-active" title="WB Plus activ">WB Plus activ</span>') +
       '<span class="wb4-clock" id="wbClock">' + formatClock(new Date()) + "</span>" +
       "</div>" +
       "</div>" +
-      // Subtle subscription status pill — replaces the old
-      // big yellow nag banner. Just a small line under the
-      // top bar, not a screaming attention grab. Hidden once
-      // the user activates WB Plus.
-      (!subscribed
-        ? '<div class="wb4-substrip">' +
-          'WB Plus inactiv. Multiplayer indisponibil. ' +
-          '<a href="#" data-wb-action="subscribe">Activează abonamentul</a>' +
-          "</div>"
-        : "") +
       '<div class="wb4-content">' +
       '<div class="wb4-row" id="wb4Row">' +
       // System tile first (combined system menu)
@@ -859,57 +988,75 @@
 
   // ============================================================
   // ABOUT SECTION
-  // Each variant has its own About page with technical details
-  // AND a satirical commentary block. The commentary anchors
-  // the satire's third pillar: at school = curriculum lock,
-  // at home = console lock, ICE decides whether your
-  // purchase keeps working.
+  // Each variant has its own About page. Hardware specs are
+  // constant across all three variants since installing a
+  // different OS does not upgrade the chips: it's the same
+  // appliance underneath. Only the "Sistem instalat" section
+  // and the prose change per variant.
   // ============================================================
   function showAbout(variant) {
     var bd = document.createElement("div");
     bd.className = "wb-about-bd";
-    var content;
+    var hardwareTable =
+      '<div class="wb-about-section">' +
+      '<div class="wb-about-section-title">Hardware</div>' +
+      '<table class="wb-about-table">' +
+      '<tr><td>Model</td><td>GDX-APPLIANCE-A04 (VIA EPIA-LN)</td></tr>' +
+      '<tr><td>Service tag</td><td>GDX-CT-2003-A04</td></tr>' +
+      '<tr><td>CPU</td><td>VIA C7-D la 1,0 GHz (FSB 533 MHz)</td></tr>' +
+      '<tr><td>Cache</td><td>L1 128 KB (64 KB I + 64 KB D), L2 128 KB on-die</td></tr>' +
+      '<tr><td>Memorie totală</td><td>512 MB DDR1-400</td></tr>' +
+      '<tr><td>Memorie de bază</td><td>640 KB</td></tr>' +
+      '<tr><td>Memorie extinsă</td><td>523264 KB</td></tr>' +
+      '<tr><td>IDE Primary Master</td><td>GDX-IDE-FLASH 256 MB</td></tr>' +
+      '<tr><td>IDE Primary Slave</td><td>[ niciunul ]</td></tr>' +
+      '<tr><td>SATA Port 1 / 2</td><td>[ niciunul ] / [ niciunul ]</td></tr>' +
+      '<tr><td>USB</td><td>2 x USB 2.0 (EHCI)</td></tr>' +
+      '<tr><td>LAN</td><td>VIA VT6105M 10/100 Mbps</td></tr>' +
+      '<tr><td>Firmware</td><td>coreboot 4.22-gdx (înlocuiește PhoenixBIOS 4.06 Rev 1.04)</td></tr>' +
+      '<tr><td>BIOS region</td><td>8 MB (128 sectoare x 64 KB)</td></tr>' +
+      "</table>" +
+      '<p style="margin-top: 10px; font-size: 12px; color: #4a4a4a;">Aceste specificații sunt cele raportate de firmware-ul plăcii de bază. Instalarea unui alt sistem de operare nu modifică niciun component fizic al aparatului.</p>' +
+      "</div>";
+    var systemTable, prose;
     if (variant === "w3") {
-      content =
+      systemTable =
         '<div class="wb-about-section">' +
-        '<div class="wb-about-section-title">Specificații</div>' +
+        '<div class="wb-about-section-title">Sistem instalat</div>' +
         '<table class="wb-about-table">' +
-        '<tr><td>Model</td><td>Waterboard 3 SCPH-50004</td></tr>' +
-        '<tr><td>CPU</td><td>Emotion Engine la 294 MHz (emulat pe VIA C7)</td></tr>' +
-        '<tr><td>GPU</td><td>Graphics Synthesizer (emulat)</td></tr>' +
-        '<tr><td>Memorie</td><td>32 MB RDRAM (emulat în 256 MB DDR1)</td></tr>' +
-        '<tr><td>Stocare</td><td>240 MB pe partiția /storage</td></tr>' +
+        '<tr><td>Sistem de operare</td><td>Waterboard 3</td></tr>' +
         '<tr><td>Versiune</td><td>WB3-2.4.0 (2024)</td></tr>' +
         '<tr><td>Producător</td><td>ICE Legacy Series</td></tr>' +
         '<tr><td>Cont necesar</td><td>nu</td></tr>' +
         '<tr><td>Verificare disc</td><td>nu</td></tr>' +
         '<tr><td>Abonament</td><td>nu</td></tr>' +
         '<tr><td>Restricții regionale</td><td>nu</td></tr>' +
+        '<tr><td>Actualizări forțate</td><td>nu</td></tr>' +
         "</table>" +
-        "</div>" +
+        "</div>";
+      prose =
         '<div class="wb-about-section">' +
         '<div class="wb-about-section-title">Despre acest sistem</div>' +
         '<p>Waterboard 3 este o consolă din generația 2000. Cumpărați jocul, introduceți discul, îl jucați. Discul fizic ține locul licenței. Sistemul nu cere cont, nu cere abonament și nu necesită conexiune la internet pentru a porni jocurile.</p>' +
         '<p>Nu există servicii online proprii. Salvările stau pe cardurile de memorie locale. Jocurile rulează independent. Producătorul nu poate dezactiva sistemul după vânzare.</p>' +
         "</div>";
     } else if (variant === "w4") {
-      content =
+      systemTable =
         '<div class="wb-about-section">' +
-        '<div class="wb-about-section-title">Specificații</div>' +
+        '<div class="wb-about-section-title">Sistem instalat</div>' +
         '<table class="wb-about-table">' +
-        '<tr><td>Model</td><td>Waterboard 4 CUH-2216</td></tr>' +
-        '<tr><td>CPU</td><td>Jaguar 8-core la 1,6 GHz (emulat)</td></tr>' +
-        '<tr><td>GPU</td><td>Liverpool 1,84 TFLOPS (emulat)</td></tr>' +
-        '<tr><td>Memorie</td><td>8 GB GDDR5 (emulat în 256 MB DDR1)</td></tr>' +
-        '<tr><td>Stocare</td><td>500 GB / 240 MB pe partiția /storage</td></tr>' +
+        '<tr><td>Sistem de operare</td><td>Waterboard 4</td></tr>' +
         '<tr><td>Versiune</td><td>WB4-9.51.0 (2024)</td></tr>' +
         '<tr><td>Producător</td><td>Intercal Computer Entertainment</td></tr>' +
         '<tr><td>Cont necesar</td><td>recomandat</td></tr>' +
         '<tr><td>Verificare disc</td><td>la fiecare lansare</td></tr>' +
         '<tr><td>Abonament</td><td>WB Plus pentru multiplayer</td></tr>' +
         '<tr><td>Restricții regionale</td><td>pentru unele titluri</td></tr>' +
+        '<tr><td>Actualizări forțate</td><td>la cerere</td></tr>' +
+        '<tr><td>Siguranță NVRAM</td><td>arsă la instalare (anti-rollback)</td></tr>' +
         "</table>" +
-        "</div>" +
+        "</div>";
+      prose =
         '<div class="wb-about-section">' +
         '<div class="wb-about-section-title">Despre acest sistem</div>' +
         '<p>Waterboard 4 este o consolă de generație recentă. Jocurile pot fi cumpărate fizic sau digital și se instalează complet pe SSD-ul intern. La fiecare lansare unitatea verifică prezența discului original în slot. Fără disc, jocul nu pornește, chiar dacă fișierele de instalare sunt prezente.</p>' +
@@ -917,15 +1064,11 @@
         '<p>Contul ICE nu este obligatoriu, dar fără el sunt indisponibile: magazinul digital, salvările în cloud, multiplayer-ul, WB Plus. La prima pornire se afișează un mesaj care recomandă crearea contului.</p>' +
         "</div>";
     } else {
-      content =
+      systemTable =
         '<div class="wb-about-section">' +
-        '<div class="wb-about-section-title">Specificații</div>' +
+        '<div class="wb-about-section-title">Sistem instalat</div>' +
         '<table class="wb-about-table">' +
-        '<tr><td>Model</td><td>Waterboard 5 CFI-2016</td></tr>' +
-        '<tr><td>CPU</td><td>Zen 2 8-core la 3,5 GHz (emulat)</td></tr>' +
-        '<tr><td>GPU</td><td>RDNA 2 10,28 TFLOPS (emulat)</td></tr>' +
-        '<tr><td>Memorie</td><td>16 GB GDDR6 (emulat în 256 MB DDR1)</td></tr>' +
-        '<tr><td>Stocare</td><td>825 GB SSD / 240 MB pe partiția /storage</td></tr>' +
+        '<tr><td>Sistem de operare</td><td>Waterboard 5</td></tr>' +
         '<tr><td>Versiune</td><td>WB5-3.10 (2024)</td></tr>' +
         '<tr><td>Producător</td><td>Intercal Computer Entertainment</td></tr>' +
         '<tr><td>Cont necesar</td><td>obligatoriu</td></tr>' +
@@ -933,8 +1076,11 @@
         '<tr><td>Abonament</td><td>WB Plus pentru multiplayer și salvări cloud</td></tr>' +
         '<tr><td>Restricții regionale</td><td>132 țări blocate la lansare</td></tr>' +
         '<tr><td>Actualizări forțate</td><td>da, unele elimină funcții existente</td></tr>' +
+        '<tr><td>Siguranță NVRAM</td><td>arsă la instalare (anti-rollback)</td></tr>' +
+        '<tr><td>Regiune fixată</td><td>RO (arsă în NVRAM la instalare)</td></tr>' +
         "</table>" +
-        "</div>" +
+        "</div>";
+      prose =
         '<div class="wb-about-section">' +
         '<div class="wb-about-section-title">Despre acest sistem</div>' +
         '<p>Waterboard 5 este consola de generație curentă a ICE. Păstrează tot ce face Waterboard 4 (verificare disc, abonament pentru multiplayer) și adaugă mai multe restricții.</p>' +
@@ -943,6 +1089,7 @@
         '<p>Actualizările de firmware sunt obligatorii pentru menținerea accesului la serviciile online. Unele actualizări pot elimina funcții existente.</p>' +
         "</div>";
     }
+    var content = hardwareTable + systemTable + prose;
     bd.innerHTML =
       '<div class="wb-about">' +
       '<div class="wb-about-header">' +
@@ -1044,18 +1191,18 @@
     teardownAll();
     var root = makeRoot();
     root.innerHTML =
-      '<div class="wbp">' +
+      '<div class="wbp wbp-poff-shell">' +
       '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / OPRIT</div>' +
       '<div class="wbp-inner wb-poff">' +
-      '<pre class="wbp-banner">' +
-      "Aparatul este oprit. Sistemul de operare " + variantName(variant) + " nu rulează.\n" +
-      "Apăsați Pornire pentru a relansa sistemul." +
-      "</pre>" +
+      '<div class="wb-poff-card">' +
+      '<div class="wb-poff-title">Aparatul este oprit</div>' +
+      '<div class="wb-poff-sub">Sistemul de operare ' + variantName(variant) + ' nu rulează. Apăsați Pornire pentru a relansa sistemul.</div>' +
       '<div class="wb-poff-actions">' +
       '<button class="wbp-btn wbp-btn-default" id="wbPoffOn">Pornire</button>' +
       (variant === "w4" || variant === "w5"
         ? '<button class="wbp-btn" id="wbPoffReset">Reinstalează coreboot</button>'
         : "") +
+      "</div>" +
       "</div>" +
       "</div>" +
       "</div>";
@@ -1299,6 +1446,7 @@
       '<button class="wb-game-close" data-wb-game-close>X</button>' +
       "</div>" +
       '<div class="wb-game-area" id="wbGameArea"></div>' +
+      '<div class="wb-game-controls" id="wbGameControls"></div>' +
       '<div class="wb-game-hint" id="wbGameHint"></div>' +
       "</div>";
     document.body.appendChild(bd);
@@ -1306,6 +1454,78 @@
       bd.remove();
     });
     return bd;
+  }
+
+  // ============================================================
+  // ON-SCREEN TOUCH CONTROLS
+  // Each keyboard-based game (racer, lemur, puzzle, snake,
+  // pong) renders a small row of large tap targets below the
+  // canvas. They synthesize keydown/keyup events on `window`
+  // so the game's existing keyboard handlers run unchanged.
+  // Always visible: on desktop they double as a key-binding
+  // hint, on touch screens they make the games actually
+  // playable. Holding a button stays "pressed" until release.
+  // ============================================================
+  function makeTouchButton(label, key) {
+    var btn = document.createElement("button");
+    btn.className = "wb-touch-btn";
+    btn.innerHTML = label;
+    btn.setAttribute("type", "button");
+    var pressed = false;
+    function press(e) {
+      if (e) e.preventDefault();
+      if (pressed) return;
+      pressed = true;
+      btn.classList.add("wb-touch-btn-down");
+      try { window.dispatchEvent(new KeyboardEvent("keydown", { key: key, bubbles: true })); } catch (_) {}
+    }
+    function release(e) {
+      if (e) e.preventDefault();
+      if (!pressed) return;
+      pressed = false;
+      btn.classList.remove("wb-touch-btn-down");
+      try { window.dispatchEvent(new KeyboardEvent("keyup", { key: key, bubbles: true })); } catch (_) {}
+    }
+    btn.addEventListener("touchstart", press, { passive: false });
+    btn.addEventListener("touchend", release, { passive: false });
+    btn.addEventListener("touchcancel", release);
+    btn.addEventListener("mousedown", press);
+    btn.addEventListener("mouseup", release);
+    btn.addEventListener("mouseleave", release);
+    // Prevent the click event (fires after mousedown+mouseup on
+    // some browsers) from triggering a second synthetic press.
+    btn.addEventListener("click", function (e) { e.preventDefault(); });
+    return btn;
+  }
+  function addTouchControls(bd, layout) {
+    var controls = bd.querySelector("#wbGameControls");
+    if (!controls) return;
+    controls.innerHTML = "";
+    controls.setAttribute("data-layout", layout);
+    if (layout === "horizontal-2") {
+      controls.appendChild(makeTouchButton("◀", "ArrowLeft"));
+      controls.appendChild(makeTouchButton("▶", "ArrowRight"));
+    } else if (layout === "horizontal-3-jump") {
+      controls.appendChild(makeTouchButton("◀", "ArrowLeft"));
+      controls.appendChild(makeTouchButton("SARI", " "));
+      controls.appendChild(makeTouchButton("▶", "ArrowRight"));
+    } else if (layout === "dpad-undo-reset") {
+      controls.classList.add("wb-game-controls-grid");
+      controls.appendChild(makeTouchButton("U", "u"));
+      controls.appendChild(makeTouchButton("▲", "ArrowUp"));
+      controls.appendChild(makeTouchButton("R", "r"));
+      controls.appendChild(makeTouchButton("◀", "ArrowLeft"));
+      controls.appendChild(makeTouchButton("▼", "ArrowDown"));
+      controls.appendChild(makeTouchButton("▶", "ArrowRight"));
+    } else if (layout === "dpad-4") {
+      controls.classList.add("wb-game-controls-grid");
+      controls.appendChild(document.createElement("span"));
+      controls.appendChild(makeTouchButton("▲", "ArrowUp"));
+      controls.appendChild(document.createElement("span"));
+      controls.appendChild(makeTouchButton("◀", "ArrowLeft"));
+      controls.appendChild(makeTouchButton("▼", "ArrowDown"));
+      controls.appendChild(makeTouchButton("▶", "ArrowRight"));
+    }
   }
 
   function launchSnake(variant) {
@@ -1318,6 +1538,7 @@
     canvas.width = W * cell; canvas.height = H * cell;
     canvas.tabIndex = 0; canvas.style.outline = "none"; canvas.className = "wb-canvas";
     area.appendChild(canvas); canvas.focus();
+    addTouchControls(bd, "dpad-4");
     var ctx = canvas.getContext("2d");
     var snake = [{ x: 10, y: 8 }, { x: 9, y: 8 }, { x: 8, y: 8 }];
     var dir = { x: 1, y: 0 }, pendingDir = dir;
@@ -1403,6 +1624,7 @@
     canvas.width = 560; canvas.height = 360;
     canvas.tabIndex = 0; canvas.style.outline = "none"; canvas.className = "wb-canvas";
     area.appendChild(canvas); canvas.focus();
+    addTouchControls(bd, "dpad-4");
     var ctx = canvas.getContext("2d");
     var pH = 60, pW = 8;
     var p1 = { x: 12, y: canvas.height / 2 - pH / 2, dy: 0 };
@@ -1534,6 +1756,7 @@
     canvas.width = W; canvas.height = H;
     canvas.className = "wb-canvas"; canvas.tabIndex = 0; canvas.style.outline = "none";
     area.appendChild(canvas); canvas.focus();
+    addTouchControls(bd, "horizontal-2");
     var ctx = canvas.getContext("2d");
     var laneX = [90, 180, 270]; // 3 lanes
     var playerLane = 1;
@@ -1982,6 +2205,7 @@
     canvas.width = W; canvas.height = H;
     canvas.className = "wb-canvas"; canvas.tabIndex = 0; canvas.style.outline = "none";
     area.appendChild(canvas); canvas.focus();
+    addTouchControls(bd, "horizontal-3-jump");
     var ctx = canvas.getContext("2d");
     // Static level
     var platforms = [
@@ -2142,14 +2366,17 @@
     hint.textContent = "← → ↑ ↓ sau WASD pentru a mișca lemurul. U anulează ultima mișcare, R resetează. Esc închide.";
     // Level encoding: # wall, . floor, $ box, * box-on-target,
     // @ player, + player-on-target, space outside.
+    // 3 boxes ($), 3 targets (*), 1 player (@). Solvable by
+    // pushing each box one or two squares right. Box-on-target
+    // is encoded as * and counted as one box and one target.
     var LEVEL = [
       "##########",
       "#........#",
       "#..####..#",
-      "#..#.....#",
-      "#.@$.$.*.#",
-      "#..#.....#",
-      "#..####..#",
+      "#..#..*..#",
+      "#.@$....*#",
+      "#..$..*..#",
+      "#..$.....#",
       "##########"
     ];
     var ROWS = LEVEL.length, COLS = LEVEL[0].length;
@@ -2158,6 +2385,7 @@
     canvas.width = COLS * CELL; canvas.height = ROWS * CELL + 40;
     canvas.className = "wb-canvas"; canvas.tabIndex = 0; canvas.style.outline = "none";
     area.appendChild(canvas); canvas.focus();
+    addTouchControls(bd, "dpad-undo-reset");
     var ctx = canvas.getContext("2d");
     // Static layout: walls + targets
     var walls = [];
@@ -2172,14 +2400,11 @@
         for (var x = 0; x < COLS; x++) {
           var c = LEVEL[y][x];
           if (c === "#") walls.push({ x: x, y: y });
-          if (c === "." || c === "$" || c === "@") { /* floor */ }
           if (c === "*" || c === "+") targets.push({ x: x, y: y });
           if (c === "$" || c === "*") boxes.push({ x: x, y: y });
           if (c === "@" || c === "+") { player.x = x; player.y = y; }
         }
       }
-      // Add a target inside the open area so it's not too trivial
-      targets.push({ x: 8, y: 4 });
     }
     function isWall(x, y) {
       return walls.some(function (w) { return w.x === x && w.y === y; });

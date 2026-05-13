@@ -3033,6 +3033,86 @@ body.srv2003-min .app { display: none; }
     padding: 0 4px;
     margin-right: 2px;
 }
+/* ------------------------------------------------------------
+   BIOS SETUP - portrait / narrow mobile layout
+   Phoenix's two-pane layout (fields on the left, item help on
+   the right) needs ~620px of width to read. On portrait phones
+   the help pane gets squeezed under 200px and field labels +
+   values jam together. Stack help below fields, give tabs
+   horizontal scroll, shrink the field-label fixed width, and
+   wrap footer keys onto multiple lines. The .bios-setup root
+   stays full-screen.
+   ------------------------------------------------------------ */
+@media (max-width: 640px) {
+    .bios-setup { font-size: 12px; }
+    .bios-setup .bios-tabs {
+        padding: 4px 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        white-space: nowrap;
+    }
+    .bios-setup .bios-tab {
+        padding: 2px 6px;
+        margin-right: 4px;
+        display: inline-block;
+    }
+    .bios-setup .bios-body {
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr auto;
+    }
+    .bios-setup .bios-fields {
+        padding: 8px 12px;
+        border-right: 0;
+        border-bottom: 1px solid #c0c0c0;
+    }
+    .bios-setup .bios-field {
+        padding: 1px 2px;
+    }
+    .bios-setup .bios-field-label {
+        flex: 0 0 140px;
+    }
+    .bios-setup .bios-field-block {
+        margin: 4px 0 6px 12px;
+    }
+    .bios-setup .bios-help {
+        padding: 8px 12px;
+        max-height: 30vh;
+        overflow-y: auto;
+    }
+    .bios-setup .bios-help-text {
+        font-size: 11px;
+        line-height: 1.5;
+    }
+    .bios-setup .bios-footer {
+        padding: 4px 8px;
+        gap: 8px;
+        font-size: 10px;
+    }
+    /* The safe-off screen's F1/F2/F12 buttons are awkward on
+       phones because they sit in a single tight row. Wrap and
+       enlarge tap targets so they're actually pressable. */
+    .srv2k3-bios-controls {
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: center;
+    }
+    .srv2k3-bios-btn {
+        min-height: 44px;
+        padding: 8px 12px;
+    }
+}
+@media (max-width: 380px) {
+    /* Truly narrow (small phone portrait): drop the label fixed
+       width entirely so the value gets full row width on a new
+       line when the label is long. */
+    .bios-setup .bios-field {
+        flex-wrap: wrap;
+    }
+    .bios-setup .bios-field-label {
+        flex: 0 0 100%;
+        font-weight: 700;
+    }
+}
 
 .srv2k3-shut-screen.phase-bios-error {
     background: #000000;
@@ -4846,6 +4926,93 @@ body.srv2003-desktop .dialog-footer {
     font-size: 11px;
     line-height: 1.5;
 }
+/* Bottom keystroke hint inside the picker: lists the
+   keyboard/UI shortcut to reach the Setup utility. Single
+   button styled to match the BIOS-utility tone. */
+.wbp-keys {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px dashed #2a2a2a;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.wbp-key-btn {
+    background: transparent;
+    border: 1px solid #3a3a3a;
+    color: #d8d8d8;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+.wbp-key-btn:hover { background: #1a1a1a; }
+.wbp-key-btn kbd {
+    font-family: "Lucida Console", "Consolas", monospace;
+    background: #1a1a1a;
+    border: 1px solid #4a4a4a;
+    color: #ffd34d;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 11px;
+}
+/* Coreboot Setup utility: simplified single-screen table.
+   Borrows the BIOS-style chrome (.wbp) for the surface and
+   adds a 2-column table where only the first three rows are
+   editable; the rest are read-only "compiled in" values. */
+.wbs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-size: 12px;
+    color: #d8d8d8;
+    font-family: "Lucida Console", "Consolas", monospace;
+}
+.wbs-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #1a1a1a;
+    vertical-align: middle;
+}
+.wbs-label {
+    width: 50%;
+    color: #b0b0b0;
+}
+.wbs-row-edit .wbs-label {
+    color: #ffffff;
+}
+.wbs-row-edit .wbs-value {
+    color: #80a8d0;
+}
+.wbs-value-ro {
+    color: #808080;
+    font-style: italic;
+}
+.wbs-divider {
+    background: #1a1a1a;
+    color: #80a8d0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 10px !important;
+    border-bottom: 1px solid #2a2a2a !important;
+}
+.wbs-select {
+    background: #050505;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 4px 8px;
+    width: 100%;
+    max-width: 280px;
+}
+.wbs-select:focus {
+    outline: 1px solid #80a8d0;
+    outline-offset: -1px;
+}
 .wbp-btn {
     background: #1a1a1a;
     border: 1px solid #3a3a3a;
@@ -4891,20 +5058,58 @@ body.srv2003-desktop .dialog-footer {
     margin: 0;
 }
 
-/* Power off screen: lives inside .wbp; just centers the
-   power-on / reset-bios buttons under a banner. */
-.wb-poff {
+/* Power off screen: full-height surface inside .wbp that
+   centers a single card with a large title, a one-paragraph
+   subtitle, and the action buttons. Centred both axes so the
+   text reads as the focal point of the screen rather than as
+   a tiny left-aligned blob in the top corner. */
+.wbp-poff-shell {
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+}
+.wbp-poff-shell .wbp-inner {
+    flex: 1;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    height: 100%;
+}
+.wb-poff {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.wb-poff-card {
+    text-align: center;
+    max-width: 560px;
+    padding: 0 24px;
+}
+.wb-poff-title {
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    font-size: 32px;
+    font-weight: 300;
+    color: #e8e8e8;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+.wb-poff-sub {
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    font-size: 15px;
+    color: #a8a8a8;
+    line-height: 1.6;
+    margin-bottom: 28px;
+    text-wrap: pretty;
 }
 .wb-poff-actions {
     display: flex;
     gap: 12px;
-    margin-top: 18px;
     justify-content: center;
+    flex-wrap: wrap;
+}
+@media (max-width: 480px) {
+    .wb-poff-title { font-size: 26px; }
+    .wb-poff-sub { font-size: 14px; }
+    .wb-poff-actions .wbp-btn { flex: 1; min-width: 140px; }
 }
 
 /* ------------------------------------------------------------
@@ -5020,16 +5225,19 @@ body.srv2003-desktop .dialog-footer {
 /* ------------------------------------------------------------
    W4 SHELL  (PS4-style)
    Full blue radial gradient with stylized wave overlay,
-   top status bar with profile + trophies + clock, a single
+   top status bar with brand + WB Plus pill + clock, a single
    horizontal row of large square tiles with the active title
-   displayed in the meta block below. Subtle subscription
-   strip replaces the old yellow nag banner.
+   displayed in the meta block below.
    ------------------------------------------------------------ */
 .wb4-shell {
+    /* Inherit position:absolute + inset:0 from .wb-shell so
+       the gradient fills the entire viewport. An earlier
+       `position: relative` override here collapsed the shell
+       to its content height and let the wb-root's black
+       background show through above and below. */
     background: radial-gradient(ellipse at 35% 30%, #2a5aaa 0%, #163070 45%, #0c1c4c 100%);
     color: #ffffff;
     font-family: "Segoe UI", "Tahoma", sans-serif;
-    position: relative;
 }
 /* Decorative flowing wave overlay drawn with pseudo-elements */
 .wb4-bg-waves {
@@ -5080,21 +5288,34 @@ body.srv2003-desktop .dialog-footer {
     color: rgba(255, 255, 255, 0.85);
     font-variant-numeric: tabular-nums;
 }
-.wb4-substrip {
-    position: relative;
-    z-index: 2;
-    padding: 6px 28px;
-    background: rgba(0, 0, 0, 0.20);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.85);
-    flex-shrink: 0;
-}
-.wb4-substrip a {
+/* Subscription state pill in the W4 top bar. Yellow-tinted
+   when inactive (the call-to-action), neutral when active.
+   Replaces the earlier full-width black strip below the
+   topbar that broke the blue gradient. Pressing the pill
+   opens the same subscription dialog the strip used to. */
+.wb4-sub-pill {
+    background: rgba(0, 0, 0, 0.22);
+    border: 1px solid rgba(255, 211, 77, 0.5);
     color: #ffd34d;
-    text-decoration: underline;
-    margin-left: 6px;
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 80ms linear;
+    white-space: nowrap;
+}
+.wb4-sub-pill:hover {
+    background: rgba(0, 0, 0, 0.40);
+}
+.wb4-sub-pill:focus {
+    outline: 2px solid #ffd34d;
+    outline-offset: 1px;
+}
+.wb4-sub-pill-active {
+    border-color: rgba(180, 230, 180, 0.5);
+    color: #c0f0c0;
+    cursor: default;
 }
 .wb4-content {
     position: relative;
@@ -5717,6 +5938,52 @@ body.srv2003-desktop .dialog-footer {
     border-top: 1px solid #2a3040;
     background: #0a0e1a;
     line-height: 1.4;
+}
+/* On-screen tap controls below the canvas. Empty (no buttons
+   injected) for games that already work with mouse/touch
+   (strategy, RPG). For arrow-key games, addTouchControls()
+   populates with one of the layouts below. */
+.wb-game-controls {
+    display: flex;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #0a0e1a;
+    border-top: 1px solid #2a3040;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.wb-game-controls:empty {
+    display: none;
+}
+.wb-game-controls-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 56px);
+    gap: 6px;
+    justify-content: center;
+}
+.wb-touch-btn {
+    min-width: 56px;
+    min-height: 44px;
+    padding: 8px 14px;
+    background: #1a2030;
+    color: #ffffff;
+    border: 1px solid #3a4050;
+    border-radius: 4px;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    line-height: 1;
+}
+.wb-touch-btn:hover { background: #2a3040; border-color: #5a6a80; }
+.wb-touch-btn-down {
+    background: #4a6080;
+    border-color: #80a8d0;
+    transform: scale(0.96);
 }
 .wb-tank-stub {
     width: 100%;
