@@ -3294,6 +3294,7 @@ body.srv2003-desktop .pref-group:has(#prefDark) { display: none; }
     font-family: "Tahoma", "MS Sans Serif", sans-serif;
     font-size: 12px;
     line-height: 1.55;
+    text-wrap: pretty;
 }
 .srv2k3-help .help-heading {
     font-size: 16px;
@@ -4333,22 +4334,15 @@ body.srv2003-desktop .dialog-footer {
     overflow: hidden;
 }
 .coreboot-flash .cb-titlebar {
-    background: #000000;
-    color: #c0c0c0;
-    padding: 6px 14px;
-    border-bottom: 1px solid #404040;
-    font-weight: 400;
-    font-size: 12px;
-    letter-spacing: 0.02em;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    padding: 8px 16px;
+    border-bottom: 2px solid #404040;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.05em;
     text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-.coreboot-flash .cb-titlebar::before {
-    content: ">";
-    color: #80df80;
-    font-weight: 700;
+    font-family: "Lucida Console", "Consolas", monospace;
 }
 .coreboot-flash .cb-body {
     display: grid;
@@ -4709,715 +4703,1333 @@ body.srv2003-desktop .dialog-footer {
 
 /* ============================================================
    WATERBOARD CONSOLE SATIRE
-   Owned by js/srv2003/srv2003-waterboard.js. Three layers: the
-   picker (post-coreboot chooser), the install animation
-   (~6 second simulated payload flash), and the OS shells with
-   game library + game frames + W4 friction dialogs. Aesthetic
-   leans on real console UIs: dark backgrounds with strong
-   accent gradients, oversized typography, full-bleed game
-   tiles, a hero feature on the home screen, a sleek HUD bar
-   with online state and a live clock. W3 reads as desaturated
-   retro, W4 as over-saturated marketing-deck.
+   Owned by js/srv2003/srv2003-waterboard.js. Layers covered:
+     - Picker (BIOS-style payload chooser, .wbp)
+     - Install animation (.wbi-bar, .wbi-log)
+     - W3 shell (PS2-era minimal columns, .wb3-shell)
+     - W4 shell (PS4-style blue gradient + tile row, .wb4-shell)
+     - W5 shell (PS5-style grey tabs, .wb5-shell)
+     - W5 account-creation gate (.wb5-account-screen)
+     - System menu (.wb-menu)
+     - About dialog (.wb-about)
+     - Friction dialogs (.wb-friction) - subtle, no gold-glow
+     - Game frame + canvas + stubs (.wb-game-frame)
+     - Power off screen (.wb-poff)
    ============================================================ */
+
+/* Root: a full-viewport surface that owns the screen after a
+   successful coreboot flash. Every other Server 2003 / QNX
+   chrome is torn down by teardownAll() before mounting this. */
 .wb-root {
     position: fixed;
     inset: 0;
-    background: #050508;
-    color: #e8e8f0;
-    z-index: 99800;
-    font-family: "Segoe UI", "Tahoma", system-ui, sans-serif;
-    overflow: auto;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* ---------- BRAND MARKS (stacked WB + number) ---------- */
-.wb-brand-mark {
-    width: 64px;
-    height: 64px;
-    display: inline-flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    line-height: 1;
-    font-family: "Segoe UI", "Tahoma", sans-serif;
-    font-style: italic;
-    font-weight: 800;
-    border: 2px solid currentColor;
-    border-radius: 6px;
-    flex: 0 0 64px;
-    padding: 6px 0 4px;
-    box-sizing: border-box;
-}
-.wb-brand-mark .wb-brand-wb {
-    font-size: 22px;
-    letter-spacing: 0.04em;
-}
-.wb-brand-mark .wb-brand-num {
-    font-size: 16px;
-    margin-top: 1px;
-    opacity: 0.85;
-}
-.wb-brand-mini {
-    width: 36px;
-    height: 36px;
-    flex: 0 0 36px;
-    border-width: 1.5px;
-    border-radius: 4px;
-    padding: 3px 0 2px;
-}
-.wb-brand-mini .wb-brand-wb { font-size: 12px; }
-.wb-brand-mini .wb-brand-num { font-size: 9px; margin-top: 0; }
-
-.wb-brand-w3 {
-    background: linear-gradient(160deg, #1a3a5a 0%, #0a1a2a 100%);
-    color: #a0d0ff;
-    border-color: #6090c0;
-}
-.wb-brand-w4 {
-    background: linear-gradient(160deg, #2a1a4a 0%, #0a0a18 100%);
-    color: #ffd34d;
-    border-color: #ffd34d;
-    box-shadow: 0 0 12px rgba(255, 211, 77, 0.3);
-}
-
-/* ---------- PICKER ---------- */
-.wb-picker {
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 48px 24px 32px;
-}
-.wb-picker-header {
-    text-align: center;
-    margin-bottom: 36px;
-}
-.wb-picker-title {
-    font-size: 36px;
-    font-weight: 200;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-}
-.wb-picker-title::before {
-    content: "// ";
-    color: #80df80;
-    font-family: "Lucida Console", monospace;
-    font-size: 28px;
-}
-.wb-picker-sub {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #8090a0;
-    max-width: 720px;
-    margin-left: auto;
-    margin-right: auto;
-    line-height: 1.55;
-}
-.wb-picker-cards {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-}
-.wb-card {
-    background: #0e0e18;
-    border: 1px solid #202030;
-    border-radius: 6px;
-    padding: 24px;
-    cursor: pointer;
-    transition: border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+    background: #000;
+    color: #e8e8e8;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    z-index: 99000;
     overflow: hidden;
 }
-.wb-card::before {
-    content: "";
+
+/* ------------------------------------------------------------
+   PICKER (.wbp) and INSTALL (.wbi-bar/.wbi-log)
+   Both render inside .wbp because we are still in BIOS-payload
+   territory: dark, monospace, plain borders. Deliberately not
+   glossy. The user hasn't picked an OS yet.
+   ------------------------------------------------------------ */
+.wbp {
     position: absolute;
     inset: 0;
-    background: radial-gradient(circle at 0% 0%, rgba(255,255,255,0.04), transparent 50%);
-    pointer-events: none;
-}
-.wb-card:hover {
-    transform: translateY(-3px);
-}
-.wb-card-w3 {
-    border-top: 4px solid #6090c0;
-}
-.wb-card-w3:hover {
-    border-color: #6090c0;
-    box-shadow: 0 0 28px rgba(96, 144, 192, 0.3);
-}
-.wb-card-w4 {
-    border-top: 4px solid #ffd34d;
-}
-.wb-card-w4:hover {
-    border-color: #ffd34d;
-    box-shadow: 0 0 28px rgba(255, 211, 77, 0.3);
-}
-.wb-card-brand {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 18px;
-    flex-wrap: wrap;
-}
-.wb-brand-name {
-    font-size: 26px;
-    font-weight: 300;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-    flex: 1;
-}
-.wb-brand-tag {
-    width: 100%;
-    margin-top: 4px;
-    font-size: 12.5px;
-    color: #8090a0;
-    flex-basis: 100%;
-    line-height: 1.5;
-}
-.wb-card-body { flex: 1; }
-.wb-card-section-title {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #c0a060;
-    margin: 18px 0 8px;
-    font-weight: 700;
-}
-.wb-card-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    font-size: 13px;
-    line-height: 1.55;
-}
-.wb-card-list li {
-    padding: 5px 0 5px 22px;
-    position: relative;
-    color: #d0d0d8;
-}
-.wb-card-list li::before {
-    position: absolute;
-    left: 4px;
-    top: 5px;
-    font-weight: 700;
-    font-family: "Lucida Console", monospace;
-}
-.wb-good li::before { content: "+"; color: #80df80; }
-.wb-meh  li::before { content: "~"; color: #c0a060; }
-.wb-bad  li::before { content: "x"; color: #df6060; }
-.wb-card-btn {
-    margin-top: 20px;
-    padding: 12px 16px;
-    background: #ffd34d;
-    color: #1a1410;
-    border: 0;
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    border-radius: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    transition: background 120ms;
-}
-.wb-card-btn:hover { background: #ffe082; }
-.wb-card-w3 .wb-card-btn {
-    background: #6090c0;
-    color: #ffffff;
-}
-.wb-card-w3 .wb-card-btn:hover { background: #80a8d0; }
-.wb-picker-footer {
-    margin-top: 28px;
-    padding-top: 18px;
-    border-top: 1px solid #202030;
-    text-align: center;
-    font-size: 11px;
-    color: #606070;
-    letter-spacing: 0.04em;
-}
-
-/* ---------- INSTALL ANIMATION ---------- */
-.wb-install {
-    max-width: 760px;
-    margin: 80px auto 0;
-    padding: 24px;
-}
-.wb-install-header {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    margin-bottom: 22px;
-}
-.wb-install-title {
-    font-size: 22px;
-    font-weight: 200;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-}
-.wb-install-progress-wrap {
-    height: 4px;
-    background: #14141e;
-    border: 0;
-    overflow: hidden;
-    margin-bottom: 18px;
-    border-radius: 2px;
-}
-.wb-install-progress {
-    height: 100%;
-    width: 0;
-    background: linear-gradient(90deg, #6090c0, #80dfff);
-    transition: width 200ms linear;
-}
-.wb-install-log {
-    background: #000000;
-    color: #80df80;
+    background: #0a0a0a;
+    color: #d8d8d8;
     font-family: "Lucida Console", "Consolas", monospace;
-    font-size: 12px;
-    padding: 14px 16px;
-    height: 320px;
-    overflow: auto;
-    border: 1px solid #202030;
-    line-height: 1.5;
-    border-radius: 3px;
-}
-.wb-install-line { white-space: pre-wrap; }
-
-/* ---------- OS SHELLS (W3 / W4) ---------- */
-.wb-shell {
-    min-height: 100%;
     display: flex;
     flex-direction: column;
 }
-.wb-shell-w3 {
-    background:
-        radial-gradient(ellipse at 20% 0%, rgba(96,144,192,0.12), transparent 60%),
-        radial-gradient(ellipse at 80% 100%, rgba(96,144,192,0.06), transparent 60%),
-        #0a1828;
+.wbp-titlebar {
+    background: #1a1a1a;
+    color: #b0b0b0;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-bottom: 1px solid #2a2a2a;
+    letter-spacing: 0.5px;
 }
-.wb-shell-w4 {
-    background:
-        radial-gradient(ellipse at 0% 0%, rgba(255,211,77,0.08), transparent 50%),
-        radial-gradient(ellipse at 100% 100%, rgba(255,211,77,0.04), transparent 60%),
-        #06060e;
+.wbp-inner {
+    flex: 1;
+    overflow: auto;
+    padding: 24px 32px;
+    max-width: 880px;
+    margin: 0 auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+.wbp-banner {
+    color: #b0c8b0;
+    font-size: 13px;
+    line-height: 1.5;
+    margin: 0 0 18px 0;
+    white-space: pre-wrap;
+}
+.wbp-rows {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #2a2a2a;
+    background: #050505;
+}
+.wbp-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #1a1a1a;
+    cursor: pointer;
+    transition: background 60ms linear;
+}
+.wbp-row:last-child { border-bottom: none; }
+.wbp-row:hover {
+    background: #1a2a3a;
+    color: #ffffff;
+}
+.wbp-row-locked {
+    cursor: not-allowed;
+    color: #555;
+    background: #0a0a0a;
+    opacity: 0.75;
+}
+.wbp-row-locked:hover {
+    background: #0a0a0a;
+    color: #555;
+}
+.wbp-row-key {
+    font-weight: bold;
+    width: 64px;
+    flex-shrink: 0;
+    color: #80a8d0;
+}
+.wbp-row-locked .wbp-row-key { color: #555; }
+.wbp-row-meta { flex: 1; min-width: 0; }
+.wbp-row-name { font-size: 14px; font-weight: bold; }
+.wbp-row-kind {
+    color: #888;
+    font-weight: normal;
+    font-size: 12px;
+}
+.wbp-row-tag {
+    color: #909090;
+    font-size: 12px;
+    margin-top: 2px;
+}
+.wbp-row-locked .wbp-row-tag { color: #444; }
+.wbp-row-size {
+    color: #808080;
+    font-size: 12px;
+    flex-shrink: 0;
+    text-align: right;
+}
+.wbp-row-locked-note {
+    color: #b06060;
+    font-size: 10px;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+}
+.wbp-note {
+    margin-top: 14px;
+    padding: 10px 12px;
+    background: #1a0e0e;
+    border: 1px solid #4a2020;
+    color: #d8b0b0;
+    font-size: 12px;
+    line-height: 1.5;
+}
+.wbp-footer {
+    margin-top: 18px;
+    color: #808080;
+    font-size: 11px;
+    line-height: 1.5;
+}
+.wbp-btn {
+    background: #1a1a1a;
+    border: 1px solid #3a3a3a;
+    color: #d8d8d8;
+    font-family: inherit;
+    font-size: 12px;
+    padding: 6px 14px;
+    cursor: pointer;
+}
+.wbp-btn:hover { background: #2a2a2a; }
+.wbp-btn-default {
+    background: #2a3a5a;
+    border-color: #4a6a9a;
+    color: #ffffff;
+}
+.wbp-btn-default:hover { background: #3a4a6a; }
+
+/* Install animation log + progress bar inside .wbp */
+.wbi-bar {
+    height: 4px;
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    margin: 12px 0;
+    position: relative;
+    overflow: hidden;
+}
+.wbi-bar-fill {
+    height: 100%;
+    width: 0;
+    background: #80a8d0;
+    transition: width 80ms linear;
+}
+.wbi-log {
+    background: #050505;
+    border: 1px solid #2a2a2a;
+    padding: 10px 12px;
+    color: #b0c8b0;
+    font-size: 12px;
+    line-height: 1.5;
+    height: 320px;
+    overflow: auto;
+    white-space: pre-wrap;
+    margin: 0;
 }
 
-/* HUD-style top bar */
-.wb-statusbar {
+/* Power off screen: lives inside .wbp; just centers the
+   power-on / reset-bios buttons under a banner. */
+.wb-poff {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    height: 100%;
+}
+.wb-poff-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    justify-content: center;
+}
+
+/* ------------------------------------------------------------
+   SHARED SHELL CONTAINER
+   Every console OS root sits inside .wb-shell so layout rules
+   that should apply to all three (full viewport, hidden
+   overflow) only need to be written once.
+   ------------------------------------------------------------ */
+.wb-shell {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ------------------------------------------------------------
+   W3 SHELL  (PS2-era minimal)
+   Dark background, single horizontal stripe accent, two
+   columns: system actions on the left, games on the right.
+   Deliberately less polished than W4/W5; the point is that
+   W3 doesn't need polish because it doesn't try to monetize
+   you after the sale.
+   ------------------------------------------------------------ */
+.wb3-shell {
+    background: #0a0e1a;
+    color: #d8d8d8;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+}
+.wb3-stripe {
+    height: 4px;
+    background: linear-gradient(90deg, #1a3070 0%, #4a80c0 50%, #1a3070 100%);
+    flex-shrink: 0;
+}
+.wb3-topbar {
+    height: 36px;
+    background: #0a0e1a;
+    border-bottom: 1px solid #1a2030;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 24px;
-    border-bottom: 1px solid #1a1a28;
-    background: rgba(0, 0, 0, 0.45);
-    backdrop-filter: blur(10px);
+    padding: 0 18px;
+    flex-shrink: 0;
 }
-.wb-statusbar-left, .wb-statusbar-right {
+.wb3-brand {
+    font-weight: bold;
+    color: #80a8d0;
+    letter-spacing: 1px;
+    font-size: 13px;
+}
+.wb3-clock {
+    color: #909090;
+    font-family: "Lucida Console", monospace;
+    font-size: 12px;
+}
+.wb3-columns {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+.wb3-col-system {
+    width: 240px;
+    background: #050810;
+    border-right: 1px solid #1a2030;
+    padding: 12px 0;
+    flex-shrink: 0;
+    overflow-y: auto;
+}
+.wb3-col-games {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px 0;
+}
+.wb3-system-title {
+    color: #80a8d0;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 4px 18px 8px 18px;
+}
+.wb3-sys-item {
+    padding: 8px 18px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #d8d8d8;
+}
+.wb3-sys-item:hover {
+    background: #1a2a4a;
+    color: #ffffff;
+}
+.wb3-game {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 18px;
+    cursor: pointer;
+}
+.wb3-game:hover {
+    background: #1a2a4a;
+}
+.wb3-game-art {
+    width: 72px;
+    height: 44px;
+    flex-shrink: 0;
+    border: 1px solid #2a3040;
+    overflow: hidden;
+}
+.wb3-game-art svg { display: block; width: 100%; height: 100%; }
+.wb3-game-meta { flex: 1; min-width: 0; }
+.wb3-game-title { font-size: 13px; color: #ffffff; }
+.wb3-game-sub { font-size: 11px; color: #909090; margin-top: 2px; }
+
+/* ------------------------------------------------------------
+   W4 SHELL  (PS4-style)
+   Full blue radial gradient with stylized wave overlay,
+   top status bar with profile + trophies + clock, a single
+   horizontal row of large square tiles with the active title
+   displayed in the meta block below. Subtle subscription
+   strip replaces the old yellow nag banner.
+   ------------------------------------------------------------ */
+.wb4-shell {
+    background: radial-gradient(ellipse at 35% 30%, #2a5aaa 0%, #163070 45%, #0c1c4c 100%);
+    color: #ffffff;
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    position: relative;
+}
+/* Decorative flowing wave overlay drawn with pseudo-elements */
+.wb4-bg-waves {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 600px 180px at 20% 70%, rgba(120, 180, 240, 0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 800px 240px at 80% 30%, rgba(180, 220, 255, 0.10) 0%, transparent 60%);
+}
+.wb4-bg-waves::before, .wb4-bg-waves::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.06) 50%, transparent 70%);
+    background-size: 1600px 100%;
+    background-repeat: no-repeat;
+}
+.wb4-bg-waves::after {
+    background-position: 600px 0;
+    opacity: 0.6;
+}
+.wb4-topbar {
+    position: relative;
+    z-index: 2;
+    height: 56px;
+    padding: 0 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #ffffff;
+    flex-shrink: 0;
+}
+.wb4-top-left, .wb4-top-right {
     display: flex;
     align-items: center;
     gap: 14px;
 }
-.wb-statusbar-name {
-    font-weight: 300;
-    color: #ffffff;
-    font-size: 17px;
-    letter-spacing: 0.02em;
-    font-style: italic;
-}
-.wb-status-pill {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    color: #c0c0d0;
-    padding: 4px 12px;
-    border-radius: 14px;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+.wb4-brand {
+    font-size: 14px;
     font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 2px;
 }
-.wb-pill-on  {
-    background: rgba(128, 223, 128, 0.15);
-    border-color: rgba(128, 223, 128, 0.5);
-    color: #80df80;
+.wb4-clock {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.85);
+    font-variant-numeric: tabular-nums;
 }
-.wb-pill-off {
-    background: rgba(223, 96, 96, 0.15);
-    border-color: rgba(223, 96, 96, 0.5);
-    color: #df8080;
+.wb4-substrip {
+    position: relative;
+    z-index: 2;
+    padding: 6px 28px;
+    background: rgba(0, 0, 0, 0.20);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
 }
-.wb-status-clock {
-    font-family: "Segoe UI", system-ui, sans-serif;
-    font-size: 13px;
+.wb4-substrip a {
+    color: #ffd34d;
+    text-decoration: underline;
+    margin-left: 6px;
+}
+.wb4-content {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 80px 56px 40px 56px;
+    overflow: hidden;
+}
+.wb4-row {
+    display: flex;
+    gap: 22px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Padding inside the scroll container gives the active
+       tile's outer glow physical room to render without being
+       clipped by the row's overflow-x:auto. Negative margins
+       compensate so the row's outer layout dimensions stay
+       unchanged. The 32px figure covers the worst-case glow
+       extent of an active tile (3px ring + scale + 18px blur). */
+    padding: 32px 32px 24px 32px;
+    margin: -32px -32px 0 -32px;
+}
+.wb4-tile {
+    width: 200px;
+    height: 200px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform 80ms linear, box-shadow 80ms linear;
+}
+.wb4-tile-art {
+    width: 100%;
+    height: 100%;
+}
+.wb4-tile-art svg { display: block; width: 100%; height: 100%; }
+.wb4-tile-active {
+    transform: scale(1.06);
+    box-shadow:
+        0 0 0 3px #5ad8ff,
+        0 0 18px 2px rgba(90, 216, 255, 0.45);
+    z-index: 3;
+}
+.wb4-tile-system .wb4-art-system { width: 100%; height: 100%; }
+.wb4-active-meta {
+    margin-top: 26px;
     color: #ffffff;
+}
+.wb4-active-title {
+    font-size: 38px;
     font-weight: 300;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.5px;
+    line-height: 1.15;
+}
+.wb4-active-sub {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 6px;
+    max-width: 720px;
+    line-height: 1.5;
 }
 
-/* W4 nag banner */
-.wb-nag-banner {
-    background: linear-gradient(90deg, rgba(255,211,77,0.12), rgba(255,211,77,0.02));
-    border-bottom: 1px solid rgba(255,211,77,0.4);
-    color: #ffd34d;
-    padding: 10px 24px;
-    font-size: 13px;
+/* ------------------------------------------------------------
+   W5 SHELL  (PS5-style)
+   Light/grey background with subtle gradient, tab bar (Games
+   | Media), smaller square tiles in a row, search/settings/
+   profile/clock at top-right. Account-bound. Region-locked
+   tiles get a globe icon overlay.
+   ------------------------------------------------------------ */
+.wb5-shell {
+    background: linear-gradient(180deg, #cfd2d8 0%, #b8bcc4 60%, #9a9ea6 100%);
+    color: #1a1a1a;
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+}
+.wb5-topbar {
+    height: 56px;
+    padding: 0 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.wb5-tabs {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+}
+.wb5-tab {
+    font-size: 22px;
+    font-weight: 300;
+    color: #1a1a1a;
+    cursor: default;
+    letter-spacing: 0.5px;
+}
+.wb5-tab-active {
+    font-weight: 600;
+}
+.wb5-top-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.wb5-icon {
+    color: #1a1a1a;
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 80ms linear;
+}
+.wb5-icon:hover { background: rgba(0, 0, 0, 0.10); }
+.wb5-icon:focus { outline: 2px solid #2a4a7a; outline-offset: 1px; }
+.wb5-profile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.wb5-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4a6a9a 0%, #2a4a7a 100%);
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+}
+.wb5-clock {
+    font-size: 15px;
+    color: #1a1a1a;
+    font-variant-numeric: tabular-nums;
+}
+.wb5-content {
+    flex: 1;
+    padding: 28px 48px 32px 48px;
+    overflow: auto;
+}
+.wb5-tile-row {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* Padding inside the scroll container gives the active
+       tile's outer glow physical room to render. Negative
+       margins keep the row's outer layout unchanged. */
+    padding: 28px 28px 16px 28px;
+    margin: -28px -28px 0 -28px;
+}
+.wb5-tile {
+    width: 140px;
+    height: 140px;
+    flex-shrink: 0;
+    background: rgba(0, 0, 0, 0.10);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    position: relative;
+    transition: transform 80ms linear, box-shadow 80ms linear;
+}
+.wb5-tile-art {
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+.wb5-tile-art svg { display: block; width: 100%; height: 100%; }
+.wb5-tile-active {
+    transform: scale(1.06);
+    box-shadow:
+        0 0 0 3px rgba(255, 255, 255, 0.92),
+        0 4px 14px rgba(0, 0, 0, 0.40);
+    z-index: 3;
+}
+.wb5-tile-system .wb5-art-system { width: 100%; height: 100%; }
+.wb5-region-lock {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #ffffff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1;
+}
+.wb5-tile-locked {
+    opacity: 0.85;
+}
+.wb5-active-meta {
+    margin-top: 36px;
+    color: #1a1a1a;
+}
+.wb5-active-tag {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: rgba(26, 26, 26, 0.65);
+    font-weight: 600;
+}
+.wb5-active-title {
+    font-size: 36px;
+    font-weight: 400;
+    margin-top: 6px;
+    line-height: 1.15;
+}
+.wb5-active-sub {
+    font-size: 15px;
+    color: rgba(26, 26, 26, 0.65);
+    margin-top: 6px;
+    max-width: 720px;
+    line-height: 1.5;
+}
+
+/* ------------------------------------------------------------
+   W5 ACCOUNT CREATION GATE
+   First-boot mandatory sign-up. Appears INSIDE .wb5-shell so
+   the page already has the W5 background loaded before any
+   gameplay is reachable.
+   ------------------------------------------------------------ */
+.wb5-account-screen {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 14px;
+    padding: 28px;
+    overflow: auto;
 }
-.wb-nag-cta {
-    background: #ffd34d;
-    color: #1a1410;
-    border: 0;
-    padding: 6px 14px;
-    font-weight: 700;
-    cursor: pointer;
-    font-family: inherit;
-    border-radius: 3px;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-.wb-nag-cta:hover { background: #ffe082; }
-
-/* Hero featured-game banner above the library */
-.wb-hero {
-    position: relative;
-    margin: 24px auto 0;
-    max-width: 1100px;
-    padding: 0 24px;
-    box-sizing: border-box;
-}
-.wb-hero-card {
-    position: relative;
-    height: 240px;
+.wb5-account-card {
+    background: rgba(255, 255, 255, 0.95);
+    color: #1a1a1a;
     border-radius: 8px;
-    overflow: hidden;
-    background: linear-gradient(135deg, #0a3a4a 0%, #1a1a3a 100%);
-    border: 1px solid #1a1a28;
-    display: flex;
-    align-items: flex-end;
+    max-width: 520px;
+    width: 100%;
     padding: 24px 28px;
-    cursor: pointer;
-    transition: transform 160ms;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
 }
-.wb-hero-card:hover { transform: translateY(-2px); }
-.wb-hero-card::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 70% 50%, rgba(128,223,255,0.18), transparent 60%);
-    pointer-events: none;
+.wb5-account-title {
+    font-size: 22px;
+    font-weight: 400;
 }
-.wb-hero-meta { position: relative; z-index: 1; max-width: 60%; }
-.wb-hero-tag {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: #80dfff;
-    margin-bottom: 8px;
-    font-weight: 700;
-}
-.wb-hero-title {
-    font-size: 32px;
-    font-weight: 200;
-    color: #ffffff;
-    letter-spacing: 0.01em;
-    line-height: 1.1;
-    margin-bottom: 6px;
-}
-.wb-hero-sub {
+.wb5-account-sub {
     font-size: 13px;
-    color: #c0c0d0;
+    color: rgba(26, 26, 26, 0.7);
+    margin-top: 6px;
     line-height: 1.5;
 }
-.wb-hero-art {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
-    width: 50%;
-    z-index: 0;
+.wb5-account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 18px;
 }
-.wb-hero-art svg { width: 100%; height: 100%; display: block; opacity: 0.85; }
-
-/* Library + tiles */
-.wb-library {
-    flex: 1;
-    padding: 28px 24px 32px;
-    max-width: 1100px;
-    width: 100%;
-    margin: 0 auto;
-    box-sizing: border-box;
-}
-.wb-library-title {
+.wb5-account-form label {
     font-size: 12px;
-    color: #8090a0;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    margin-bottom: 16px;
-    font-weight: 700;
+    color: rgba(26, 26, 26, 0.7);
+    font-weight: 600;
 }
-.wb-tiles {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: 18px;
+.wb5-account-form input[type="text"],
+.wb5-account-form input[type="email"] {
+    padding: 8px 10px;
+    border: 1px solid #b0b4bc;
+    border-radius: 4px;
+    font-size: 13px;
+    font-family: inherit;
+    background: #ffffff;
+    color: #1a1a1a;
 }
-.wb-tile {
-    background: #0e0e18;
-    border: 1px solid #202030;
+.wb5-account-form input:focus { outline: 2px solid #4a6a9a; outline-offset: -1px; }
+.wb5-checkbox {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 12px;
+    color: rgba(26, 26, 26, 0.85);
+    line-height: 1.5;
+    margin-top: 6px;
+}
+.wb5-checkbox input { margin-top: 2px; flex-shrink: 0; }
+.wb5-btn {
+    padding: 10px 16px;
+    border: none;
+    border-radius: 4px;
+    font-family: inherit;
+    font-size: 13px;
     cursor: pointer;
-    transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
-    overflow: hidden;
-    border-radius: 6px;
-    position: relative;
+    background: #d0d4dc;
+    color: #1a1a1a;
 }
-.wb-tile:hover {
-    transform: scale(1.03);
-    border-color: #80dfff;
-    box-shadow: 0 4px 24px rgba(128, 223, 255, 0.2);
-}
-.wb-tile-art {
-    aspect-ratio: 4 / 3;
-    overflow: hidden;
-    background: #000;
-    position: relative;
-}
-.wb-tile-art::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.6));
-}
-.wb-tile-art svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
-.wb-tile-title {
-    padding: 12px 14px 4px;
-    font-weight: 600;
+.wb5-btn:hover { background: #c0c4cc; }
+.wb5-btn-primary {
+    background: #2a4a7a;
     color: #ffffff;
-    font-size: 15px;
-    letter-spacing: 0.01em;
 }
-.wb-tile-sub {
-    padding: 0 14px 14px;
-    color: #8090a0;
-    font-size: 11px;
+.wb5-btn-primary:hover { background: #3a5a8a; }
+
+/* ------------------------------------------------------------
+   SYSTEM MENU
+   Floating menu shown when the system tile is opened. Plain
+   list of options, dismissible by clicking outside.
+   ------------------------------------------------------------ */
+.wb-menu-bd {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.wb-menu {
+    background: #1a1e2a;
+    color: #e8e8e8;
+    border: 1px solid #3a4050;
+    min-width: 280px;
+    max-width: 360px;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+}
+.wb-menu-title {
+    background: #0a0e1a;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: #80a8d0;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 600;
+    border-bottom: 1px solid #2a3040;
 }
-.wb-footer {
-    padding: 18px 24px;
-    border-top: 1px solid #1a1a28;
-    color: #606070;
-    font-size: 11px;
-    text-align: center;
-    letter-spacing: 0.04em;
+.wb-menu-list {
+    display: flex;
+    flex-direction: column;
+    padding: 6px 0;
+}
+.wb-menu-item {
+    background: transparent;
+    border: none;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 13px;
+    padding: 8px 14px;
+    text-align: left;
+    cursor: pointer;
+}
+.wb-menu-item:hover {
+    background: #2a3a5a;
+    color: #ffffff;
+}
+.wb-menu-item-cancel {
+    color: #a0a0a0;
+    margin-top: 4px;
+    border-top: 1px solid #2a3040;
 }
 
-/* ---------- FRICTION DIALOGS (W4 only) ---------- */
+/* ------------------------------------------------------------
+   ABOUT DIALOG
+   Big card with two sections: technical specifications table
+   and satirical commentary prose. Anchors the project's third
+   pillar of satire: school = curriculum lock, home = console
+   lock, platform owner decides whether your purchase keeps
+   working.
+   ------------------------------------------------------------ */
+.wb-about-bd {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 99600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+}
+.wb-about {
+    background: #ffffff;
+    color: #1a1a1a;
+    max-width: 760px;
+    width: 100%;
+    max-height: calc(100vh - 48px);
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.wb-about-header {
+    background: #0c2c5c;
+    color: #ffffff;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+.wb-about-title {
+    font-size: 15px;
+    font-weight: 600;
+}
+.wb-about-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+    font-family: "Lucida Console", monospace;
+    font-size: 13px;
+    width: 24px;
+    height: 22px;
+    line-height: 1;
+    cursor: pointer;
+}
+.wb-about-close:hover { background: rgba(255, 255, 255, 0.25); }
+.wb-about-body {
+    padding: 18px 22px 22px 22px;
+    overflow: auto;
+    flex: 1;
+}
+.wb-about-section {
+    margin-bottom: 22px;
+}
+.wb-about-section:last-child { margin-bottom: 0; }
+.wb-about-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #0c2c5c;
+    border-bottom: 1px solid #b0b8c8;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+}
+.wb-about-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.wb-about-table td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #e0e4ec;
+}
+.wb-about-table td:first-child {
+    width: 200px;
+    color: #4a4a4a;
+}
+.wb-about-section p {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    line-height: 1.6;
+}
+.wb-about-section p:last-child { margin-bottom: 0; }
+
+/* ------------------------------------------------------------
+   FRICTION DIALOGS (.wb-friction)
+   Subtle. NOT the gold-glow-and-red-everywhere of the earlier
+   build. Plain modal card, neutral chrome, error text only as
+   prose. The point is that the platform's friction is normal,
+   not exceptional.
+   ------------------------------------------------------------ */
 .wb-friction-bd {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.82);
-    backdrop-filter: blur(6px);
-    z-index: 99900;
-    display: grid;
-    place-items: center;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 24px;
+    overflow: auto;
 }
 .wb-friction {
-    background: #0e0e18;
-    border: 1px solid rgba(255,211,77,0.5);
-    color: #e8e8f0;
-    width: min(560px, 100%);
-    padding: 26px 28px;
-    font-family: inherit;
-    box-shadow: 0 0 40px rgba(255, 211, 77, 0.25);
-    border-radius: 6px;
+    background: #ffffff;
+    color: #1a1a1a;
+    max-width: 520px;
+    width: 100%;
+    border-radius: 4px;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
 }
-.wb-friction-art {
-    text-align: center;
-    margin-bottom: 12px;
-}
-.wb-friction-art svg {
-    width: 88px;
-    height: 88px;
-}
+.wb-friction-compact { max-width: 420px; }
 .wb-friction-title {
-    font-size: 22px;
-    font-weight: 300;
-    color: #ffd34d;
-    margin-bottom: 14px;
-    text-align: center;
-    letter-spacing: 0.02em;
+    background: #0c2c5c;
+    color: #ffffff;
+    padding: 10px 16px;
+    font-size: 14px;
+    font-weight: 600;
 }
 .wb-friction-body {
-    font-size: 13.5px;
-    line-height: 1.6;
-    color: #c0c0d0;
+    padding: 14px 18px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #1a1a1a;
 }
-.wb-friction-body p { margin: 8px 0; }
+.wb-friction-body p { margin: 0 0 10px 0; }
+.wb-friction-body p:last-child { margin-bottom: 0; }
 .wb-friction-body ul {
-    margin: 10px 0;
-    padding-left: 24px;
+    margin: 8px 0;
+    padding-left: 20px;
 }
-.wb-friction-body li { margin: 6px 0; }
+.wb-friction-body li {
+    margin-bottom: 4px;
+    font-size: 12px;
+    line-height: 1.5;
+}
 .wb-friction-actions {
-    margin-top: 20px;
     display: flex;
     gap: 8px;
+    padding: 10px 14px 14px 14px;
     justify-content: flex-end;
     flex-wrap: wrap;
 }
 .wb-btn {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.16);
-    color: #e8e8f0;
-    padding: 9px 16px;
-    cursor: pointer;
+    padding: 7px 14px;
+    border: 1px solid #b0b8c8;
+    background: #e8ecf2;
+    color: #1a1a1a;
     font-family: inherit;
     font-size: 12px;
-    border-radius: 3px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    font-weight: 600;
+    cursor: pointer;
+    border-radius: 2px;
 }
-.wb-btn:hover { background: rgba(255,255,255,0.12); border-color: #ffd34d; }
+.wb-btn:hover { background: #d8dce2; }
 .wb-btn-primary {
-    background: #ffd34d;
-    color: #1a1410;
-    border-color: #ffd34d;
-    font-weight: 700;
+    background: #2a4a7a;
+    color: #ffffff;
+    border-color: #1a3a6a;
 }
-.wb-btn-primary:hover { background: #ffe082; }
+.wb-btn-primary:hover { background: #3a5a8a; }
 .wb-sub-tiers {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    margin: 14px 0 6px;
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
 }
 .wb-sub-tier {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.12);
-    padding: 12px 10px;
-    text-align: center;
-    font-size: 11.5px;
-    color: #c0c0d0;
+    flex: 1;
+    min-width: 100px;
+    padding: 8px 10px;
+    background: #f0f3f8;
+    border: 1px solid #d0d8e0;
     border-radius: 4px;
-    line-height: 1.5;
+    font-size: 12px;
+    line-height: 1.4;
+    text-align: center;
 }
 
-/* ---------- GAME FRAMES ---------- */
+/* ------------------------------------------------------------
+   GAME FRAME (.wb-game-bd)
+   When a game launches, this modal frame holds a canvas-based
+   game (Snake, Pong) or a stub message. Same plain chrome as
+   other dialogs. Close via X button or Esc.
+   ------------------------------------------------------------ */
 .wb-game-bd {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.94);
-    z-index: 99950;
-    display: grid;
-    place-items: center;
-    padding: 16px;
-}
-.wb-game-frame {
-    background: #0a0a14;
-    border: 1px solid rgba(255,255,255,0.16);
-    border-radius: 4px;
-    width: auto;
-    max-width: 100%;
-    max-height: 100%;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-.wb-game-titlebar {
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 99800;
     display: flex;
     align-items: center;
-    background: rgba(255,255,255,0.04);
-    color: #ffffff;
-    padding: 8px 8px 8px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    justify-content: center;
+    padding: 24px;
+}
+.wb-game-frame {
+    background: #1a1e2a;
+    color: #e8e8e8;
+    border: 1px solid #3a4050;
+    max-width: 720px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+}
+.wb-game-titlebar {
+    background: #0a0e1a;
+    color: #e8e8e8;
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #2a3040;
 }
 .wb-game-title {
-    flex: 1;
-    font-weight: 300;
-    font-size: 14px;
-    letter-spacing: 0.02em;
+    font-size: 13px;
+    font-weight: 600;
+    color: #80a8d0;
 }
 .wb-game-close {
-    background: rgba(255,255,255,0.06);
-    color: #ffffff;
-    border: 1px solid rgba(255,255,255,0.2);
-    width: 24px;
-    height: 22px;
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid #3a4050;
+    color: #e8e8e8;
+    font-family: "Lucida Console", monospace;
+    width: 22px;
+    height: 20px;
     line-height: 1;
-    font-size: 12px;
-    font-weight: 700;
     cursor: pointer;
-    font-family: inherit;
-    border-radius: 2px;
+    font-size: 12px;
 }
-.wb-game-close:hover { background: rgba(223, 96, 96, 0.4); border-color: #df6060; }
+.wb-game-close:hover { background: rgba(255, 255, 255, 0.2); }
 .wb-game-area {
-    background: #000000;
-    display: grid;
-    place-items: center;
-    padding: 16px;
-}
-.wb-game-hint {
-    background: rgba(0,0,0,0.45);
-    color: #8090a0;
-    padding: 10px 16px;
-    font-size: 11.5px;
-    border-top: 1px solid rgba(255,255,255,0.08);
-    line-height: 1.5;
+    padding: 14px;
+    display: flex;
+    justify-content: center;
+    background: #0a0e1a;
 }
 .wb-canvas {
     display: block;
+    max-width: 100%;
+    height: auto;
     image-rendering: pixelated;
 }
-
-/* Tank stub (online-only fake) */
+.wb-game-hint {
+    padding: 8px 14px;
+    font-size: 11px;
+    color: #a0a0a0;
+    border-top: 1px solid #2a3040;
+    background: #0a0e1a;
+    line-height: 1.4;
+}
 .wb-tank-stub {
-    color: #d0d0d8;
-    padding: 36px 32px;
-    max-width: 540px;
+    width: 100%;
+    max-width: 480px;
+    color: #e8e8e8;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 .wb-tank-status {
     display: flex;
+    gap: 12px;
     align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-    font-size: 14px;
+    font-size: 13px;
+    color: #b0c8d0;
 }
 .wb-tank-spinner {
-    width: 36px;
-    height: 36px;
-    border: 3px solid rgba(255,255,255,0.1);
-    border-top-color: #80dfff;
+    width: 16px;
+    height: 16px;
+    border: 2px solid #2a3040;
+    border-top-color: #80a8d0;
     border-radius: 50%;
-    animation: wb-spin 1s linear infinite;
-    flex: 0 0 36px;
+    animation: wb-spin 0.9s linear infinite;
+    flex-shrink: 0;
 }
-@keyframes wb-spin {
-    to { transform: rotate(360deg); }
+@keyframes wb-spin { to { transform: rotate(360deg); } }
+.wb-tank-meta {
+    font-size: 12px;
+    line-height: 1.55;
+    color: #a8b0c0;
 }
-.wb-tank-meta { font-size: 13px; line-height: 1.6; color: #c0c0d0; }
+.wb-tank-meta p { margin: 0 0 8px 0; }
+.wb-tank-meta p:last-child { margin-bottom: 0; }
 .wb-tank-meta strong { color: #ffd34d; }
 
-/* ---------- MOBILE REFLOW ---------- */
+/* ------------------------------------------------------------
+   STAR GALAXY VII  (RPG combat arena)
+   This is the only game that lays out with HTML divs rather
+   than canvas (turn-based combat reads better as discrete UI
+   pieces than as a pixel-rendered scene). Three-column layout:
+   enemy portrait/bars on the left, scrolling combat log in the
+   middle, player portrait/bars + action buttons on the right.
+   The whole arena sits inside the standard .wb-game-frame.
+   ------------------------------------------------------------ */
+.rpg-arena {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr 1fr;
+    gap: 14px;
+    width: 100%;
+    max-width: 720px;
+    background: #0a0e1a;
+    color: #e8e8e8;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+}
+.rpg-side {
+    padding: 14px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid #2a3040;
+    background: linear-gradient(180deg, #15203a 0%, #0a1428 100%);
+    border-radius: 4px;
+}
+.rpg-side-enemy {
+    border-color: #5a2020;
+    background: linear-gradient(180deg, #2a1020 0%, #1a0810 100%);
+}
+.rpg-side-player {
+    border-color: #205a40;
+    background: linear-gradient(180deg, #102a1c 0%, #081810 100%);
+}
+.rpg-portrait {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    border: 2px solid #2a3040;
+    background: #0a0e1a;
+    position: relative;
+}
+.rpg-portrait-enemy {
+    background:
+        radial-gradient(circle at 35% 35%, #df40a0 0%, #401050 60%, #100020 100%);
+    box-shadow: 0 0 18px rgba(223, 64, 160, 0.35);
+}
+.rpg-portrait-enemy::before {
+    content: "";
+    position: absolute;
+    left: 24px; top: 32px;
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #ffd34d;
+    box-shadow: 28px 0 #ffd34d;
+}
+.rpg-portrait-enemy::after {
+    content: "";
+    position: absolute;
+    left: 28px; bottom: 24px;
+    width: 36px; height: 6px;
+    border-radius: 6px;
+    background: #1a0010;
+}
+.rpg-portrait-player {
+    background:
+        radial-gradient(circle at 50% 35%, #d8b890 0%, #a87830 60%, #402810 100%);
+    box-shadow: 0 0 18px rgba(255, 211, 77, 0.30);
+}
+.rpg-portrait-player::before {
+    content: "";
+    position: absolute;
+    left: 32px; top: 32px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #1a1a1a;
+    box-shadow: 20px 0 #1a1a1a;
+}
+.rpg-portrait-player::after {
+    content: "";
+    position: absolute;
+    left: 36px; bottom: 28px;
+    width: 24px; height: 4px;
+    border-radius: 4px;
+    background: #5a2010;
+}
+.rpg-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    text-align: center;
+}
+.rpg-bars {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.rpg-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: #a0b0c0;
+    font-family: "Lucida Console", monospace;
+}
+.rpg-bar > span:first-child {
+    width: 22px;
+    flex-shrink: 0;
+    color: #ffffff;
+    font-weight: 600;
+}
+.rpg-bar > span:last-child {
+    width: 56px;
+    flex-shrink: 0;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.rpg-bar-track {
+    flex: 1;
+    height: 10px;
+    background: #050810;
+    border: 1px solid #2a3040;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.rpg-bar-fill {
+    height: 100%;
+    transition: width 200ms ease-out;
+}
+.rpg-bar-hp { background: linear-gradient(90deg, #df4040 0%, #ff8060 100%); }
+.rpg-bar-mp { background: linear-gradient(90deg, #4080df 0%, #60a8ff 100%); }
+.rpg-log {
+    padding: 12px;
+    background: #050810;
+    border: 1px solid #2a3040;
+    border-radius: 4px;
+    height: 260px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.55;
+}
+.rpg-log-line {
+    margin-bottom: 4px;
+    color: #c0c8d0;
+}
+.rpg-log-line:last-child { margin-bottom: 0; }
+.rpg-log-win {
+    color: #80df80;
+    font-weight: 600;
+}
+.rpg-log-lose {
+    color: #df6060;
+    font-weight: 600;
+}
+.rpg-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 4px;
+}
+.rpg-btn {
+    padding: 8px 10px;
+    background: #1a2a3a;
+    border: 1px solid #3a4050;
+    color: #e8e8e8;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 3px;
+    text-align: left;
+}
+.rpg-btn:hover:not([disabled]) {
+    background: #2a3a4a;
+    border-color: #5a6a8a;
+    color: #ffffff;
+}
+.rpg-btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+/* ------------------------------------------------------------
+   RESPONSIVE
+   The console shells are designed for desktop-ish widths but
+   should still be usable on a narrow viewport. Mostly: drop
+   the W3 system column, scale down the W4 tile row, give the
+   W5 tiles a more reasonable mobile footprint, stack the RPG
+   arena vertically so portraits and the log all fit.
+   ------------------------------------------------------------ */
 @media (max-width: 720px) {
-    .wb-picker-cards { grid-template-columns: 1fr; }
-    .wb-tiles { grid-template-columns: 1fr 1fr; gap: 12px; }
-    .wb-sub-tiers { grid-template-columns: 1fr; }
-    .wb-friction-actions { justify-content: stretch; }
+    .wbp-inner { padding: 18px 14px; }
+    .wbp-row { flex-wrap: wrap; }
+    .wb3-col-system {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #1a2030;
+        padding: 8px 0;
+    }
+    .wb3-columns { flex-direction: column; }
+    .wb4-content { padding: 28px 14px 18px 14px; }
+    .wb4-row { gap: 12px; }
+    .wb4-tile { width: 140px; height: 140px; }
+    .wb4-active-meta { margin-top: 18px; }
+    .wb4-active-title { font-size: 26px; }
+    .wb4-active-sub { font-size: 13px; }
+    .wb4-topbar { padding: 0 14px; }
+    .wb5-topbar { padding: 0 14px; }
+    .wb5-content { padding: 16px 14px; }
+    .wb5-tile-row { gap: 10px; }
+    .wb5-tile { width: 110px; height: 110px; }
+    .wb5-active-meta { margin-top: 20px; }
+    .wb5-active-title { font-size: 24px; }
+    .wb5-active-sub { font-size: 13px; }
     .wb-friction-actions .wb-btn { flex: 1; }
-    .wb-hero-card { height: 200px; padding: 20px; }
-    .wb-hero-title { font-size: 24px; }
-    .wb-hero-meta { max-width: 100%; }
-    .wb-hero-art { display: none; }
-    .wb-statusbar { padding: 10px 16px; gap: 8px; }
-    .wb-statusbar-name { font-size: 14px; }
-    .wb-status-clock { display: none; }
+    .wb-game-bd { padding: 12px; }
+    .wb-about-body { padding: 14px 16px; }
+    /* RPG arena drops from 3 columns to a stacked layout: log
+       comes last so the action buttons stay near the bottom of
+       the viewport where the user's thumb can reach them. */
+    .rpg-arena {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    .rpg-side {
+        flex-direction: row;
+        align-items: center;
+        gap: 12px;
+    }
+    .rpg-portrait { width: 64px; height: 64px; flex-shrink: 0; }
+    .rpg-portrait-enemy::before { left: 16px; top: 22px; width: 8px; height: 8px; box-shadow: 18px 0 #ffd34d; }
+    .rpg-portrait-enemy::after { left: 18px; bottom: 16px; width: 24px; height: 4px; }
+    .rpg-portrait-player::before { left: 20px; top: 22px; box-shadow: 14px 0 #1a1a1a; }
+    .rpg-portrait-player::after { left: 22px; bottom: 18px; width: 18px; }
+    .rpg-name { text-align: left; flex-shrink: 0; min-width: 88px; }
+    .rpg-bars { flex: 1; }
+    .rpg-log { height: 180px; }
+    .rpg-side-player {
+        flex-wrap: wrap;
+    }
+    .rpg-actions {
+        order: 3;
+        width: 100%;
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* When the coreboot flash sequence is running, every other surface
+   on the page is forcibly hidden so no chrome from QNX, the
+   Server 2003 desktop, the install animation, or BIOS Setup leaks
+   through during the transition. The flash overlay itself
+   (.coreboot-flash) is exempt. */
+body.coreboot-flashing > *:not(.coreboot-flash):not(script):not(style) {
+    display: none !important;
+}
+
+/* Avoid widow words: a single dangling word on the last line
+   of a paragraph looks bad on console prompts and dialogs.
+   text-wrap: pretty re-flows wrap points to prevent it where
+   the browser supports it (Chrome 117+, Safari 17.4+). Older
+   browsers fall back to the normal wrap algorithm. */
+.wb-friction-body,
+.wb-friction-body p,
+.wb-friction-body li,
+.wb-about-section p,
+.wb-tank-meta p,
+.wb-tank-meta,
+.wbp-banner,
+.wbp-note,
+.wb5-account-sub,
+.wb5-active-sub,
+.wb4-active-sub,
+.wb3-game-sub,
+.wb-game-hint {
+    text-wrap: pretty;
 }

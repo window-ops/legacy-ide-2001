@@ -228,7 +228,7 @@
         .join("");
       var topic = topics[activeIdx];
       bd.innerHTML =
-        '<div class="dialog" style="max-width: 880px;">' +
+        '<div class="dialog" style="max-width: 1020px;">' +
         '<div class="dialog-header">Ajutor și Asistență, Windows Server 2003</div>' +
         '<div class="dialog-body" style="padding: 0;">' +
         '<div class="help-banner">' +

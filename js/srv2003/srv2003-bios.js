@@ -344,7 +344,13 @@
                     return '<div class="bios-field' + sel + '" data-bios-field="' + i + '"><span class="bios-field-label">' + f.label + ':</span></div>' +
                         '<div class="bios-field-block" data-bios-field="' + i + '">' + val + '</div>';
                 }
-                else if (f.type === 'action') val = '';
+                else if (f.type === 'action') {
+                    // The Supervisor Password field is an action that
+                    // also exposes its current state. Showing it on
+                    // the same row makes the "cleared" feedback
+                    // immediate after the prompt closes.
+                    val = (f.id === 'adminPwd') ? '[' + settings.adminPwd + ']' : '';
+                }
                 return '<div class="bios-field' + sel + '" data-bios-field="' + i + '">' +
                     '<span class="bios-field-label">' + f.label + (f.type === 'action' ? '' : ':') + '</span>' +
                     '<span class="bios-field-value">' + val + '</span>' +

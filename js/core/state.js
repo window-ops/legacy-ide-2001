@@ -14,7 +14,8 @@ var STATE = {
     contextNode: null,
     prefs: {
         strict: true, romanian: true, inlineStyle: false,
-        highlight: false, autoClose: false, osBanner: true, dark: false,
+        highlight: false, autoClose: false, autoIndent: false,
+        osBanner: true, dark: false,
         antiHang: true, allowTransitional: true,
         startMenuStyle: 'modern',
         // 'bar' shows close affordance only in the existing dialog

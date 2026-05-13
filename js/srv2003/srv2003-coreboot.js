@@ -170,7 +170,7 @@
       // Drops from SB bottom-left (x=494, y=124) to SPI top (y=180).
       '<g class="arch-bus' + active("lpc") + '" data-arch="lpc">' +
       '<line x1="494" y1="124" x2="494" y2="180" stroke="#000" stroke-width="1.3"/>' +
-      '<text x="502" y="156" font-family="Lucida Console, Consolas, monospace" font-size="9">LPC / SPI</text>' +
+      '<text x="486" y="156" text-anchor="end" font-family="Lucida Console, Consolas, monospace" font-size="9">LPC / SPI</text>' +
       "</g>" +
       // ===== SPI flash chip (the target of the flash) =====
       // SOIC-8 with pins on top and bottom, x=444-544 y=180-240.
@@ -243,6 +243,12 @@
   // ============================================================
   function runFlashSequence() {
     if (document.getElementById("corebootFlashRoot")) return;
+    // Hide everything else IMMEDIATELY by adding a body class that
+    // sets all other surfaces (Server 2003 desktop, taskbar, QNX
+    // kiosk, install animation, BIOS) to display:none. The flash
+    // overlay then mounts on a clean black background and nothing
+    // else can flicker through during the transition.
+    document.body.classList.add("coreboot-flashing");
     var root = document.createElement("div");
     root.id = "corebootFlashRoot";
     root.className = "coreboot-flash";
@@ -281,7 +287,7 @@
       root.innerHTML =
         '<div class="cb-shell">' +
         '<div class="cb-titlebar">' +
-        "gdx-net.local : remote-flash 0.4 : tty0" +
+        "GDX-APPLIANCE-A04 / FLASH FIRMWARE / coreboot 4.22-gdx" +
         "</div>" +
         '<div class="cb-body">' +
         '<div class="cb-pane cb-arch-pane" id="cbArchPane">' +
@@ -484,44 +490,8 @@
       await delay(700);
       log("Expected: " + ctx.payloadHash);
       await delay(300);
-      if (ctx.attempt === 1) {
-        // The deliberate failure: WP was active at start, the
-        // image got truncated mid-download. Make this look real:
-        // hash mismatch + a hint that the WP register was set
-        // when the SPI shadow was prepared.
-        log("Computed: 39c1d2bc8f49a708... TRUNCATED", "cb-err");
-        log("ERROR: SHA-256 mismatch.", "cb-err");
-        log(
-          "The flash region was held read-only at the moment the SPI",
-          "cb-err",
-        );
-        log("controller copied the prefetch buffer. Result: payload", "cb-err");
-        log("was clipped at byte 426496.", "cb-err");
-        log("");
-        log(
-          "Verify that BIOS Setup -> Advanced -> Flash Write Protect",
-          "cb-warn",
-        );
-        log("is set to Disabled. Then reluati de la etapa 1.", "cb-warn");
-        log("");
-        setAction(
-          '<button class="cb-btn cb-btn-default" id="cbRetryAfterFail">Înapoi la Setup</button>' +
-          '<button class="cb-btn" id="cbAbortAfterFail">Anulează</button>',
-        );
-        var which = await new Promise(function (res) {
-          document
-            .getElementById("cbRetryAfterFail")
-            .addEventListener("click", function () {
-              res("retry");
-            });
-          document
-            .getElementById("cbAbortAfterFail")
-            .addEventListener("click", function () {
-              res("abort");
-            });
-        });
-        return which;
-      }
+      // The flash is satirically reliable on this BIOS revision; we
+      // don\'t do the deliberate first-attempt mismatch any more.
       log("Computed: " + ctx.payloadHash);
       await delay(400);
       log("SHA-256 OK.", "cb-ok");
@@ -718,18 +688,19 @@
       }
       next();
       function finish() {
-        // Persist the flash. Subsequent reloads should detect this
-        // and skip every legacy environment.
+        // After SeaBIOS finishes POST, commit the flash and hand
+        // off directly to the post-flash takeover. We deliberately
+        // do NOT insert a safe-off-style confirmation screen here:
+        // the flash is complete, there is no Phoenix BIOS to
+        // return to, and the new firmware boots straight into the
+        // payload selector. The takeover is mandatory.
         markFlashed();
-        // Hand off to the post-flash splash. The actual full
-        // post-flash environment is implemented in a separate
-        // module loaded next.
         if (typeof window.SRV2K3_COREBOOT_TAKEOVER === "function") {
           try {
             window.SRV2K3_COREBOOT_TAKEOVER();
+            return;
           } catch (e) {}
         }
-        // Drop a permanent splash if no takeover handler exists.
         renderPostFlashSplash();
       }
     }

@@ -62,6 +62,7 @@ function bindPreferenceControls() {
         if (inner) inner.classList.toggle('highlighted', !!STATE.prefs.highlight);
     });
     bindPref('prefAutoClose', 'autoClose');
+    bindPref('prefAutoIndent', 'autoIndent');
     bindPref('prefOSBanner', 'osBanner', function() {
         STATE.bannerDismissed = false;
         renderBanner();
