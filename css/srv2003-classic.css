@@ -4342,19 +4342,7 @@ body.srv2003-desktop .dialog-footer {
     font-size: 13px;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 12px;
     font-family: "Lucida Console", "Consolas", monospace;
-}
-.coreboot-flash .cb-titlebar::before {
-    content: "";
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    background: #80df80;
-    border-radius: 50%;
-    box-shadow: 0 0 6px #80df80;
 }
 .coreboot-flash .cb-body {
     display: grid;
@@ -5081,61 +5069,14 @@ body.srv2003-desktop .dialog-footer {
     align-items: center;
     gap: 14px;
 }
-.wb4-top-center {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    font-size: 13px;
-    color: rgba(255, 255, 255, 0.75);
-}
-.wb4-icon-tri, .wb4-icon-info {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.12);
-    color: #ffffff;
-    font-size: 12px;
-    font-style: italic;
-    font-weight: bold;
-}
-.wb4-icon-tri::before {
-    content: "";
-    width: 0;
-    height: 0;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 7px solid #ffd34d;
-}
-.wb4-friends {
-    background: rgba(255, 255, 255, 0.10);
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-}
-.wb4-profile {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-.wb4-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #ffd34d 0%, #df9020 100%);
-    display: inline-block;
-}
-.wb4-username { font-size: 13px; font-weight: 600; }
-.wb4-trophies {
-    background: rgba(255, 255, 255, 0.10);
-    padding: 4px 10px;
-    border-radius: 4px;
-    font-size: 12px;
+.wb4-brand {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    letter-spacing: 2px;
 }
 .wb4-clock {
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(255, 255, 255, 0.85);
     font-variant-numeric: tabular-nums;
 }
@@ -5169,7 +5110,14 @@ body.srv2003-desktop .dialog-footer {
     gap: 22px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 16px;
+    /* Padding inside the scroll container gives the active
+       tile's outer glow physical room to render without being
+       clipped by the row's overflow-x:auto. Negative margins
+       compensate so the row's outer layout dimensions stay
+       unchanged. The 32px figure covers the worst-case glow
+       extent of an active tile (3px ring + scale + 18px blur). */
+    padding: 32px 32px 24px 32px;
+    margin: -32px -32px 0 -32px;
 }
 .wb4-tile {
     width: 200px;
@@ -5190,8 +5138,8 @@ body.srv2003-desktop .dialog-footer {
 .wb4-tile-active {
     transform: scale(1.06);
     box-shadow:
-        0 0 0 4px #5ad8ff,
-        0 0 32px 6px rgba(90, 216, 255, 0.55);
+        0 0 0 3px #5ad8ff,
+        0 0 18px 2px rgba(90, 216, 255, 0.45);
     z-index: 3;
 }
 .wb4-tile-system .wb4-art-system { width: 100%; height: 100%; }
@@ -5248,9 +5196,6 @@ body.srv2003-desktop .dialog-footer {
 .wb5-tab-active {
     font-weight: 600;
 }
-.wb5-tab-disabled {
-    color: rgba(26, 26, 26, 0.45);
-}
 .wb5-top-right {
     display: flex;
     align-items: center;
@@ -5258,10 +5203,19 @@ body.srv2003-desktop .dialog-footer {
 }
 .wb5-icon {
     color: #1a1a1a;
-    font-size: 20px;
+    font-size: 22px;
     cursor: pointer;
     line-height: 1;
+    width: 30px;
+    height: 30px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 80ms linear;
 }
+.wb5-icon:hover { background: rgba(0, 0, 0, 0.10); }
+.wb5-icon:focus { outline: 2px solid #2a4a7a; outline-offset: 1px; }
 .wb5-profile {
     display: inline-flex;
     align-items: center;
@@ -5294,7 +5248,11 @@ body.srv2003-desktop .dialog-footer {
     gap: 16px;
     overflow-x: auto;
     overflow-y: hidden;
-    padding-bottom: 8px;
+    /* Padding inside the scroll container gives the active
+       tile's outer glow physical room to render. Negative
+       margins keep the row's outer layout unchanged. */
+    padding: 28px 28px 16px 28px;
+    margin: -28px -28px 0 -28px;
 }
 .wb5-tile {
     width: 140px;
@@ -5319,7 +5277,7 @@ body.srv2003-desktop .dialog-footer {
     transform: scale(1.06);
     box-shadow:
         0 0 0 3px rgba(255, 255, 255, 0.92),
-        0 8px 28px rgba(0, 0, 0, 0.35);
+        0 4px 14px rgba(0, 0, 0, 0.40);
     z-index: 3;
 }
 .wb5-tile-system .wb5-art-system { width: 100%; height: 100%; }
@@ -6006,7 +5964,6 @@ body.srv2003-desktop .dialog-footer {
     .wb4-active-title { font-size: 26px; }
     .wb4-active-sub { font-size: 13px; }
     .wb4-topbar { padding: 0 14px; }
-    .wb4-top-center { display: none; }
     .wb5-topbar { padding: 0 14px; }
     .wb5-content { padding: 16px 14px; }
     .wb5-tile-row { gap: 10px; }

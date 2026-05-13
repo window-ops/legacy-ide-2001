@@ -300,23 +300,23 @@
       : "NVRAM fuse:        unburned";
     root.innerHTML =
       '<div class="wbp">' +
-      '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / coreboot 4.22-gdx / SELECTOR BIOS</div>' +
+      '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / coreboot 4.22-gdx / SELECTOR SISTEM</div>' +
       '<div class="wbp-inner">' +
       '<pre class="wbp-banner">' +
       "Mainboard:         via/epia-ln, BIOS region 524288 bytes\n" +
       "SPI write-protect: dezactivat (jumper J3)\n" +
       "Supervisor:        nu este setat\n" +
       brickLine + "\n\n" +
-      "Selectați BIOS-ul de încărcat:" +
+      "Selectați Sistemul de Operare:" +
       "</pre>" +
       '<div class="wbp-rows">' + rowsHtml + "</div>" +
       (brick
         ? '<div class="wbp-note">' +
-          "O instalare anterioară a Waterboard " + (brick === "w5" ? "5" : "4") + " a inscripționat o variabilă NVRAM permanentă (fuse) care marchează acest aparat ca fiind locked pe generația " + brick.toUpperCase() + " sau mai nouă. Variabila NU poate fi ștearsă, nici prin reset BIOS, nici prin reflashare coreboot, nici prin oprirea aparatului. Modelele mai vechi rămân indisponibile permanent." +
+          "O instalare anterioară a Waterboard " + (brick === "w5" ? "5" : "4") + " a inscripționat o siguranță NVRAM permanentă care marchează acest aparat ca fiind blocat pe generația " + brick.toUpperCase() + " sau mai nouă. Siguranța NU poate fi ștearsă, nici prin reset BIOS, nici prin reflash coreboot, nici prin oprirea aparatului. Modelele mai vechi rămân indisponibile permanent." +
           "</div>"
         : "") +
       '<div class="wbp-footer">' +
-      "Selecția va instala BIOS-ul ales pe partiția /storage. Generațiile W4 și W5 ard variabila NVRAM la prima pornire." +
+      "Selecția va instala Sistemul de Operare ales pe partiția /storage. Generațiile W4 și W5 ard variabila NVRAM la prima pornire." +
       "</div>" +
       "</div>" +
       "</div>";
@@ -344,10 +344,10 @@
     var brandName = variantName(variant);
     root.innerHTML =
       '<div class="wbp">' +
-      '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / INSTALARE BIOS / ' + brandName + "</div>" +
+      '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / INSTALARE / ' + brandName + "</div>" +
       '<div class="wbp-inner">' +
       '<pre class="wbp-banner">' +
-      "Se instalează imaginea BIOS " + brandName + " în /storage..." +
+      "Se instalează Sistemul de Operare " + brandName + " în /storage..." +
       "</pre>" +
       '<div class="wbi-bar"><div class="wbi-bar-fill" id="wbiBar"></div></div>' +
       '<pre class="wbi-log" id="wbiLog"></pre>' +
@@ -365,7 +365,7 @@
         [1100, "[NET]  Bring up eth0               ... OK"],
         [1700, "[GAME] Index /storage/games        ... 5 titluri"],
         [2400, "[USER] Cont utilizator              ... nu este necesar"],
-        [3100, "[DRM]  Subsistem DRM                ... absent (intenționat)"],
+        [3100, "[DRM]  Subsistem DRM                ... absent"],
         [3800, "[OK]   Sistem gata in 3,8s."]
       ];
     } else if (variant === "w4") {
@@ -377,8 +377,8 @@
         [1700, "[NVRAM] Lock  page 0x12 (anti-rollback) ... OK"],
         [2100, "[NET]  Bring up eth0                ... OK"],
         [2500, "[NET]  Auth wb4-auth.intercal.com   ... OK"],
-        [2900, "[ACCT] Cont Free                    ... WB Plus: INACTIV"],
-        [3400, "[DRM]  Modul optical-disc handshake ... incarcat"],
+        [2900, "[ACCT] Cont Gratuit                 ... WB Plus: INACTIV"],
+        [3400, "[DRM]  Modul optical-disc handshake ... încărcat"],
         [3900, "[GAME] Index /storage/games         ... 7 titluri, 5 cer disc"],
         [4500, "[OK]   Sistem gata in 4,5s."]
       ];
@@ -393,8 +393,8 @@
         [2500, "[NET]  Bring up eth0                ... OK"],
         [2900, "[NET]  Auth wb5-auth.intercal.com   ... OK"],
         [3300, "[ACCT] Cont ICE                     ... necesar la prima pornire"],
-        [3700, "[REG]  Verificare regiune RO         ... 12 titluri marcate restricționate"],
-        [4100, "[DRM]  Modul optical-disc handshake ... incarcat"],
+        [3700, "[REG]  Verificare regiune RO         ... 12 titluri marcate ca restricționate"],
+        [4100, "[DRM]  Modul optical-disc handshake ... încărcat"],
         [4500, "[FW]   Actualizări de firmware       ... 2 obligatorii"],
         [4900, "[GAME] Index /storage/games         ... 8 titluri, 6 cer disc"],
         [5400, "[OK]   Sistem gata in 5,4s."]
@@ -550,26 +550,23 @@
     root.innerHTML =
       '<div class="wb4-shell wb-shell">' +
       '<div class="wb4-bg-waves"></div>' +
+      // Top bar: brand on the left so the user can tell at a
+      // glance which OS they booted, clock on the right. The
+      // earlier triangle/info/friends/trophies/username were
+      // decorative only (no behaviour); they have been removed
+      // so the chrome only shows things the user can act on.
       '<div class="wb4-topbar">' +
       '<div class="wb4-top-left">' +
-      '<span class="wb4-icon-tri" aria-hidden="true"></span>' +
-      '<span class="wb4-icon-info" aria-hidden="true">i</span>' +
-      "</div>" +
-      '<div class="wb4-top-center">' +
-      '<span class="wb4-friends">friends 0</span>' +
+      '<span class="wb4-brand">WATERBOARD 4</span>' +
       "</div>" +
       '<div class="wb4-top-right">' +
-      '<span class="wb4-profile">' +
-      '<span class="wb4-avatar"></span>' +
-      '<span class="wb4-username">jucator</span>' +
-      "</span>" +
-      '<span class="wb4-trophies">' + (subscribed ? "★ 14" : "★ 14") + "</span>" +
       '<span class="wb4-clock" id="wbClock">' + formatClock(new Date()) + "</span>" +
       "</div>" +
       "</div>" +
       // Subtle subscription status pill — replaces the old
       // big yellow nag banner. Just a small line under the
-      // top bar, not a screaming attention grab.
+      // top bar, not a screaming attention grab. Hidden once
+      // the user activates WB Plus.
       (!subscribed
         ? '<div class="wb4-substrip">' +
           'WB Plus inactiv. Multiplayer indisponibil. ' +
@@ -666,14 +663,18 @@
 
     root.innerHTML =
       '<div class="wb5-shell wb-shell">' +
+      // Top bar: only the single active "Jocuri" tab remains.
+      // The earlier "Media" tab was decorative (disabled and
+      // unwired); removed rather than left as visual noise.
+      // The search icon was also decorative and was removed.
+      // Settings ⚙ is wired to open the system menu so the
+      // icon corresponds to an actual action.
       '<div class="wb5-topbar">' +
       '<div class="wb5-tabs">' +
       '<span class="wb5-tab wb5-tab-active">Jocuri</span>' +
-      '<span class="wb5-tab wb5-tab-disabled">Media</span>' +
       "</div>" +
       '<div class="wb5-top-right">' +
-      '<span class="wb5-icon" aria-hidden="true" title="Căutare">⌕</span>' +
-      '<span class="wb5-icon" data-wb5-action="settings" title="Setări">⚙</span>' +
+      '<span class="wb5-icon" data-wb5-action="settings" title="Setări sistem" tabindex="0" role="button">⚙</span>' +
       '<span class="wb5-profile" title="' + account + '"><span class="wb5-avatar">' + account.charAt(0).toUpperCase() + "</span></span>" +
       '<span class="wb5-clock" id="wbClock">' + formatClock(new Date()) + "</span>" +
       "</div>" +
@@ -743,6 +744,17 @@
         }
       });
     });
+    // Settings gear in the top right opens the same system
+    // menu the system tile opens. The earlier W5 chrome had
+    // a decorative gear icon with no handler; now it matches
+    // the user's expectation.
+    var settingsIcon = root.querySelector('[data-wb5-action="settings"]');
+    if (settingsIcon) {
+      settingsIcon.addEventListener("click", function () { openSystemMenu("w5"); });
+      settingsIcon.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openSystemMenu("w5"); }
+      });
+    }
 
     // Mandatory firmware update prompt on boot. Polite the
     // first time, blocks multiplayer the second time.
@@ -863,22 +875,22 @@
         '<div class="wb-about-section-title">Specificații</div>' +
         '<table class="wb-about-table">' +
         '<tr><td>Model</td><td>Waterboard 3 SCPH-50004</td></tr>' +
-        '<tr><td>CPU</td><td>Emotion Engine @ 294 MHz (emulat pe VIA C7)</td></tr>' +
+        '<tr><td>CPU</td><td>Emotion Engine la 294 MHz (emulat pe VIA C7)</td></tr>' +
         '<tr><td>GPU</td><td>Graphics Synthesizer (emulat)</td></tr>' +
         '<tr><td>Memorie</td><td>32 MB RDRAM (emulat în 256 MB DDR1)</td></tr>' +
         '<tr><td>Stocare</td><td>240 MB pe partiția /storage</td></tr>' +
         '<tr><td>Versiune</td><td>WB3-2.4.0 (2024)</td></tr>' +
         '<tr><td>Producător</td><td>ICE Legacy Series</td></tr>' +
-        '<tr><td>Cont necesar</td><td>NU</td></tr>' +
-        '<tr><td>Verificare disc</td><td>NU</td></tr>' +
-        '<tr><td>Abonament</td><td>NU</td></tr>' +
-        '<tr><td>Restricții regionale</td><td>NU</td></tr>' +
+        '<tr><td>Cont necesar</td><td>nu</td></tr>' +
+        '<tr><td>Verificare disc</td><td>nu</td></tr>' +
+        '<tr><td>Abonament</td><td>nu</td></tr>' +
+        '<tr><td>Restricții regionale</td><td>nu</td></tr>' +
         "</table>" +
         "</div>" +
         '<div class="wb-about-section">' +
-        '<div class="wb-about-section-title">Despre satira</div>' +
-        '<p>Waterboard 3 este forma pe care platformele de jocuri o aveau înainte ca producătorii consolelor să-și revadă politicile de licențiere. Cumpărați un joc, îl porniți, îl jucați. Discul fizic funcționează ca licență. Niciun cont, niciun abonament, niciun server între voi și jocul vostru.</p>' +
-        '<p>Satira proiectului are trei părți. La școală, programa analitică hotărăște ce limbaje și ce instrumente puteți folosi. Acasă, când deschideți consola, producătorul ei hotărăște dacă jocul pe care l-ați cumpărat astăzi va mai porni mâine. Waterboard 3 este referința pentru cum nu trebuia să se ajungă, dar s-a ajuns: pe Waterboard 4 și 5 producătorul consolei se interpune între voi și conținutul plătit.</p>' +
+        '<div class="wb-about-section-title">Despre acest sistem</div>' +
+        '<p>Waterboard 3 este o consolă din generația 2000. Cumpărați jocul, introduceți discul, îl jucați. Discul fizic ține locul licenței. Sistemul nu cere cont, nu cere abonament și nu necesită conexiune la internet pentru a porni jocurile.</p>' +
+        '<p>Nu există servicii online proprii. Salvările stau pe cardurile de memorie locale. Jocurile rulează independent. Producătorul nu poate dezactiva sistemul după vânzare.</p>' +
         "</div>";
     } else if (variant === "w4") {
       content =
@@ -886,23 +898,23 @@
         '<div class="wb-about-section-title">Specificații</div>' +
         '<table class="wb-about-table">' +
         '<tr><td>Model</td><td>Waterboard 4 CUH-2216</td></tr>' +
-        '<tr><td>CPU</td><td>Jaguar 8-core @ 1.6 GHz (emulat)</td></tr>' +
-        '<tr><td>GPU</td><td>Liverpool 1.84 TFLOPS (emulat)</td></tr>' +
+        '<tr><td>CPU</td><td>Jaguar 8-core la 1,6 GHz (emulat)</td></tr>' +
+        '<tr><td>GPU</td><td>Liverpool 1,84 TFLOPS (emulat)</td></tr>' +
         '<tr><td>Memorie</td><td>8 GB GDDR5 (emulat în 256 MB DDR1)</td></tr>' +
         '<tr><td>Stocare</td><td>500 GB / 240 MB pe partiția /storage</td></tr>' +
         '<tr><td>Versiune</td><td>WB4-9.51.0 (2024)</td></tr>' +
         '<tr><td>Producător</td><td>Intercal Computer Entertainment</td></tr>' +
-        '<tr><td>Cont necesar</td><td>Recomandat</td></tr>' +
-        '<tr><td>Verificare disc</td><td>DA, la fiecare lansare</td></tr>' +
-        '<tr><td>Abonament</td><td>WB Plus pentru multiplayer online</td></tr>' +
-        '<tr><td>Restricții regionale</td><td>Pentru unele titluri</td></tr>' +
+        '<tr><td>Cont necesar</td><td>recomandat</td></tr>' +
+        '<tr><td>Verificare disc</td><td>la fiecare lansare</td></tr>' +
+        '<tr><td>Abonament</td><td>WB Plus pentru multiplayer</td></tr>' +
+        '<tr><td>Restricții regionale</td><td>pentru unele titluri</td></tr>' +
         "</table>" +
         "</div>" +
         '<div class="wb-about-section">' +
-        '<div class="wb-about-section-title">Despre satira</div>' +
-        '<p>Waterboard 4 reproduce comportamentul real al platformelor moderne de jocuri. Cumpărați un joc, îl instalați complet, dar la fiecare lansare consola cere discul fizic în unitate ca să confirme că aveți licența. Pierdeți discul pentru un titlu plătit și instalat: nu mai puteți juca, deși tehnic ar funcționa.</p>' +
-        '<p>Multiplayer-ul online este blocat în spatele unui abonament WB Plus, separat de prețul jocului. Pentru titluri cross-platform în care studio-ul a vândut același multiplayer și pe PC fără cost suplimentar, plătiți un al doilea acces: către producătorul consolei, pentru dreptul de a vă conecta la matchmaking.</p>' +
-        '<p>Satira proiectului are trei părți. La școală programa decide ce puteți învăța. Acasă consola decide cu ce condiții puteți juca ce ați cumpărat. Producătorul ei se interpune între voi și conținutul plătit, și își rezervă dreptul de a schimba condițiile când vrea.</p>' +
+        '<div class="wb-about-section-title">Despre acest sistem</div>' +
+        '<p>Waterboard 4 este o consolă de generație recentă. Jocurile pot fi cumpărate fizic sau digital și se instalează complet pe SSD-ul intern. La fiecare lansare unitatea verifică prezența discului original în slot. Fără disc, jocul nu pornește, chiar dacă fișierele de instalare sunt prezente.</p>' +
+        '<p>Multiplayer-ul este condiționat de un abonament WB Plus activ, plătit separat de prețul jocurilor. Pentru titluri care există și pe PC, modul multiplayer este de obicei accesibil acolo fără cost suplimentar.</p>' +
+        '<p>Contul ICE nu este obligatoriu, dar fără el sunt indisponibile: magazinul digital, salvările în cloud, multiplayer-ul, WB Plus. La prima pornire se afișează un mesaj care recomandă crearea contului.</p>' +
         "</div>";
     } else {
       content =
@@ -910,23 +922,25 @@
         '<div class="wb-about-section-title">Specificații</div>' +
         '<table class="wb-about-table">' +
         '<tr><td>Model</td><td>Waterboard 5 CFI-2016</td></tr>' +
-        '<tr><td>CPU</td><td>Zen 2 8-core @ 3.5 GHz (emulat)</td></tr>' +
-        '<tr><td>GPU</td><td>RDNA 2 10.28 TFLOPS (emulat)</td></tr>' +
+        '<tr><td>CPU</td><td>Zen 2 8-core la 3,5 GHz (emulat)</td></tr>' +
+        '<tr><td>GPU</td><td>RDNA 2 10,28 TFLOPS (emulat)</td></tr>' +
         '<tr><td>Memorie</td><td>16 GB GDDR6 (emulat în 256 MB DDR1)</td></tr>' +
         '<tr><td>Stocare</td><td>825 GB SSD / 240 MB pe partiția /storage</td></tr>' +
         '<tr><td>Versiune</td><td>WB5-3.10 (2024)</td></tr>' +
         '<tr><td>Producător</td><td>Intercal Computer Entertainment</td></tr>' +
-        '<tr><td>Cont necesar</td><td>OBLIGATORIU</td></tr>' +
-        '<tr><td>Verificare disc</td><td>DA, la fiecare lansare</td></tr>' +
-        '<tr><td>Abonament</td><td>WB Plus pentru multiplayer și cloud-saves</td></tr>' +
+        '<tr><td>Cont necesar</td><td>obligatoriu</td></tr>' +
+        '<tr><td>Verificare disc</td><td>la fiecare lansare</td></tr>' +
+        '<tr><td>Abonament</td><td>WB Plus pentru multiplayer și salvări cloud</td></tr>' +
         '<tr><td>Restricții regionale</td><td>132 țări blocate la lansare</td></tr>' +
-        '<tr><td>Actualizări forțate</td><td>DA, ocazional ce elimină funcții</td></tr>' +
+        '<tr><td>Actualizări forțate</td><td>da, unele elimină funcții existente</td></tr>' +
         "</table>" +
         "</div>" +
         '<div class="wb-about-section">' +
-        '<div class="wb-about-section-title">Despre satira</div>' +
-        '<p>Waterboard 5 reprezintă forma ideală a unei console moderne din perspectiva producătorului ei. Tot ce făcea Waterboard 4 (verificare disc, abonament pentru multiplayer), plus: cont obligatoriu de la prima pornire, restricții regionale care vă pot bloca jocuri pe care le-ați plătit dacă vă mutați în țara nepotrivită, actualizări forțate de firmware care ocazional elimină funcții pentru care ați cumpărat consola, și posibilitatea ca jocurile din biblioteca dumneavoastră personală să fie șterse când expiră contractul de licențiere între producător și studio.</p>' +
-        '<p>Satira proiectului are trei părți. La școală, programa decide ce limbaje aveți voie să folosiți. Acasă, când vreți să vă jucați, producătorul consolei decide dacă jocul pe care l-ați cumpărat astăzi va mai porni mâine, dacă veți avea acces la el din regiunea în care ați călătorit, dacă serverele vor fi încă pornite peste cinci ani, și dacă funcția pentru care ați cumpărat consola va supraviețui următoarei actualizări obligatorii. Singurul element comun între cele două: cineva între voi și ceea ce ați plătit.</p>' +
+        '<div class="wb-about-section-title">Despre acest sistem</div>' +
+        '<p>Waterboard 5 este consola de generație curentă a ICE. Păstrează tot ce face Waterboard 4 (verificare disc, abonament pentru multiplayer) și adaugă mai multe restricții.</p>' +
+        '<p>Contul ICE este obligatoriu de la prima pornire. Fără cont activ, sistemul nu trece de ecranul inițial de configurare.</p>' +
+        '<p>Sistemul aplică restricții regionale verificate la fiecare lansare: 12 titluri din catalogul actual nu pot fi pornite din România, chiar dacă au fost achiziționate dintr-o altă regiune. Restricția se aplică pe contul activ, nu pe locul de cumpărare.</p>' +
+        '<p>Actualizările de firmware sunt obligatorii pentru menținerea accesului la serviciile online. Unele actualizări pot elimina funcții existente.</p>' +
         "</div>";
     }
     bd.innerHTML =
@@ -966,11 +980,11 @@
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">BIOS blocat prin variabilă NVRAM permanentă</div>' +
       '<div class="wb-friction-body">' +
-      "<p>" + variantName(variant) + ' a inscripționat la prima pornire o variabilă NVRAM <code>WB_FUSE_GEN=' + (brick || variant).toUpperCase() + '</code> și a închis fizic pagina 0x12 (anti-rollback). Aceste protecții <strong>nu pot fi ștearse</strong>, nici prin reflashare coreboot, nici prin reset BIOS, nici prin scoaterea bateriei CMOS.</p>' +
-      "<p>Reflashing-ul coreboot este în continuare disponibil și va aduce înapoi selectorul de BIOS, dar generațiile anterioare " + (brick || variant).toUpperCase() + " rămân indisponibile permanent: fusul a fost ars la nivel de hardware.</p>" +
+      "<p>" + variantName(variant) + ' a inscripționat la prima pornire o siguranță NVRAM <code>WB_FUSE_GEN=' + (brick || variant).toUpperCase() + '</code> și a închis fizic pagina 0x12 (anti-rollback). Aceste protecții <strong>nu pot fi șterse</strong>, nici prin reflash coreboot, nici prin reset BIOS, nici prin scoaterea bateriei CMOS.</p>' +
+      "<p>Procesul de reflash coreboot este în continuare disponibil și va aduce înapoi selectorul de sistem, dar generațiile anterioare " + (brick || variant).toUpperCase() + " rămân indisponibile permanent: siguranța a fost arsă la nivel de hardware.</p>" +
       "</div>" +
       '<div class="wb-friction-actions">' +
-      '<button class="wb-btn wb-btn-primary" data-wb-install="reflash">Reflash coreboot</button>' +
+      '<button class="wb-btn wb-btn-primary" data-wb-install="reflash">Reinstalează coreboot</button>' +
       '<button class="wb-btn" data-wb-install="cancel">Anulează</button>' +
       "</div>" +
       "</div>";
@@ -1035,12 +1049,12 @@
       '<div class="wbp-inner wb-poff">' +
       '<pre class="wbp-banner">' +
       "Aparatul este oprit. Sistemul de operare " + variantName(variant) + " nu rulează.\n" +
-      "Apăsați Power On pentru a relansa sistemul." +
+      "Apăsați Pornire pentru a relansa sistemul." +
       "</pre>" +
       '<div class="wb-poff-actions">' +
-      '<button class="wbp-btn wbp-btn-default" id="wbPoffOn">Power On</button>' +
+      '<button class="wbp-btn wbp-btn-default" id="wbPoffOn">Pornire</button>' +
       (variant === "w4" || variant === "w5"
-        ? '<button class="wbp-btn" id="wbPoffReset">Reflash coreboot</button>'
+        ? '<button class="wbp-btn" id="wbPoffReset">Reinstalează coreboot</button>'
         : "") +
       "</div>" +
       "</div>" +
@@ -1054,7 +1068,7 @@
       rs.addEventListener("click", function () {
         if (confirm(
           "Această procedură va șterge contul, abonamentele și starea de instalare a jocurilor, " +
-          "apoi va relansa selectorul de BIOS. Variabila NVRAM (fuse) nu va fi ștearsă: generațiile anterioare " +
+          "apoi va relansa selectorul de sistem. Siguranța NVRAM nu va fi ștearsă: generațiile anterioare " +
           "rămân indisponibile. Continuați?"
         )) {
           // Wipe variant only. Keep coreboot.v1 (we stay in
@@ -1629,7 +1643,7 @@
     var bd = makeGameRoot("Strato Blitz");
     var area = bd.querySelector("#wbGameArea");
     var hint = bd.querySelector("#wbGameHint");
-    hint.textContent = "Click pe unitatea verde, apoi click pe o celulă vecină pentru mutare, sau pe inamic pentru atac. Esc închide.";
+    hint.textContent = "Apăsați pe o unitate verde, apoi pe o celulă vecină pentru mutare, sau pe un inamic adiacent pentru atac. Esc închide.";
     var COLS = 7, ROWS = 5, CELL = 60;
     var canvas = document.createElement("canvas");
     canvas.width = COLS * CELL; canvas.height = ROWS * CELL + 40;
@@ -1843,7 +1857,7 @@
       '<button class="rpg-btn" data-rpg-act="attack">Atac (0 MP)</button>' +
       '<button class="rpg-btn" data-rpg-act="special">Specială (3 MP)</button>' +
       '<button class="rpg-btn" data-rpg-act="defend">Apărare (0 MP)</button>' +
-      '<button class="rpg-btn" data-rpg-act="heal">Pulse Vindecare (4 MP)</button>' +
+      '<button class="rpg-btn" data-rpg-act="heal">Puls de Vindecare (4 MP)</button>' +
       "</div>" +
       "</div>" +
       "</div>";
@@ -1898,7 +1912,7 @@
         '<button class="rpg-btn" data-rpg-act="attack">Atac (0 MP)</button>' +
         '<button class="rpg-btn" data-rpg-act="special"' + (pMp < 3 ? " disabled" : "") + '>Specială (3 MP)</button>' +
         '<button class="rpg-btn" data-rpg-act="defend">Apărare (0 MP)</button>' +
-        '<button class="rpg-btn" data-rpg-act="heal"' + (pMp < 4 ? " disabled" : "") + '>Pulse Vindecare (4 MP)</button>';
+        '<button class="rpg-btn" data-rpg-act="heal"' + (pMp < 4 ? " disabled" : "") + '>Puls de Vindecare (4 MP)</button>';
       document.getElementById("rpgActions").querySelectorAll("[data-rpg-act]").forEach(function (b) {
         b.addEventListener("click", function () { playerAct(b.getAttribute("data-rpg-act")); });
       });
@@ -2201,6 +2215,7 @@
       draw();
     }
     function checkWin() {
+      if (boxes.length === 0) return; // Defensive: empty level isn't a win.
       var all = boxes.every(function (b) {
         return targets.some(function (t) { return t.x === b.x && t.y === b.y; });
       });
@@ -2251,7 +2266,7 @@
       }).length;
       ctx.fillStyle = "#0a0e1a"; ctx.fillRect(0, ROWS * CELL, canvas.width, 40);
       ctx.fillStyle = "#a0c8d0"; ctx.font = "13px 'Tahoma', sans-serif"; ctx.textAlign = "left";
-      ctx.fillText("Cuburi pe țintă: " + onTargetCount + "/" + boxes.length, 10, ROWS * CELL + 24);
+      ctx.fillText("Cuburi pe ținte: " + onTargetCount + "/" + boxes.length, 10, ROWS * CELL + 24);
       ctx.textAlign = "right"; ctx.fillStyle = "#909090";
       ctx.fillText("Mișcări: " + history.length, canvas.width - 10, ROWS * CELL + 24);
       if (won) {

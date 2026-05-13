@@ -119,6 +119,60 @@ function onEditorKey(e) {
             }
         }
     }
+    if (STATE.prefs.autoIndent && e.key === 'Enter' && STATE.activeFile) {
+        // Preserve leading whitespace of the current line on Enter,
+        // plus one extra level (4 spaces) when the line opens a
+        // block: trailing { ( [ for JS/CSS, or a non-void opening
+        // HTML tag for .html files. If the cursor sits between an
+        // open/close pair on the same line (e.g. {| } ), additionally
+        // push the closing pair onto its own line, indented one
+        // level less than the inner block.
+        var aiPos = ta.selectionStart;
+        var aiBefore = ta.value.substring(0, aiPos);
+        var aiAfter = ta.value.substring(ta.selectionEnd);
+        var aiLineStart = aiBefore.lastIndexOf('\n') + 1;
+        var aiCurrentLine = aiBefore.substring(aiLineStart);
+        var aiIndentMatch = /^([ \t]*)/.exec(aiCurrentLine);
+        var aiIndent = aiIndentMatch ? aiIndentMatch[1] : '';
+        var aiTrimmedRight = aiCurrentLine.replace(/\s+$/, '');
+        var aiNode = findNode(STATE.tree, STATE.activeFile);
+        var aiIsHTML = aiNode && /\.html?$/i.test(aiNode.name);
+        var aiExtra = '';
+        var aiOpensPair = false;
+        var aiPairClose = '';
+        if (/[\{\(\[]$/.test(aiTrimmedRight)) {
+            aiExtra = '    ';
+            var aiOpenChar = aiTrimmedRight.charAt(aiTrimmedRight.length - 1);
+            aiPairClose = aiOpenChar === '{' ? '}' :
+                          aiOpenChar === '(' ? ')' : ']';
+            aiOpensPair = (aiAfter.charAt(0) === aiPairClose);
+        } else if (aiIsHTML) {
+            var aiTagMatch = /<([a-zA-Z][\w]*)([^<>]*)?>$/.exec(aiTrimmedRight);
+            if (aiTagMatch) {
+                var aiTag = aiTagMatch[1].toLowerCase();
+                var aiAttrs = aiTagMatch[2] || '';
+                var aiVoidEls = ['br','hr','img','input','meta','link','area','base','col','embed','param','source','track','wbr'];
+                var aiSelfClose = /\/\s*$/.test(aiAttrs);
+                if (aiVoidEls.indexOf(aiTag) === -1 && !aiSelfClose) {
+                    aiExtra = '    ';
+                    aiOpensPair = new RegExp('^</' + aiTag + '>', 'i').test(aiAfter);
+                }
+            }
+        }
+        e.preventDefault();
+        var aiInsert, aiCaret;
+        if (aiOpensPair) {
+            aiInsert = '\n' + aiIndent + aiExtra + '\n' + aiIndent;
+            aiCaret = aiPos + 1 + aiIndent.length + aiExtra.length;
+        } else {
+            aiInsert = '\n' + aiIndent + aiExtra;
+            aiCaret = aiPos + aiInsert.length;
+        }
+        ta.value = aiBefore + aiInsert + aiAfter;
+        ta.selectionStart = ta.selectionEnd = aiCaret;
+        onEditorInput();
+        return;
+    }
 }
 function updateLineNumbers() {
     var ta = $('editor'); if (!ta) return;
