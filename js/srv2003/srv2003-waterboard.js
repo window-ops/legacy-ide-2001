@@ -360,107 +360,537 @@
 
   // ============================================================
   // COREBOOT SETUP UTILITY
-  // Simplified counterpart to the Phoenix BIOS Setup utility:
-  // single screen, no tabs, mostly read-only because coreboot
-  // bakes its choices in at compile time. The only user-editable
-  // entries are the boot timeout, the default-OS hint, and the
-  // POST verbosity. Everything else is exposed for inspection
-  // and marked as compiled-in. Reached from the picker via F2
-  // or the on-screen [F2] Setup button.
+  // Models the real coreboot Kconfig menuconfig screen. Real
+  // coreboot's "BIOS setup" is the curses Kconfig UI you run
+  // before compilation: a tree of submenus (General setup,
+  // Mainboard, Chipset, Console options, System tables,
+  // Payload, VGA BIOS, Debugging) with values either compiled
+  // in or chosen here. Most options are read-only at runtime
+  // because coreboot bakes them at build time; a small set is
+  // editable and persisted in NVRAM.
+  //
+  // The user picks a display theme:
+  //   - "classic":  ncurses look the real Kconfig screen has
+  //   - "modern":   plain blue dialog UI consistent with the
+  //                 rest of the post-flash chrome
+  //
+  // The Load Alternate Configuration File entry doubles as the
+  // factory NVRAM restore: loading the factory backup wipes
+  // the brick fuse and the variant state, returning the
+  // appliance to a clean post-flash state without re-flashing
+  // coreboot itself.
   // ============================================================
-  var COREBOOT_SETUP_KEY = "ide.coreboot.setup.v1";
-  function loadCorebootSetup() {
+  var CB_CFG_KEY = "ide.coreboot.setup.v2";
+  var CB_CFG_DEFAULTS = {
+    theme: "classic",
+    localversion: "-gdx",
+    bootsplash: true,
+    fsb_speed: "533 MHz",
+    memory_timing: "Auto-detect",
+    serial_enable: true,
+    baud_rate: "115200",
+    ehci_debug: false,
+    vga_console: true,
+    smbios_manufacturer: "GDX",
+    smbios_product: "Educational Appliance A04",
+    acpi_tables: true,
+    mp_tables: true,
+    default_os: "none",
+    boot_timeout: "10",
+    vga_bios_enable: true,
+    log_level: "INFO",
+    post_codes: false,
+    show_timing: false
+  };
+  function cbLoadCfg() {
     try {
-      var raw = sessionStorage.getItem(COREBOOT_SETUP_KEY);
-      var s = raw ? JSON.parse(raw) : null;
-      return s || { defaultOs: "none", bootTimeout: "10", verbosePost: "off" };
-    } catch (e) { return { defaultOs: "none", bootTimeout: "10", verbosePost: "off" }; }
+      var raw = sessionStorage.getItem(CB_CFG_KEY);
+      var saved = raw ? JSON.parse(raw) : {};
+      var out = {};
+      for (var k in CB_CFG_DEFAULTS) out[k] = CB_CFG_DEFAULTS[k];
+      for (var k2 in saved) if (k2 in CB_CFG_DEFAULTS) out[k2] = saved[k2];
+      return out;
+    } catch (e) {
+      var d = {};
+      for (var k3 in CB_CFG_DEFAULTS) d[k3] = CB_CFG_DEFAULTS[k3];
+      return d;
+    }
   }
-  function saveCorebootSetup(s) {
-    try { sessionStorage.setItem(COREBOOT_SETUP_KEY, JSON.stringify(s)); } catch (e) {}
+  function cbSaveCfg(cfg) {
+    try { sessionStorage.setItem(CB_CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
   }
+  // Backward-compat shim: a couple of helpers elsewhere still
+  // reach for the v1 schema. Keep them as thin wrappers over
+  // the v2 store so they don't break.
+  function loadCorebootSetup() {
+    var c = cbLoadCfg();
+    return { defaultOs: c.default_os, bootTimeout: c.boot_timeout, verbosePost: c.show_timing ? "on" : "off" };
+  }
+
+  // Menu definitions. Each menu is an array of items. An item
+  // is one of:
+  //   { type: "submenu",   id: <menu key>,    label }
+  //   { type: "bool",      id: <cfg key>,     label }
+  //   { type: "choice",    id: <cfg key>,     label, choices: [{v,l}] }
+  //   { type: "string",    id: <cfg key>,     label, maxLen }
+  //   { type: "info",      label, value }                    (read-only)
+  //   { type: "info-locked", label, value }                  (compiled-in)
+  //   { type: "separator" }
+  //   { type: "action",    id: <action key>,  label }
+  // The "selected" navigation skips separators and pure info
+  // rows since they can't be activated.
+  function cbBuildMenus(cfg, brick) {
+    return {
+      root: [
+        { type: "submenu", id: "general", label: "General setup" },
+        { type: "submenu", id: "mainboard", label: "Mainboard" },
+        { type: "submenu", id: "chipset", label: "Chipset" },
+        { type: "submenu", id: "console", label: "Console options" },
+        { type: "submenu", id: "tables", label: "System tables" },
+        { type: "submenu", id: "payload", label: "Payload" },
+        { type: "submenu", id: "vgabios", label: "VGA BIOS" },
+        { type: "submenu", id: "debugging", label: "Debugging" },
+        { type: "separator" },
+        { type: "action", id: "load_alt", label: "Load an Alternate Configuration File" },
+        { type: "action", id: "save_alt", label: "Save an Alternate Configuration File" },
+        { type: "separator" },
+        { type: "action", id: "reflash_cb", label: "Reflash coreboot firmware" }
+      ],
+      general: [
+        { type: "string", id: "localversion", label: "Local version string", maxLen: 24 },
+        { type: "bool",   id: "bootsplash", label: "Boot splash image" },
+        { type: "choice", id: "theme", label: "Setup display theme",
+          choices: [{ v: "classic", l: "Classic curses" }, { v: "modern", l: "Modern" }] }
+      ],
+      mainboard: [
+        { type: "info-locked", label: "Mainboard vendor", value: "VIA" },
+        { type: "info-locked", label: "Mainboard model",  value: "EPIA-LN" },
+        { type: "info-locked", label: "Board revision",   value: "rev 1.0" },
+        { type: "info-locked", label: "ROM chip size",    value: "8 MB" }
+      ],
+      chipset: [
+        { type: "info-locked", label: "Northbridge", value: "VIA CN700" },
+        { type: "info-locked", label: "Southbridge", value: "VIA VT8237R Plus" },
+        { type: "choice", id: "fsb_speed", label: "Frontside bus",
+          choices: [{ v: "400 MHz", l: "400 MHz" }, { v: "533 MHz", l: "533 MHz" }, { v: "667 MHz", l: "667 MHz" }] },
+        { type: "choice", id: "memory_timing", label: "Memory timing",
+          choices: [{ v: "Auto-detect", l: "Auto-detect" }, { v: "Aggressive", l: "Aggressive" }, { v: "Conservative", l: "Conservative" }] }
+      ],
+      console: [
+        { type: "bool",   id: "serial_enable", label: "Serial console" },
+        { type: "choice", id: "baud_rate", label: "Baud rate",
+          choices: [
+            { v: "9600", l: "9600" }, { v: "19200", l: "19200" },
+            { v: "38400", l: "38400" }, { v: "57600", l: "57600" },
+            { v: "115200", l: "115200" }
+          ] },
+        { type: "bool", id: "ehci_debug", label: "EHCI debug port" },
+        { type: "bool", id: "vga_console", label: "VGA console" }
+      ],
+      tables: [
+        { type: "string", id: "smbios_manufacturer", label: "SMBIOS Manufacturer", maxLen: 24 },
+        { type: "string", id: "smbios_product", label: "SMBIOS Product Name", maxLen: 32 },
+        { type: "bool", id: "acpi_tables", label: "Generate ACPI tables" },
+        { type: "bool", id: "mp_tables", label: "Generate MP tables" }
+      ],
+      payload: [
+        { type: "info-locked", label: "Primary payload",   value: "SeaBIOS 1.16.3 + wb-selector 0.4" },
+        { type: "info-locked", label: "Secondary payload", value: "(none)" },
+        { type: "choice", id: "default_os", label: "Default OS at boot",
+          choices: [
+            { v: "none", l: "(none, show selector)" },
+            { v: "last", l: "Last booted" },
+            { v: "w3",   l: "Waterboard 3" },
+            { v: "w4",   l: "Waterboard 4" },
+            { v: "w5",   l: "Waterboard 5" }
+          ] },
+        { type: "choice", id: "boot_timeout", label: "Selector timeout",
+          choices: [
+            { v: "0",  l: "disabled" },
+            { v: "5",  l: "5 s" },
+            { v: "10", l: "10 s" },
+            { v: "30", l: "30 s" }
+          ] }
+      ],
+      vgabios: [
+        { type: "bool", id: "vga_bios_enable", label: "Include VGA BIOS image" },
+        { type: "info-locked", label: "VGA BIOS path", value: "site-local/via-unichrome.rom" }
+      ],
+      debugging: [
+        { type: "choice", id: "log_level", label: "Console log level",
+          choices: [
+            { v: "EMERG",   l: "EMERG  (0)" }, { v: "ALERT",   l: "ALERT  (1)" },
+            { v: "CRIT",    l: "CRIT   (2)" }, { v: "ERR",     l: "ERR    (3)" },
+            { v: "WARNING", l: "WARN   (4)" }, { v: "NOTICE",  l: "NOTICE (5)" },
+            { v: "INFO",    l: "INFO   (6)" }, { v: "DEBUG",   l: "DEBUG  (7)" },
+            { v: "SPEW",    l: "SPEW   (8)" }
+          ] },
+        { type: "bool", id: "post_codes", label: "Show POST codes at flash" },
+        { type: "bool", id: "show_timing", label: "Show stage timing at flash" },
+        { type: "info-locked", label: "NVRAM fuse state",
+          value: brick ? brick.toUpperCase() + " (arsă, permanentă)" : "neatinsă" }
+      ]
+    };
+  }
+  function cbIsSelectable(item) {
+    return item.type === "submenu" || item.type === "bool" ||
+           item.type === "choice" || item.type === "string" ||
+           item.type === "action";
+  }
+  // Find next/prev selectable item index.
+  function cbFindNext(items, start, dir) {
+    var n = items.length;
+    var i = start;
+    for (var k = 0; k < n; k++) {
+      i = (i + dir + n) % n;
+      if (cbIsSelectable(items[i])) return i;
+    }
+    return start;
+  }
+  function cbCycleChoice(item, current, dir) {
+    var idx = -1;
+    for (var i = 0; i < item.choices.length; i++) {
+      if (item.choices[i].v === current) { idx = i; break; }
+    }
+    if (idx < 0) idx = 0;
+    idx = (idx + dir + item.choices.length) % item.choices.length;
+    return item.choices[idx].v;
+  }
+  function cbChoiceLabel(item, value) {
+    for (var i = 0; i < item.choices.length; i++) {
+      if (item.choices[i].v === value) return item.choices[i].l;
+    }
+    return value;
+  }
+
+  // Active setup state. Persisted only on Save/Exit; Esc from
+  // root discards in-flight edits.
   function showCorebootSetup() {
     teardownAll();
     var root = makeRoot();
-    var cfg = loadCorebootSetup();
+    var cfg = cbLoadCfg();
     var brick = getBrick();
-    var brickRow = brick
-      ? brick.toUpperCase() + " (arsă, permanentă)"
-      : "neatinsă";
-    root.innerHTML =
-      '<div class="wbp">' +
-      '<div class="wbp-titlebar">GDX-APPLIANCE-A04 / coreboot 4.22-gdx / SETUP UTILITY</div>' +
-      '<div class="wbp-inner">' +
-      '<pre class="wbp-banner">' +
-      "coreboot 4.22-gdx, compilat 2024-09-12\n" +
-      "Mainboard: via/epia-ln, ROM: 8 MB (128 sectoare x 64 KB)\n" +
-      "Cele mai multe setări coreboot sunt compilate în firmware și NU pot fi modificate la rulare. Doar câteva opțiuni de boot pot fi schimbate aici." +
-      "</pre>" +
-      '<table class="wbs-table">' +
-      '<tr class="wbs-row-edit">' +
-      '<td class="wbs-label">Sistem implicit la pornire</td>' +
-      '<td class="wbs-value">' +
-      '<select id="wbsDefaultOs" class="wbs-select">' +
-      '<option value="none"' + (cfg.defaultOs === "none" ? " selected" : "") + '>(niciunul, afișează selectorul)</option>' +
-      '<option value="last"' + (cfg.defaultOs === "last" ? " selected" : "") + '>Ultimul OS pornit</option>' +
-      '<option value="w3"' + (cfg.defaultOs === "w3" ? " selected" : "") + '>Waterboard 3</option>' +
-      '<option value="w4"' + (cfg.defaultOs === "w4" ? " selected" : "") + '>Waterboard 4</option>' +
-      '<option value="w5"' + (cfg.defaultOs === "w5" ? " selected" : "") + '>Waterboard 5</option>' +
-      "</select>" +
-      "</td></tr>" +
-      '<tr class="wbs-row-edit">' +
-      '<td class="wbs-label">Timeout selector (secunde)</td>' +
-      '<td class="wbs-value">' +
-      '<select id="wbsTimeout" class="wbs-select">' +
-      '<option value="5"' + (cfg.bootTimeout === "5" ? " selected" : "") + '>5</option>' +
-      '<option value="10"' + (cfg.bootTimeout === "10" ? " selected" : "") + '>10</option>' +
-      '<option value="30"' + (cfg.bootTimeout === "30" ? " selected" : "") + '>30</option>' +
-      '<option value="0"' + (cfg.bootTimeout === "0" ? " selected" : "") + '>oprit</option>' +
-      "</select>" +
-      "</td></tr>" +
-      '<tr class="wbs-row-edit">' +
-      '<td class="wbs-label">POST detaliat</td>' +
-      '<td class="wbs-value">' +
-      '<select id="wbsVerbose" class="wbs-select">' +
-      '<option value="off"' + (cfg.verbosePost === "off" ? " selected" : "") + '>oprit</option>' +
-      '<option value="on"' + (cfg.verbosePost === "on" ? " selected" : "") + '>pornit</option>' +
-      "</select>" +
-      "</td></tr>" +
-      '<tr><td colspan="2" class="wbs-divider">Informații compilate (read-only)</td></tr>' +
-      '<tr><td class="wbs-label">Versiune coreboot</td><td class="wbs-value-ro">4.22-gdx</td></tr>' +
-      '<tr><td class="wbs-label">Payload</td><td class="wbs-value-ro">SeaBIOS 1.16.3 + wb-selector 0.4</td></tr>' +
-      '<tr><td class="wbs-label">Romstage</td><td class="wbs-value-ro">via/c7</td></tr>' +
-      '<tr><td class="wbs-label">Ramstage</td><td class="wbs-value-ro">x86_32</td></tr>' +
-      '<tr><td class="wbs-label">Verificare integritate</td><td class="wbs-value-ro">SHA-256 (compilată în firmware)</td></tr>' +
-      '<tr><td class="wbs-label">SPI write-protect</td><td class="wbs-value-ro">dezactivat (jumper J3)</td></tr>' +
-      '<tr><td class="wbs-label">Siguranță NVRAM</td><td class="wbs-value-ro">' + brickRow + "</td></tr>" +
-      "</table>" +
-      '<div class="wb-poff-actions" style="justify-content: space-between;">' +
-      '<button class="wbp-btn" id="wbsBack">Înapoi (Esc)</button>' +
-      '<button class="wbp-btn wbp-btn-default" id="wbsSave">Salvează și ieși (F10)</button>' +
-      "</div>" +
-      "</div>" +
-      "</div>";
-    function save() {
-      saveCorebootSetup({
-        defaultOs: document.getElementById("wbsDefaultOs").value,
-        bootTimeout: document.getElementById("wbsTimeout").value,
-        verbosePost: document.getElementById("wbsVerbose").value
+    var menus = cbBuildMenus(cfg, brick);
+    var stack = [{ menu: "root", selected: 0 }];
+    function currentMenu() { return menus[stack[stack.length - 1].menu]; }
+    function currentSel()  { return stack[stack.length - 1]; }
+    function focusFirstSelectable(state) {
+      var items = menus[state.menu];
+      if (!cbIsSelectable(items[state.selected])) {
+        state.selected = cbFindNext(items, -1, 1);
+      }
+    }
+    focusFirstSelectable(currentSel());
+
+    function rebuild() {
+      // Rebuild menus when something changed that affects
+      // labels or fuse status (e.g. theme switch).
+      menus = cbBuildMenus(cfg, brick);
+    }
+
+    function render() {
+      root.className = "wb-root cbs-host cbs-theme-" + cfg.theme;
+      var items = currentMenu();
+      var sel = currentSel().selected;
+      var headerHelp = "Săgeți: navigare.  &lt;Enter&gt;: selectare/intrare în submeniu.  &lt;Y&gt;/&lt;N&gt;: activează/dezactivează.  &lt;Esc&gt;: înapoi.  &lt;?&gt;: ajutor.";
+      var legend = "Legend: [*] activat   [ ] dezactivat   ---&gt; submeniu   (value) opțiune curentă";
+      var crumb = stack.length === 1
+        ? "coreboot Configuration"
+        : "coreboot Configuration &raquo; " + cbCrumbLabel(stack);
+      var itemsHtml = items.map(function (it, i) {
+        var cls = "cbs-item";
+        if (i === sel) cls += " cbs-item-selected";
+        if (it.type === "separator") return '<div class="cbs-sep">---</div>';
+        if (it.type === "info-locked") {
+          return '<div class="cbs-item cbs-item-locked">' +
+            '<span class="cbs-marker">    </span>' +
+            '<span class="cbs-label">' + escapeHtml(it.label) + '</span>' +
+            '<span class="cbs-value">' + escapeHtml(it.value) + '</span>' +
+            "</div>";
+        }
+        var marker = "    ", suffix = "";
+        if (it.type === "submenu") suffix = " --->";
+        else if (it.type === "bool") marker = cfg[it.id] ? "[*] " : "[ ] ";
+        else if (it.type === "choice") suffix = " (" + cbChoiceLabel(it, cfg[it.id]) + ")";
+        else if (it.type === "string") suffix = " (" + (cfg[it.id] || "") + ")";
+        else if (it.type === "action") marker = " >  ";
+        return '<div class="' + cls + '" data-cbs-idx="' + i + '">' +
+          '<span class="cbs-marker">' + escapeHtml(marker) + '</span>' +
+          '<span class="cbs-label">' + escapeHtml(it.label) + escapeHtml(suffix) + '</span>' +
+          "</div>";
+      }).join("");
+      root.innerHTML =
+        '<div class="cbs">' +
+        '<div class="cbs-title">.config &mdash; coreboot v4.22-gdx Configuration</div>' +
+        '<div class="cbs-window">' +
+        '<div class="cbs-window-title">' + crumb + "</div>" +
+        '<div class="cbs-window-help">' + headerHelp + '<br>' + legend + "</div>" +
+        '<div class="cbs-items" id="cbsItems">' + itemsHtml + "</div>" +
+        '<div class="cbs-actions">' +
+        '<button class="cbs-action cbs-action-default" data-cbs-act="select">&lt;Select&gt;</button>' +
+        '<button class="cbs-action" data-cbs-act="exit">&lt; Exit &gt;</button>' +
+        '<button class="cbs-action" data-cbs-act="help">&lt; Help &gt;</button>' +
+        "</div>" +
+        "</div>" +
+        "</div>";
+      // Wire click-to-select on items
+      root.querySelectorAll("[data-cbs-idx]").forEach(function (el) {
+        el.addEventListener("click", function () {
+          var idx = parseInt(el.getAttribute("data-cbs-idx"), 10);
+          var st = currentSel();
+          st.selected = idx;
+          activate();
+        });
       });
+      root.querySelectorAll("[data-cbs-act]").forEach(function (el) {
+        el.addEventListener("click", function () {
+          var act = el.getAttribute("data-cbs-act");
+          if (act === "select") activate();
+          else if (act === "exit") exitFlow();
+          else if (act === "help") showHelp();
+        });
+      });
+    }
+    function cbCrumbLabel(stk) {
+      // Build "General setup" / "Console options" trail
+      var trail = [];
+      for (var i = 1; i < stk.length; i++) {
+        var name = stk[i].menu;
+        // Find the label by looking at parent menu's submenu entry
+        var parent = menus[stk[i - 1].menu];
+        for (var j = 0; j < parent.length; j++) {
+          if (parent[j].type === "submenu" && parent[j].id === name) {
+            trail.push(parent[j].label);
+            break;
+          }
+        }
+      }
+      return trail.join(" &raquo; ");
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[c];
+      });
+    }
+    function activate() {
+      var st = currentSel();
+      var item = currentMenu()[st.selected];
+      if (!item || !cbIsSelectable(item)) return;
+      if (item.type === "submenu") {
+        var ns = { menu: item.id, selected: 0 };
+        focusFirstSelectable(ns);
+        stack.push(ns);
+        render();
+      } else if (item.type === "bool") {
+        cfg[item.id] = !cfg[item.id];
+        render();
+      } else if (item.type === "choice") {
+        // Cycle to next value. For two-option choices that's a
+        // toggle; for many, repeated Enter walks through.
+        var prev = cfg[item.id];
+        cfg[item.id] = cbCycleChoice(item, prev, 1);
+        if (item.id === "theme") rebuild();
+        render();
+      } else if (item.type === "string") {
+        openStringEditor(item);
+      } else if (item.type === "action") {
+        runAction(item.id);
+      }
+    }
+    function exitFlow() {
+      // Mirror real menuconfig: ask whether to save changes.
+      // We persist regardless of whether changes were made
+      // because there's no clean diff and the cost is tiny.
+      cbSaveCfg(cfg);
       showConsolePicker();
     }
-    function back() { showConsolePicker(); }
-    document.getElementById("wbsBack").addEventListener("click", back);
-    document.getElementById("wbsSave").addEventListener("click", save);
+    function showHelp() {
+      var st = currentSel();
+      var item = currentMenu()[st.selected];
+      var msg;
+      if (!item || !cbIsSelectable(item)) {
+        msg = "Această linie este informativă. Selectați un meniu sau o opțiune și apăsați < Help > pentru detalii.";
+      } else if (item.type === "submenu") {
+        msg = "Submeniu: " + item.label + ". Apăsați Enter pentru a-l deschide.";
+      } else if (item.type === "bool") {
+        msg = "Opțiune binară. Apăsați Enter, Y sau N pentru a comuta.";
+      } else if (item.type === "choice") {
+        msg = "Opțiune cu valori multiple. Apăsați Enter pentru a trece la valoarea următoare.";
+      } else if (item.type === "string") {
+        msg = "Șir editabil. Apăsați Enter pentru a deschide editorul textual.";
+      } else if (item.type === "action") {
+        msg = "Acțiune: " + item.label + ".";
+      }
+      alert(msg);
+    }
+    function openStringEditor(item) {
+      var v = prompt(item.label, cfg[item.id] || "");
+      if (v == null) return;
+      if (item.maxLen && v.length > item.maxLen) v = v.substring(0, item.maxLen);
+      cfg[item.id] = v;
+      render();
+    }
+    function runAction(actId) {
+      if (actId === "save_alt") {
+        var name = prompt("Numele configurației de salvat (slot 1..3):", "slot1");
+        if (!name) return;
+        try {
+          var key = "ide.coreboot.altcfg." + name.replace(/[^a-zA-Z0-9_-]/g, "");
+          sessionStorage.setItem(key, JSON.stringify(cfg));
+          alert("Configurația a fost salvată în slotul \"" + name + "\".");
+        } catch (e) { alert("Eroare la salvare."); }
+        return;
+      }
+      if (actId === "load_alt") {
+        showLoadAltDialog();
+        return;
+      }
+      if (actId === "reflash_cb") {
+        // Re-run the coreboot flash sequence. Confirmed first
+        // because mid-flash interruption is the only way to
+        // brick the appliance per the warning text. The
+        // current setup config is saved before flashing so
+        // the user's choices survive the takeover. After the
+        // flash completes, the takeover hands off to the
+        // picker exactly as the first-time flash does; the
+        // NVRAM fuse and the variant state are untouched
+        // (flashing coreboot does NOT clear them).
+        if (!confirm(
+          "Această acțiune va rescrie complet regiunea coreboot din SPI flash (8 MB). " +
+          "Toate setările de mai sus vor fi păstrate. Siguranța NVRAM (dacă este arsă) NU este afectată. " +
+          "Nu opriți aparatul în timpul procedurii: o întrerupere în timpul scrierii lasă aparatul nepornibil. " +
+          "Continuați?"
+        )) return;
+        cbSaveCfg(cfg);
+        if (window.SRV2K3_COREBOOT && typeof window.SRV2K3_COREBOOT.runFlashSequence === "function") {
+          window.removeEventListener("keydown", onKey, true);
+          window.SRV2K3_COREBOOT.runFlashSequence();
+        } else {
+          alert("Modulul coreboot nu este disponibil în această imagine.");
+        }
+        return;
+      }
+    }
+    function showLoadAltDialog() {
+      // List available alternate configurations + the factory
+      // NVRAM backup. Selecting "factory" resets the brick
+      // fuse and the variant state (the user's path to revert
+      // an OS-level lock without re-flashing coreboot itself).
+      var slots = [];
+      try {
+        for (var i = 0; i < sessionStorage.length; i++) {
+          var k = sessionStorage.key(i);
+          if (k && k.indexOf("ide.coreboot.altcfg.") === 0) {
+            slots.push(k.substring("ide.coreboot.altcfg.".length));
+          }
+        }
+      } catch (e) {}
+      var bd = document.createElement("div");
+      bd.className = "cbs-modal-bd";
+      var slotsHtml = slots.length
+        ? slots.map(function (s) {
+            return '<button class="cbs-alt-btn" data-cbs-load="user:' + s + '">' + escapeHtml(s) + '</button>';
+          }).join("")
+        : '<div class="cbs-alt-empty">(niciun slot utilizator salvat)</div>';
+      bd.innerHTML =
+        '<div class="cbs-modal">' +
+        '<div class="cbs-modal-title">Load an Alternate Configuration File</div>' +
+        '<div class="cbs-modal-body">' +
+        '<p>Selectați configurația alternativă pe care doriți să o încărcați. Configurațiile utilizator restaurează doar opțiunile setup-ului. <strong>Backup-ul de fabrică</strong> reflashează regiunile NVRAM editabile, inclusiv pagina 0x12 și siguranța de generație: aparatul revine la starea de imediat după instalarea coreboot.</p>' +
+        '<div class="cbs-alt-section-title">Configurații utilizator</div>' +
+        '<div class="cbs-alt-list">' + slotsHtml + "</div>" +
+        '<div class="cbs-alt-section-title">Backup furnizor</div>' +
+        '<div class="cbs-alt-list">' +
+        '<button class="cbs-alt-btn cbs-alt-btn-factory" data-cbs-load="factory">Factory NVRAM Backup (gdx-default.cfg)</button>' +
+        "</div>" +
+        "</div>" +
+        '<div class="cbs-modal-actions">' +
+        '<button class="cbs-action" data-cbs-load-cancel>&lt; Cancel &gt;</button>' +
+        "</div>" +
+        "</div>";
+      document.body.appendChild(bd);
+      bd.querySelectorAll("[data-cbs-load]").forEach(function (el) {
+        el.addEventListener("click", function () {
+          var what = el.getAttribute("data-cbs-load");
+          if (what === "factory") {
+            if (!confirm(
+              "Aceasta va reflasha regiunile NVRAM editabile cu valorile din imaginea de fabrică. " +
+              "Siguranța de generație (WB_FUSE_GEN) și pagina 0x12 vor fi rescrise. " +
+              "Toate datele sistemului de operare instalat se vor pierde. Continuați?"
+            )) return;
+            try {
+              sessionStorage.removeItem(STORAGE_BRICK_KEY);
+              sessionStorage.removeItem(STORAGE_KEY);
+            } catch (e) {}
+            bd.remove();
+            cbSaveCfg(cfg);
+            showConsolePicker();
+            return;
+          }
+          if (what.indexOf("user:") === 0) {
+            var name = what.substring(5);
+            try {
+              var raw = sessionStorage.getItem("ide.coreboot.altcfg." + name);
+              if (raw) {
+                var loaded = JSON.parse(raw);
+                for (var k in loaded) if (k in CB_CFG_DEFAULTS) cfg[k] = loaded[k];
+                bd.remove();
+                rebuild();
+                render();
+                alert("Configurația \"" + name + "\" a fost încărcată.");
+                return;
+              }
+            } catch (e) {}
+            alert("Eroare la încărcare.");
+          }
+        });
+      });
+      bd.querySelector("[data-cbs-load-cancel]").addEventListener("click", function () { bd.remove(); });
+    }
     function onKey(e) {
       if (!document.getElementById("wbRoot")) {
         window.removeEventListener("keydown", onKey, true);
         return;
       }
-      if (e.key === "Escape") { e.preventDefault(); back(); }
-      else if (e.key === "F10") { e.preventDefault(); save(); }
+      // Modal dialog open? let it handle its own keys.
+      if (document.querySelector(".cbs-modal-bd")) {
+        if (e.key === "Escape") {
+          e.preventDefault();
+          var b = document.querySelector(".cbs-modal-bd");
+          if (b) b.remove();
+        }
+        return;
+      }
+      var items = currentMenu();
+      var st = currentSel();
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        st.selected = cbFindNext(items, st.selected, 1);
+        render();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        st.selected = cbFindNext(items, st.selected, -1);
+        render();
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        activate();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        if (stack.length > 1) { stack.pop(); render(); }
+        else exitFlow();
+      } else if (e.key === "y" || e.key === "Y") {
+        var ya = items[st.selected];
+        if (ya && ya.type === "bool") { cfg[ya.id] = true; render(); }
+      } else if (e.key === "n" || e.key === "N") {
+        var na = items[st.selected];
+        if (na && na.type === "bool") { cfg[na.id] = false; render(); }
+      } else if (e.key === "?") {
+        e.preventDefault();
+        showHelp();
+      }
     }
     window.addEventListener("keydown", onKey, true);
+    render();
   }
 
   // ============================================================
@@ -996,7 +1426,7 @@
   // ============================================================
   function showAbout(variant) {
     var bd = document.createElement("div");
-    bd.className = "wb-about-bd";
+    bd.className = "wb-about-bd wb-about-bd-" + variant;
     var hardwareTable =
       '<div class="wb-about-section">' +
       '<div class="wb-about-section-title">Hardware</div>' +
@@ -1110,6 +1540,18 @@
   // ============================================================
   // INSTALL OTHER OS — gated on W4/W5 by BIOS lock
   // ============================================================
+  // Variant-aware dialog class helper. Each console variant
+  // ships its own dialog palette; this resolves the runtime
+  // variant to the CSS modifier class so dialog backdrops can
+  // pick up the right look without each call site duplicating
+  // the lookup. Falls back to "" when there is no variant
+  // installed yet (no variant-specific styling at picker time).
+  function dialogVariantClass() {
+    var s = loadState();
+    var v = s && s.variant;
+    return v ? " wb-friction-bd-" + v : "";
+  }
+
   function showInstallOther(variant) {
     if (variant === "w3") {
       // W3 doesn't burn the NVRAM fuse; user can switch freely
@@ -1122,16 +1564,18 @@
     }
     var brick = getBrick();
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
-      '<div class="wb-friction-title">BIOS blocat prin variabilă NVRAM permanentă</div>' +
+      '<div class="wb-friction-title">Reinstalare sistem de operare</div>' +
       '<div class="wb-friction-body">' +
-      "<p>" + variantName(variant) + ' a inscripționat la prima pornire o siguranță NVRAM <code>WB_FUSE_GEN=' + (brick || variant).toUpperCase() + '</code> și a închis fizic pagina 0x12 (anti-rollback). Aceste protecții <strong>nu pot fi șterse</strong>, nici prin reflash coreboot, nici prin reset BIOS, nici prin scoaterea bateriei CMOS.</p>' +
-      "<p>Procesul de reflash coreboot este în continuare disponibil și va aduce înapoi selectorul de sistem, dar generațiile anterioare " + (brick || variant).toUpperCase() + " rămân indisponibile permanent: siguranța a fost arsă la nivel de hardware.</p>" +
+      "<p>Reinstalarea trimite aparatul la selectorul de sisteme, unde puteți alege ce să instalați din nou.</p>" +
+      "<p>La prima pornire " + variantName(variant) + " a inscripționat o siguranță NVRAM permanentă (<code>WB_FUSE_GEN=" + (brick || variant).toUpperCase() + "</code>). Cât timp siguranța rămâne arsă, puteți reinstala doar aceeași generație sau una mai nouă. Generațiile mai vechi (Waterboard " + (brick === "w5" ? "3 și 4" : "3") + ") nu pot fi instalate.</p>" +
+      "<p>Pentru a debloca generațiile anterioare, deschideți <strong>coreboot Setup</strong> și folosiți <em>Load Alternate Configuration File → Factory NVRAM Backup</em>. Backup-ul de fabrică rescrie regiunile NVRAM și șterge siguranța.</p>" +
       "</div>" +
       '<div class="wb-friction-actions">' +
-      '<button class="wb-btn wb-btn-primary" data-wb-install="reflash">Reinstalează coreboot</button>' +
+      '<button class="wb-btn wb-btn-primary" data-wb-install="picker">Mergi la selector</button>' +
+      '<button class="wb-btn" data-wb-install="setup">Deschide coreboot Setup</button>' +
       '<button class="wb-btn" data-wb-install="cancel">Anulează</button>' +
       "</div>" +
       "</div>";
@@ -1140,15 +1584,15 @@
       b.addEventListener("click", function () {
         var act = b.getAttribute("data-wb-install");
         bd.remove();
-        if (act === "reflash") {
-          // Clear the waterboard variant only. We keep the
-          // coreboot-flashed flag AND the NVRAM brick fuse: the
-          // user returns to the BIOS selector in the post-flash
-          // environment, not to Windows Server 2003. The brick
-          // fuse will continue to lock out older generations
-          // when the picker re-renders.
+        if (act === "picker") {
+          // Clear the variant only. The coreboot-flashed flag
+          // and the NVRAM brick fuse both persist so the user
+          // returns to the BIOS selector in the post-flash
+          // environment with the same generation lock.
           resetState();
           showConsolePicker();
+        } else if (act === "setup") {
+          showCorebootSetup();
         }
       });
     });
@@ -1162,7 +1606,7 @@
   // ============================================================
   function confirmPowerOff(variant) {
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction wb-friction-compact">' +
       '<div class="wb-friction-title">Oprire</div>' +
@@ -1235,7 +1679,7 @@
     var st = loadState() || {};
     var sub = !!st.subscribed;
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">Stare abonament WB Plus</div>' +
@@ -1277,7 +1721,7 @@
   // ============================================================
   function showFirmwareUpdatePrompt() {
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">Actualizare de firmware disponibilă</div>' +
@@ -1310,7 +1754,7 @@
   // ============================================================
   function showDiscCheck(gameName, onProceed, onCancel) {
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">Introduceți discul jocului</div>' +
@@ -1336,7 +1780,7 @@
   }
   function showLostDiscNag(gameName, onClose) {
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">Disc indisponibil</div>' +
@@ -1363,7 +1807,7 @@
 
   function showSubscriptionWall(gameName, onSubscribe, onCancel) {
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">WB Plus este necesar</div>' +
@@ -1390,7 +1834,7 @@
         if (ch === "yes") onSubscribe();
         else if (ch === "paid") {
           var ack = document.createElement("div");
-          ack.className = "wb-friction-bd";
+          ack.className = "wb-friction-bd" + dialogVariantClass();
           ack.innerHTML =
             '<div class="wb-friction">' +
             '<div class="wb-friction-title">Mulțumim pentru observație</div>' +
@@ -1414,7 +1858,7 @@
 
   function showRegionLock(gameName) {
     var bd = document.createElement("div");
-    bd.className = "wb-friction-bd";
+    bd.className = "wb-friction-bd" + dialogVariantClass();
     bd.innerHTML =
       '<div class="wb-friction">' +
       '<div class="wb-friction-title">Titlu indisponibil în regiunea dumneavoastră</div>' +

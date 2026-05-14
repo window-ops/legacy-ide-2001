@@ -4726,6 +4726,32 @@ body.srv2003-desktop .dialog-footer {
         inset 2px 2px 0 #808080,
         inset -2px -2px 0 #dfdfdf;
 }
+/* Warn-flavour BIOS prompt for destructive operations like
+   firmware flash. Same Phoenix chrome but the title bar
+   reads red so the user can't miss the severity. */
+.bios-prompt-warn {
+    min-width: 380px;
+    max-width: 480px;
+}
+.bios-prompt-title-warn {
+    background: #800000;
+    color: #ffffff;
+    padding: 4px 8px;
+    font-weight: 700;
+}
+.bios-prompt-body-warn {
+    padding: 10px 14px;
+    color: #000080;
+    line-height: 1.5;
+    font-size: 12px;
+}
+.bios-prompt-body-warn p { margin: 0 0 8px 0; }
+.bios-prompt-body-warn p:last-child { margin-bottom: 0; }
+.bios-prompt-body-warn strong { color: #800000; }
+.bios-prompt-btn-danger {
+    color: #800000;
+    font-weight: 700;
+}
 
 /* Mobile reflow for the flash overlay, the primary UX surface. */
 @media (max-width: 720px) {
@@ -4963,55 +4989,269 @@ body.srv2003-desktop .dialog-footer {
    Borrows the BIOS-style chrome (.wbp) for the surface and
    adds a 2-column table where only the first three rows are
    editable; the rest are read-only "compiled in" values. */
-.wbs-table {
+/* ------------------------------------------------------------
+   COREBOOT KCONFIG SETUP UTILITY (.cbs-*)
+   Mirrors the real Linux ncurses Kconfig screen coreboot uses
+   pre-compile (.config menu). Two themes:
+     - .cbs-theme-classic: ncurses look. Blue background, white
+       window border, yellow highlight on selection, action
+       buttons at the bottom in <Select> <Exit> <Help> form.
+     - .cbs-theme-modern:  same DOM but neutral dark styling
+       matching the rest of the post-flash chrome.
+   ------------------------------------------------------------ */
+.cbs-host {
+    /* Fill the viewport regardless of theme. Both themes
+       reuse the same DOM structure; only the colour palette
+       and the border treatment change. */
+    background: #000000;
+}
+.cbs {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: auto;
+}
+.cbs-title {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    text-align: center;
+    padding: 3px 12px;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-size: 13px;
+    font-weight: 700;
+}
+.cbs-window {
     width: 100%;
-    border-collapse: collapse;
-    margin: 14px 0;
+    max-width: 720px;
+    font-family: "Lucida Console", "Consolas", "Courier New", monospace;
+    font-size: 14px;
+    padding: 14px 18px;
+    box-sizing: border-box;
+}
+.cbs-window-title {
+    text-align: center;
+    font-weight: 700;
+    margin-bottom: 8px;
+    padding: 2px 0;
+}
+.cbs-window-help {
     font-size: 12px;
-    color: #d8d8d8;
-    font-family: "Lucida Console", "Consolas", monospace;
+    line-height: 1.5;
+    padding: 4px 6px 10px 6px;
+    border-bottom: 1px solid transparent;
+    margin-bottom: 10px;
 }
-.wbs-table td {
-    padding: 7px 10px;
-    border-bottom: 1px solid #1a1a1a;
-    vertical-align: middle;
+.cbs-items {
+    padding: 4px 6px;
+    min-height: 200px;
 }
-.wbs-label {
-    width: 50%;
-    color: #b0b0b0;
+.cbs-item {
+    display: flex;
+    align-items: baseline;
+    padding: 2px 6px;
+    cursor: pointer;
+    white-space: nowrap;
+    line-height: 1.5;
 }
-.wbs-row-edit .wbs-label {
-    color: #ffffff;
+.cbs-item .cbs-marker {
+    flex-shrink: 0;
+    width: 3em;
+    font-weight: 700;
 }
-.wbs-row-edit .wbs-value {
-    color: #80a8d0;
+.cbs-item .cbs-label {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
-.wbs-value-ro {
-    color: #808080;
+.cbs-item .cbs-value {
+    margin-left: 12px;
+    opacity: 0.8;
     font-style: italic;
 }
-.wbs-divider {
+.cbs-item-locked { cursor: default; opacity: 0.65; }
+.cbs-sep {
+    text-align: center;
+    padding: 4px 0;
+    opacity: 0.5;
+}
+.cbs-actions {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    padding: 12px 0 4px 0;
+}
+.cbs-action {
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 2px 8px;
+}
+.cbs-action-default { font-weight: 700; }
+.cbs-modal-bd {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 99800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+.cbs-modal {
+    background: #f0f0f0;
+    color: #000000;
+    max-width: 560px;
+    width: 100%;
+    border: 2px solid #404040;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    font-size: 13px;
+}
+.cbs-modal-title {
+    background: #000080;
+    color: #ffffff;
+    padding: 6px 12px;
+    font-weight: 700;
+    font-size: 13px;
+}
+.cbs-modal-body {
+    padding: 12px 16px;
+    line-height: 1.55;
+}
+.cbs-modal-body p { margin: 0 0 10px 0; }
+.cbs-alt-section-title {
+    font-weight: 700;
+    margin-top: 12px;
+    margin-bottom: 6px;
+    color: #000080;
+    border-bottom: 1px solid #c0c0c0;
+    padding-bottom: 2px;
+}
+.cbs-alt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.cbs-alt-empty {
+    font-style: italic;
+    color: #707070;
+    padding: 4px 0;
+}
+.cbs-alt-btn {
+    text-align: left;
+    padding: 6px 10px;
+    background: #ffffff;
+    border: 1px solid #b0b0b0;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+}
+.cbs-alt-btn:hover { background: #e0e8f0; }
+.cbs-alt-btn-factory {
+    border-color: #800000;
+    background: #fff0e0;
+    font-weight: 700;
+}
+.cbs-alt-btn-factory:hover { background: #ffe0c0; }
+.cbs-modal-actions {
+    padding: 10px 16px;
+    border-top: 1px solid #c0c0c0;
+    text-align: right;
+}
+.cbs-modal-actions .cbs-action {
+    color: #000000;
+    border: 1px solid #b0b0b0;
+    background: #e0e0e0;
+    padding: 4px 12px;
+}
+
+/* CLASSIC theme: ncurses palette */
+.cbs-theme-classic .cbs { background: #0000aa; color: #ffffff; }
+.cbs-theme-classic .cbs-title {
+    background: #00aaaa;
+    color: #000080;
+}
+.cbs-theme-classic .cbs-window {
+    background: #0000aa;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    border-radius: 0;
+    box-shadow: 2px 2px 0 0 #000000;
+}
+.cbs-theme-classic .cbs-window-title { color: #ffffff; }
+.cbs-theme-classic .cbs-window-help {
+    color: #cccccc;
+    border-bottom-color: #4444aa;
+}
+.cbs-theme-classic .cbs-item { color: #ffffff; }
+.cbs-theme-classic .cbs-item-selected {
+    background: #aaaa00;
+    color: #000000;
+}
+.cbs-theme-classic .cbs-item-selected .cbs-marker,
+.cbs-theme-classic .cbs-item-selected .cbs-label { color: #000000; }
+.cbs-theme-classic .cbs-item-locked { color: #aaaaaa; }
+.cbs-theme-classic .cbs-sep { color: #6688cc; }
+.cbs-theme-classic .cbs-action {
+    color: #ffffff;
+    background: #0000aa;
+}
+.cbs-theme-classic .cbs-action-default {
+    background: #aaaa00;
+    color: #000000;
+    padding: 2px 10px;
+}
+.cbs-theme-classic .cbs-action:hover:not(.cbs-action-default) {
+    background: #4444cc;
+}
+
+/* MODERN theme: dark neutral, matches the post-flash chrome */
+.cbs-theme-modern .cbs { background: #0a0a0a; color: #e0e0e0; }
+.cbs-theme-modern .cbs-title {
     background: #1a1a1a;
     color: #80a8d0;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 4px 10px !important;
-    border-bottom: 1px solid #2a2a2a !important;
+    border-bottom: 1px solid #2a2a2a;
 }
-.wbs-select {
-    background: #050505;
+.cbs-theme-modern .cbs-window {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    color: #e0e0e0;
+}
+.cbs-theme-modern .cbs-window-title { color: #80a8d0; }
+.cbs-theme-modern .cbs-window-help {
+    color: #909090;
+    border-bottom-color: #2a2a2a;
+}
+.cbs-theme-modern .cbs-item { color: #d0d0d0; }
+.cbs-theme-modern .cbs-item-selected {
+    background: #2a3a5a;
     color: #ffffff;
-    border: 1px solid #3a3a3a;
-    font-family: inherit;
-    font-size: 12px;
-    padding: 4px 8px;
-    width: 100%;
-    max-width: 280px;
 }
-.wbs-select:focus {
-    outline: 1px solid #80a8d0;
-    outline-offset: -1px;
+.cbs-theme-modern .cbs-item-locked { color: #707070; }
+.cbs-theme-modern .cbs-sep { color: #4a4a4a; }
+.cbs-theme-modern .cbs-action {
+    color: #d0d0d0;
+    background: transparent;
+    border: 1px solid #3a3a3a;
+}
+.cbs-theme-modern .cbs-action-default {
+    background: #2a4a7a;
+    color: #ffffff;
+    border-color: #4a6a9a;
+}
+.cbs-theme-modern .cbs-action:hover { background: #2a2a2a; }
+.cbs-theme-modern .cbs-action-default:hover { background: #3a5a8a; }
+
+@media (max-width: 640px) {
+    .cbs { padding: 12px; }
+    .cbs-window { padding: 10px 12px; font-size: 13px; }
+    .cbs-window-help { font-size: 11px; }
+    .cbs-item .cbs-marker { width: 2.5em; }
+    .cbs-actions { gap: 10px; flex-wrap: wrap; }
 }
 .wbp-btn {
     background: #1a1a1a;
@@ -5865,6 +6105,303 @@ body.srv2003-desktop .dialog-footer {
     font-size: 12px;
     line-height: 1.4;
     text-align: center;
+}
+
+/* ============================================================
+   PER-CONSOLE DIALOG PALETTES
+   Each variant ships its own look. The DOM structure
+   (.wb-friction-bd > .wb-friction > title + body + actions)
+   stays identical; only the colours, borders, radii, and
+   button treatments change so dialogs feel like part of the
+   OS that opened them rather than a generic OS dialog.
+   ============================================================ */
+
+/* W3 - Waterboard 3 (PS2-era, plain dark)
+   Sharp corners. Flat colours. Mono in the title to echo the
+   stripe + monospace clock in the top bar. Buttons are dark
+   with thin borders, no gradients. */
+.wb-friction-bd-w3 {
+    background: rgba(0, 0, 10, 0.65);
+}
+.wb-friction-bd-w3 .wb-friction {
+    background: #0a0e1a;
+    color: #d8d8d8;
+    border: 1px solid #2a3050;
+    border-radius: 0;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+}
+.wb-friction-bd-w3 .wb-friction-title {
+    background: #0a0e1a;
+    color: #80a8d0;
+    border-bottom: 1px solid #2a3050;
+    font-family: "Tahoma", "Segoe UI", sans-serif;
+    letter-spacing: 0.5px;
+}
+.wb-friction-bd-w3 .wb-friction-title::before {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #4a80c0;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+.wb-friction-bd-w3 .wb-friction-body { color: #d8d8d8; }
+.wb-friction-bd-w3 .wb-friction-body code {
+    background: #050810;
+    padding: 1px 4px;
+    color: #80c8d0;
+    font-family: "Lucida Console", monospace;
+}
+.wb-friction-bd-w3 .wb-friction-body strong { color: #ffffff; }
+.wb-friction-bd-w3 .wb-btn {
+    background: #1a2030;
+    color: #d8d8d8;
+    border: 1px solid #2a3050;
+    border-radius: 0;
+    padding: 8px 16px;
+}
+.wb-friction-bd-w3 .wb-btn:hover { background: #2a3a5a; color: #ffffff; }
+.wb-friction-bd-w3 .wb-btn-primary {
+    background: #1a3070;
+    border-color: #4a80c0;
+    color: #ffffff;
+}
+.wb-friction-bd-w3 .wb-btn-primary:hover { background: #2a4080; }
+
+/* W4 - Waterboard 4 (PS4-era, blue gradient, rounded)
+   Matches the W4 shell's radial blue + the wave overlay. The
+   dialog itself uses a darker blue gradient so it visually
+   sits on top of the lighter shell. Rounded corners 8px,
+   white-glow shadow, light-on-dark text. */
+.wb-friction-bd-w4 {
+    background: rgba(10, 24, 70, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+.wb-friction-bd-w4 .wb-friction {
+    background: linear-gradient(180deg, #1c3266 0%, #0e1d4a 100%);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(90, 216, 255, 0.10);
+    overflow: hidden;
+}
+.wb-friction-bd-w4 .wb-friction-title {
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    font-weight: 300;
+    font-size: 18px;
+    padding: 12px 18px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    letter-spacing: 0.5px;
+}
+.wb-friction-bd-w4 .wb-friction-body {
+    color: rgba(255, 255, 255, 0.88);
+    font-size: 13px;
+    padding: 16px 18px;
+}
+.wb-friction-bd-w4 .wb-friction-body code {
+    background: rgba(0, 0, 0, 0.30);
+    color: #5ad8ff;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-family: "Lucida Console", monospace;
+}
+.wb-friction-bd-w4 .wb-friction-body strong { color: #ffd34d; font-weight: 600; }
+.wb-friction-bd-w4 .wb-friction-body em { color: rgba(255, 255, 255, 0.95); font-style: normal; font-weight: 600; }
+.wb-friction-bd-w4 .wb-friction-actions {
+    padding: 10px 16px 16px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+.wb-friction-bd-w4 .wb-btn {
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-weight: 500;
+}
+.wb-friction-bd-w4 .wb-btn:hover { background: rgba(255, 255, 255, 0.18); }
+.wb-friction-bd-w4 .wb-btn-primary {
+    background: linear-gradient(180deg, #4a90df 0%, #2a6abf 100%);
+    color: #ffffff;
+    border-color: rgba(255, 255, 255, 0.30);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+.wb-friction-bd-w4 .wb-btn-primary:hover {
+    background: linear-gradient(180deg, #5aa0ef 0%, #3a7acf 100%);
+}
+
+/* W5 - Waterboard 5 (PS5-era, light grey, frosted)
+   The W5 shell is light grey; dialogs are very light cards
+   on a dark dimmer with a subtle backdrop blur. Generous
+   rounded corners (14px), minimal chrome, the title sits
+   integrated above the body without a separate band. */
+.wb-friction-bd-w5 {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.wb-friction-bd-w5 .wb-friction {
+    background: #f0f0f3;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+}
+.wb-friction-bd-w5 .wb-friction-title {
+    background: transparent;
+    color: #1a1a1a;
+    padding: 18px 22px 4px 22px;
+    font-family: "Segoe UI", "Tahoma", sans-serif;
+    font-weight: 400;
+    font-size: 20px;
+    border-bottom: none;
+    letter-spacing: 0.2px;
+}
+.wb-friction-bd-w5 .wb-friction-body {
+    color: #2a2a2a;
+    font-size: 13px;
+    padding: 6px 22px 14px 22px;
+}
+.wb-friction-bd-w5 .wb-friction-body code {
+    background: #d8dce0;
+    color: #2a4a7a;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-family: "Lucida Console", monospace;
+}
+.wb-friction-bd-w5 .wb-friction-body strong { color: #c04040; font-weight: 600; }
+.wb-friction-bd-w5 .wb-friction-body em { color: #1a1a1a; font-style: normal; font-weight: 600; }
+.wb-friction-bd-w5 .wb-friction-actions {
+    padding: 8px 16px 16px 16px;
+    background: transparent;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+.wb-friction-bd-w5 .wb-btn {
+    background: #e0e2e8;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 18px;
+    padding: 9px 20px;
+    font-weight: 500;
+    font-size: 13px;
+}
+.wb-friction-bd-w5 .wb-btn:hover { background: #d0d4dc; }
+.wb-friction-bd-w5 .wb-btn-primary {
+    background: #2a4a7a;
+    color: #ffffff;
+}
+.wb-friction-bd-w5 .wb-btn-primary:hover { background: #3a5a8a; }
+
+/* About-dialog variant overrides. About is the long-form
+   "system properties" surface; it follows the same per-OS
+   palette as the friction dialogs but with no header band
+   on W5 (the W5 About reads as a sheet rather than a popup). */
+.wb-about-bd-w3 { background: rgba(0, 0, 10, 0.65); }
+.wb-about-bd-w3 .wb-about {
+    background: #0a0e1a;
+    color: #d8d8d8;
+    border-radius: 0;
+    border: 1px solid #2a3050;
+}
+.wb-about-bd-w3 .wb-about-header {
+    background: #0a0e1a;
+    border-bottom: 1px solid #2a3050;
+}
+.wb-about-bd-w3 .wb-about-title { color: #80a8d0; }
+.wb-about-bd-w3 .wb-about-section-title {
+    color: #80a8d0;
+    border-bottom-color: #2a3050;
+}
+.wb-about-bd-w3 .wb-about-table td {
+    border-bottom-color: #1a2030;
+    color: #d8d8d8;
+}
+.wb-about-bd-w3 .wb-about-table td:first-child { color: #909090; }
+.wb-about-bd-w3 .wb-about-section p { color: #d8d8d8; }
+.wb-about-bd-w3 .wb-about-close {
+    background: rgba(255, 255, 255, 0.10);
+    border: 1px solid #3a4050;
+    color: #d8d8d8;
+}
+
+.wb-about-bd-w4 {
+    background: rgba(10, 24, 70, 0.65);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+.wb-about-bd-w4 .wb-about {
+    background: linear-gradient(180deg, #1c3266 0%, #0e1d4a 100%);
+    color: #ffffff;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.wb-about-bd-w4 .wb-about-header {
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.wb-about-bd-w4 .wb-about-title { color: #ffffff; font-weight: 300; font-size: 18px; }
+.wb-about-bd-w4 .wb-about-section-title {
+    color: #ffd34d;
+    border-bottom-color: rgba(255, 255, 255, 0.10);
+}
+.wb-about-bd-w4 .wb-about-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.88);
+}
+.wb-about-bd-w4 .wb-about-table td:first-child { color: rgba(255, 255, 255, 0.6); }
+.wb-about-bd-w4 .wb-about-section p { color: rgba(255, 255, 255, 0.85); }
+.wb-about-bd-w4 .wb-about-close {
+    background: rgba(255, 255, 255, 0.10);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.wb-about-bd-w5 {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+.wb-about-bd-w5 .wb-about {
+    background: #f0f0f3;
+    color: #1a1a1a;
+    border-radius: 14px;
+    border: none;
+    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55);
+}
+.wb-about-bd-w5 .wb-about-header {
+    background: transparent;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding: 16px 22px;
+}
+.wb-about-bd-w5 .wb-about-title {
+    color: #1a1a1a;
+    font-weight: 400;
+    font-size: 20px;
+}
+.wb-about-bd-w5 .wb-about-section-title {
+    color: #1a1a1a;
+    border-bottom-color: rgba(0, 0, 0, 0.10);
+    font-weight: 600;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.wb-about-bd-w5 .wb-about-table td:first-child { color: #5a5a5a; }
+.wb-about-bd-w5 .wb-about-close {
+    background: #e0e2e8;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 18px;
+    width: 28px;
+    height: 28px;
+    padding: 0;
 }
 
 /* ------------------------------------------------------------

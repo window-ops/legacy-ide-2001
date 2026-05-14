@@ -418,9 +418,58 @@
                 } else if (f.id === 'adminPwd') {
                     promptSupervisorPassword();
                 } else if (f.id === 'fwFlash') {
-                    launchFlashOverlay();
+                    confirmAndLaunchFlash();
                 }
             }
+        }
+
+        // Pre-flash confirmation prompt. Flashing the BIOS is the
+        // most destructive action available in this Setup utility:
+        // the existing PhoenixBIOS image is overwritten in-place
+        // and there is no rollback path. Real flashing utilities
+        // (DOS flash16, AFUDOS, etc.) always pop a confirmation
+        // before doing the actual write, partly because the
+        // operation cannot be safely aborted partway through.
+        // Mirror that here so the action doesn't feel abrupt.
+        function confirmAndLaunchFlash() {
+            var bd = document.createElement('div');
+            bd.className = 'bios-prompt-backdrop';
+            bd.innerHTML =
+                '<div class="bios-prompt bios-prompt-warn">' +
+                '<div class="bios-prompt-title bios-prompt-title-warn">Confirm Firmware Flash</div>' +
+                '<div class="bios-prompt-body bios-prompt-body-warn">' +
+                '<p><strong>WARNING:</strong> You are about to overwrite the firmware on the SPI flash chip with the selected image. This operation cannot be undone from within Setup.</p>' +
+                '<p>The current PhoenixBIOS 4.06 image will be replaced. After the flash completes, this Setup utility will no longer be available; the new firmware\'s configuration interface (if any) takes its place.</p>' +
+                '<p>Do not power off the system during the flash. Interrupting a flash mid-write will brick the appliance.</p>' +
+                '<p>Continue?</p>' +
+                '</div>' +
+                '<div class="bios-prompt-footer">' +
+                '<button class="bios-prompt-btn bios-prompt-btn-danger" id="biosFlashOk">Yes, flash now</button>' +
+                '<button class="bios-prompt-btn" id="biosFlashCancel">Cancel</button>' +
+                '</div>' +
+                '</div>';
+            root.appendChild(bd);
+            var okBtn = document.getElementById('biosFlashOk');
+            var cancelBtn = document.getElementById('biosFlashCancel');
+            // Default focus on Cancel so accidental Enter does not
+            // trigger the flash.
+            cancelBtn.focus();
+            cancelBtn.addEventListener('click', function() { bd.remove(); });
+            okBtn.addEventListener('click', function() {
+                bd.remove();
+                launchFlashOverlay();
+            });
+            // Local key handling: Esc cancels, Enter on the focused
+            // button triggers that button. We listen on the backdrop
+            // and call stopPropagation so the BIOS root handler
+            // doesn't also process the same Escape.
+            bd.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    bd.remove();
+                }
+            }, true);
         }
 
         // Supervisor password prompt. The factory default is the
