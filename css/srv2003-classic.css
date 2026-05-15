@@ -5456,11 +5456,89 @@ body.srv2003-desktop .dialog-footer {
 .cbs-theme-modern .cbs-action-default:hover { background: #3a5a8a; }
 
 @media (max-width: 640px) {
-    .cbs { padding: 12px; }
-    .cbs-window { padding: 10px 12px; font-size: 13px; }
-    .cbs-window-help { font-size: 11px; }
-    .cbs-item .cbs-marker { width: 2.5em; }
-    .cbs-actions { gap: 10px; flex-wrap: wrap; }
+    /* Coreboot Setup utility on phones: the screen is narrow
+       so the title and crumb wrap, items get tap-friendly
+       padding, action buttons become full-width and stack,
+       and the modal dialogs (Load Alt Config, alerts, prompts,
+       confirms) take 95% width instead of the desktop 560px
+       max. The line-comment hint header shrinks to one line
+       per sentence to keep it readable. */
+    .cbs { padding: 10px; align-items: flex-start; padding-top: 32px; }
+    .cbs-title { font-size: 12px; padding: 4px 8px; }
+    .cbs-window {
+        padding: 10px 12px;
+        font-size: 13px;
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    .cbs-window-title {
+        font-size: 13px;
+        word-break: break-word;
+    }
+    .cbs-window-help {
+        font-size: 11px;
+        line-height: 1.5;
+        padding: 4px 4px 8px 4px;
+    }
+    .cbs-items { padding: 4px 0; }
+    .cbs-item {
+        white-space: normal;
+        padding: 8px 6px;
+        line-height: 1.4;
+        min-height: 36px;
+    }
+    .cbs-item .cbs-marker { width: 2.5em; flex-shrink: 0; }
+    .cbs-item .cbs-label { white-space: normal; }
+    .cbs-item .cbs-value {
+        margin-left: 0;
+        margin-top: 2px;
+        display: block;
+    }
+    .cbs-actions {
+        gap: 6px;
+        flex-wrap: wrap;
+        padding: 10px 0 2px 0;
+    }
+    .cbs-action {
+        flex: 1 1 30%;
+        min-width: 80px;
+        min-height: 44px;
+        padding: 12px 8px;
+        font-size: 14px;
+        text-align: center;
+    }
+    .cbs-modal {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+    }
+    .cbs-modal-title { font-size: 13px; padding: 8px 12px; }
+    .cbs-modal-body {
+        padding: 12px;
+        font-size: 13px;
+        max-height: 60vh;
+        overflow-y: auto;
+    }
+    .cbs-modal-actions {
+        flex-direction: column-reverse;
+        gap: 6px;
+        padding: 10px 12px;
+    }
+    .cbs-modal-actions .cbs-action {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+    .cbs-alt-btn {
+        padding: 10px 12px;
+        font-size: 13px;
+        min-height: 44px;
+    }
+    .cbs-prompt-input {
+        font-size: 14px;
+        padding: 10px;
+    }
 }
 .wbp-btn {
     background: #1a1a1a;
@@ -6314,13 +6392,28 @@ body.srv2003-desktop .dialog-footer {
 .wb-sub-tier {
     flex: 1;
     min-width: 100px;
-    padding: 8px 10px;
+    padding: 10px 12px;
     background: #f0f3f8;
     border: 1px solid #d0d8e0;
     border-radius: 4px;
     font-size: 12px;
-    line-height: 1.4;
+    line-height: 1.5;
     text-align: center;
+    /* The tier is a light card. Without an explicit text
+       colour, the W4 friction-dialog body's white text gets
+       inherited and the tier label + price become invisible
+       against the cream background. Force dark text. */
+    color: #1a1a1a;
+}
+/* The tier name uses <strong>. In W4 the body's <strong>
+   override is yellow which is unreadable on light cream;
+   in W3 it is white (invisible). Anchor to a dark blue so
+   the name reads regardless of which variant opened the
+   subscription wall. */
+.wb-sub-tier strong {
+    color: #1a3070;
+    font-weight: 700;
+    font-size: 13px;
 }
 
 /* ============================================================

@@ -85,6 +85,45 @@ function onEditorInput() {
     STATE.fileContents[STATE.activeFile] = ta.value;
     updateLineNumbers(); updateCursor(); updateHighlight(); liveLintStatus();
 }
+function downloadActiveFile() {
+    // Ctrl+S used to show a "autosave active" toast, which was
+    // confusing because users expected a file save. Now it
+    // triggers a browser download of the current tab's content.
+    // We commit the textarea value first so any unflushed
+    // edits land in STATE.fileContents before we read it.
+    if (!STATE.activeFile) { showToast('Nu există fișier activ.'); return; }
+    var ta = $('editor');
+    if (ta) STATE.fileContents[STATE.activeFile] = ta.value;
+    var content = STATE.fileContents[STATE.activeFile] || '';
+    var name = STATE.activeFile;
+    // Best-effort MIME: pick from extension so editors on the
+    // user's machine open the saved file with the right tool.
+    var lower = name.toLowerCase();
+    var mime = 'text/plain';
+    if (lower.endsWith('.html') || lower.endsWith('.htm')) mime = 'text/html';
+    else if (lower.endsWith('.css')) mime = 'text/css';
+    else if (lower.endsWith('.js'))  mime = 'application/javascript';
+    else if (lower.endsWith('.json')) mime = 'application/json';
+    else if (lower.endsWith('.xml')) mime = 'application/xml';
+    else if (lower.endsWith('.svg')) mime = 'image/svg+xml';
+    try {
+        var blob = new Blob([content], { type: mime + ';charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = name;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // Free the object URL on next tick so the click has
+        // committed before revoke.
+        setTimeout(function () { URL.revokeObjectURL(url); }, 0);
+        showToast('Descărcat: ' + name);
+    } catch (err) {
+        showToast('Descărcare eșuată.');
+    }
+}
 function onEditorKey(e) {
     var ta = $('editor');
     if (e.key === 'Tab') {
@@ -96,7 +135,11 @@ function onEditorKey(e) {
         return;
     }
     if (e.ctrlKey && (e.key === 'r' || e.key === 'R')) { e.preventDefault(); runCode(); return; }
-    if (e.ctrlKey && (e.key === 's' || e.key === 'S')) { e.preventDefault(); showToast('Salvare automată activă.'); return; }
+    if (e.ctrlKey && (e.key === 's' || e.key === 'S')) {
+        e.preventDefault();
+        downloadActiveFile();
+        return;
+    }
     if (e.key === 'F2' && STATE.activeFile) { e.preventDefault(); startRename(STATE.activeFile); return; }
     if (STATE.prefs.autoClose && e.key === '>' && STATE.activeFile) {
         var node = findNode(STATE.tree, STATE.activeFile);

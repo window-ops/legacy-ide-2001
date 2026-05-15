@@ -816,7 +816,7 @@
       root.className = "wb-root cbs-host cbs-theme-" + cfg.theme;
       var items = currentMenu();
       var sel = currentSel().selected;
-      var headerHelp = "Săgeți: navigare.  &lt;Enter&gt;: selectare/intrare în submeniu.  &lt;Y&gt;/&lt;N&gt;: activează/dezactivează.  &lt;Esc&gt;: înapoi.  &lt;?&gt;: ajutor.";
+      var headerHelp = "Săgeți: navigare.  &lt;Enter&gt; sau atingere: selectare/intrare în submeniu.  &lt;Y&gt;/&lt;N&gt;: activează/dezactivează.  &lt;Esc&gt; sau &lt;Exit&gt;: înapoi.  &lt;?&gt; sau &lt;Help&gt;: ajutor.";
       var legend = "Legend: [*] activat   [ ] dezactivat   ---&gt; submeniu   (value) opțiune curentă";
       var crumb = stack.length === 1
         ? "coreboot Configuration"
@@ -852,8 +852,8 @@
         '<div class="cbs-items" id="cbsItems">' + itemsHtml + "</div>" +
         '<div class="cbs-actions">' +
         '<button class="cbs-action cbs-action-default" data-cbs-act="select" tabindex="-1">&lt;Select&gt;</button>' +
-        '<button class="cbs-action" data-cbs-act="exit" tabindex="-1">&lt; Exit &gt;</button>' +
-        '<button class="cbs-action" data-cbs-act="help" tabindex="-1">&lt; Help &gt;</button>' +
+        '<button class="cbs-action" data-cbs-act="exit" tabindex="-1">&lt;Exit&gt;</button>' +
+        '<button class="cbs-action" data-cbs-act="help" tabindex="-1">&lt;Help&gt;</button>' +
         "</div>" +
         "</div>" +
         "</div>";
@@ -883,7 +883,7 @@
           // unambiguous.
           if (el.blur) el.blur();
           if (act === "select") activate();
-          else if (act === "exit") exitFlow();
+          else if (act === "exit") backOrExit();
           else if (act === "help") showHelp();
         });
       });
@@ -946,6 +946,14 @@
       // because there's no clean diff and the cost is tiny.
       cbSaveCfg(cfg);
       showConsolePicker();
+    }
+    // <Exit> button mirrors the Escape key: pop one submenu
+    // level if there is one, otherwise save and exit to the
+    // picker. On mobile this is the only way out because
+    // there is no physical Esc key available to the user.
+    function backOrExit() {
+      if (stack.length > 1) { stack.pop(); render(); }
+      else exitFlow();
     }
     function showHelp() {
       var st = currentSel();
@@ -1132,8 +1140,7 @@
         activate();
       } else if (e.key === "Escape") {
         e.preventDefault();
-        if (stack.length > 1) { stack.pop(); render(); }
-        else exitFlow();
+        backOrExit();
       } else if (e.key === "y" || e.key === "Y") {
         var ya = items[st.selected];
         if (ya && ya.type === "bool") { cfg[ya.id] = true; render(); }
@@ -3142,17 +3149,18 @@
       INITIAL_WALLS.push({ x: 0, y: wy });
       INITIAL_WALLS.push({ x: COLS - 1, y: wy });
     }
-    // 3 boxes, 3 targets. Boxes column 3, targets column 8.
-    // Each box is pushed right 5 times to reach its target;
-    // the player has to navigate around between pushes so it
-    // is not a one-pass solve. All target rows are reachable
-    // by pushing right only, which is the only direction a
-    // box at column 3 can move (south and east are clear, but
-    // pushing south/up requires a player position that is
-    // blocked by walls or other boxes initially).
+    // 3 boxes, 3 targets in three different solve patterns:
+    //   Box (2,3) -> target (4,1)  push UP twice, then RIGHT
+    //   Box (2,5) -> target (7,3)  push RIGHT five times, then UP twice
+    //   Box (2,6) -> target (8,6)  push RIGHT six times
+    // The boxes all start in column 2 so the player must plan
+    // the order: pushing (2,3) blocks no other path, but the
+    // three targets have to be reached using three different
+    // motion sequences. No interior walls; the only walls are
+    // the 10x8 border.
     var INITIAL_PLAYER  = { x: 1, y: 3 };
-    var INITIAL_BOXES   = [ { x: 3, y: 3 }, { x: 3, y: 4 }, { x: 3, y: 5 } ];
-    var INITIAL_TARGETS = [ { x: 8, y: 3 }, { x: 8, y: 4 }, { x: 8, y: 5 } ];
+    var INITIAL_BOXES   = [ { x: 2, y: 3 }, { x: 2, y: 5 }, { x: 2, y: 6 } ];
+    var INITIAL_TARGETS = [ { x: 4, y: 1 }, { x: 7, y: 3 }, { x: 8, y: 6 } ];
     var canvas = document.createElement("canvas");
     canvas.width = COLS * CELL; canvas.height = ROWS * CELL + 40;
     canvas.className = "wb-canvas"; canvas.tabIndex = 0; canvas.style.outline = "none";
