@@ -96,14 +96,14 @@ function renderNode(node, container, depth) {
 // "Redenumește" entry in the file context menu so the visible label
 // matches the actual binding. Capture phase so we win over any
 // in-textarea handler; we still ignore F2 when the user is typing
-// inside an editable element so it doesn\'t steal focus mid-edit.
+// inside an editable element so it doesn't steal focus mid-edit.
 document.addEventListener('keydown', function(e) {
     if (e.key !== 'F2') return;
     if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
     var t = e.target;
     // If a rename input is already open, let it handle Enter/Escape.
     if (t && t.classList && t.classList.contains('rename-input')) return;
-    // Don\'t hijack F2 when typing inside a text field, textarea or
+    // Don't hijack F2 when typing inside a text field, textarea or
     // contenteditable surface, F2 there might be meaningful for the
     // user (e.g. cell-edit conventions, screen reader bindings).
     var tag = t && t.tagName;

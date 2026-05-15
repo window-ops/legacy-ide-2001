@@ -384,7 +384,7 @@
                 settings[f.id] = f.choices[i];
                 render();
             } else if (f.type === 'order' && f.id === 'bootSeq') {
-                // Move highlighted boot device. We don\'t track an inner
+                // Move highlighted boot device. We don't track an inner
                 // selection cursor, so + moves first device up the list,
                 // - moves it down. Good enough to feel real.
                 if (dir > 0 && settings.bootSeq.length > 1) {
@@ -581,14 +581,14 @@
 
         // Snapshot settings on entry, used by exit() to compute
         // which fields actually changed during this Setup session.
-        // The diff drives applyBiosEffects(); fields that didn\'t
+        // The diff drives applyBiosEffects(); fields that didn't
         // change emit no balloon and trigger no state flip.
         var entrySnapshot = {};
         for (var ek in settings) entrySnapshot[ek] = settings[ek];
 
         function exit(saved) {
             if (saved) {
-                // Some settings can\'t change at all on this BIOS
+                // Some settings can't change at all on this BIOS
                 // revision (Secure Boot is documented as unsupported).
                 // Force them back to their entry value before save.
                 if (settings.secureBoot !== entrySnapshot.secureBoot) {
@@ -629,7 +629,7 @@
         //                 notification explaining this.
         //   COSMETIC      change is only acknowledged by a notify.
         //                 Used for settings whose simulated effect
-        //                 doesn\'t involve any other subsystem in
+        //                 doesn't involve any other subsystem in
         //                 the current build (Wake on LAN, ACPI
         //                 Suspend Type, AC Power Loss Restart, etc.)
         //

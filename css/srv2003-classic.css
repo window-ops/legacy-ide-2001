@@ -4963,6 +4963,18 @@ body.srv2003-desktop .dialog-footer {
     gap: 10px;
     flex-wrap: wrap;
 }
+/* Boot-timeout countdown line. Stays empty when there is no
+   default OS or the timeout is zero. Yellow tint so it reads
+   as an alert without being garish. */
+.wbp-countdown {
+    margin-top: 10px;
+    color: #ffd34d;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 12px;
+    min-height: 1.4em;
+    line-height: 1.4em;
+}
+.wbp-countdown:empty { display: none; }
 .wbp-key-btn {
     background: transparent;
     border: 1px solid #3a3a3a;
@@ -5145,15 +5157,26 @@ body.srv2003-desktop .dialog-footer {
     text-align: left;
     padding: 6px 10px;
     background: #ffffff;
+    /* Lock text color to dark: the button has a white
+       background regardless of the active theme, so without
+       an explicit color the classic theme's white body text
+       gets inherited here and the label becomes invisible on
+       its own background. */
+    color: #1a1a1a;
     border: 1px solid #b0b0b0;
     cursor: pointer;
     font-family: inherit;
     font-size: 13px;
 }
 .cbs-alt-btn:hover { background: #e0e8f0; }
+.cbs-alt-btn:focus {
+    outline: 2px solid #2a4a7a;
+    outline-offset: 1px;
+}
 .cbs-alt-btn-factory {
     border-color: #800000;
     background: #fff0e0;
+    color: #6a1a1a;
     font-weight: 700;
 }
 .cbs-alt-btn-factory:hover { background: #ffe0c0; }
@@ -5161,12 +5184,58 @@ body.srv2003-desktop .dialog-footer {
     padding: 10px 16px;
     border-top: 1px solid #c0c0c0;
     text-align: right;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
 }
 .cbs-modal-actions .cbs-action {
     color: #000000;
-    border: 1px solid #b0b0b0;
-    background: #e0e0e0;
-    padding: 4px 12px;
+    border: 1px solid #707070;
+    background: #d8d8d8;
+    padding: 5px 14px;
+    font-weight: 500;
+    border-radius: 2px;
+}
+.cbs-modal-actions .cbs-action:hover {
+    background: #c0c0c0;
+}
+.cbs-modal-actions .cbs-action-default {
+    background: #2a4a7a;
+    color: #ffffff;
+    border-color: #1a3a6a;
+    font-weight: 600;
+}
+.cbs-modal-actions .cbs-action-default:hover {
+    background: #3a5a8a;
+}
+.cbs-modal-actions .cbs-action-default:focus {
+    outline: 2px solid #80a8d0;
+    outline-offset: 1px;
+}
+.cbs-modal-actions .cbs-action-danger {
+    background: #8a2a2a;
+    color: #ffffff;
+    border-color: #6a1a1a;
+}
+.cbs-modal-actions .cbs-action-danger:hover {
+    background: #aa3a3a;
+}
+.cbs-prompt-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px 8px;
+    font-family: "Lucida Console", "Consolas", monospace;
+    font-size: 13px;
+    background: #ffffff;
+    color: #000000;
+    border: 1px solid #707070;
+    border-radius: 2px;
+    margin-top: 4px;
+}
+.cbs-prompt-input:focus {
+    outline: 2px solid #80a8d0;
+    outline-offset: -1px;
+    border-color: #4a80c0;
 }
 
 /* CLASSIC theme: ncurses palette */
@@ -5188,25 +5257,165 @@ body.srv2003-desktop .dialog-footer {
     border-bottom-color: #4444aa;
 }
 .cbs-theme-classic .cbs-item { color: #ffffff; }
+/* Selection uses proper reverse video like real ncurses
+   Kconfig: take the window's normal fg/bg and swap them.
+   Window is white-on-blue, so selected is blue-on-white.
+   Drops the high-saturation yellow that was visually noisy
+   and didn't match the screenshot. */
 .cbs-theme-classic .cbs-item-selected {
-    background: #aaaa00;
-    color: #000000;
+    background: #ffffff;
+    color: #0000aa;
 }
 .cbs-theme-classic .cbs-item-selected .cbs-marker,
-.cbs-theme-classic .cbs-item-selected .cbs-label { color: #000000; }
-.cbs-theme-classic .cbs-item-locked { color: #aaaaaa; }
-.cbs-theme-classic .cbs-sep { color: #6688cc; }
+.cbs-theme-classic .cbs-item-selected .cbs-label { color: #0000aa; }
+.cbs-theme-classic .cbs-item-selected .cbs-value { color: #4a4a8a; }
+.cbs-theme-classic .cbs-item-locked { color: #c0c0c0; }
+.cbs-theme-classic .cbs-sep { color: #8888cc; }
 .cbs-theme-classic .cbs-action {
     color: #ffffff;
-    background: #0000aa;
+    background: transparent;
 }
 .cbs-theme-classic .cbs-action-default {
-    background: #aaaa00;
-    color: #000000;
+    background: #ffffff;
+    color: #0000aa;
     padding: 2px 10px;
+    font-weight: 700;
 }
 .cbs-theme-classic .cbs-action:hover:not(.cbs-action-default) {
     background: #4444cc;
+}
+.cbs-theme-classic .cbs-action:focus {
+    outline: 1px dotted #ffffff;
+    outline-offset: 2px;
+}
+/* Classic-theme modal: inherit the blue/white scheme so the
+   prompt doesn't pop out as a different OS dialog. The modal
+   lives at body level so we match by sibling of the host. */
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal {
+    background: #0000aa;
+    color: #ffffff;
+    border: 2px solid #ffffff;
+    font-family: "Lucida Console", "Consolas", monospace;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-title {
+    background: #00aaaa;
+    color: #000080;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-actions {
+    border-top-color: #4444aa;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-actions .cbs-action {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid transparent;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-actions .cbs-action-default {
+    background: #ffffff;
+    color: #0000aa;
+    border-color: #ffffff;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-actions .cbs-action:hover {
+    background: #4444cc;
+    color: #ffffff;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-actions .cbs-action-default:hover {
+    background: #e0e0ff;
+    color: #0000aa;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-prompt-input {
+    background: #ffffff;
+    color: #0000aa;
+    border-color: #ffffff;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-body code {
+    color: #aaffff;
+    background: rgba(0, 0, 0, 0.30);
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-modal-body strong {
+    color: #ffff80;
+}
+/* Section dividers ("Configurații utilizator" / "Backup
+   furnizor") in the Load Alt Config dialog. The base style
+   paints them dark blue with a light underline, which is
+   invisible against the classic theme's dark blue modal
+   body. Override to bright cyan with a softer divider. */
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-alt-section-title {
+    color: #aaffff;
+    border-bottom-color: #4444aa;
+}
+/* Same problem for the "no slots saved" placeholder which
+   uses 30-40% grey in the base style: invisible on classic
+   blue. Bump to a desaturated light blue. */
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-alt-empty {
+    color: #ccccdd;
+}
+/* User-slot buttons inherit white text from the classic
+   modal body unless we re-state the dark color here. The
+   base rule does set it to #1a1a1a; this is a safety net
+   in case a future override broadens. */
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-alt-btn {
+    color: #1a1a1a;
+}
+.cbs-host.cbs-theme-classic ~ .cbs-modal-bd .cbs-alt-btn-factory {
+    color: #6a1a1a;
+}
+/* Modern-theme modal: dark card that matches the setup chrome. */
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal {
+    background: #1a1a1a;
+    color: #e0e0e0;
+    border: 1px solid #3a3a3a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-title {
+    background: #2a2a2a;
+    color: #80a8d0;
+    border-bottom: 1px solid #3a3a3a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-actions {
+    border-top-color: #2a2a2a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-actions .cbs-action {
+    background: #2a2a2a;
+    color: #e0e0e0;
+    border: 1px solid #3a3a3a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-actions .cbs-action-default {
+    background: #2a4a7a;
+    color: #ffffff;
+    border-color: #4a6a9a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-actions .cbs-action:hover {
+    background: #3a3a3a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-actions .cbs-action-default:hover {
+    background: #3a5a8a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-prompt-input {
+    background: #0a0a0a;
+    color: #ffffff;
+    border-color: #3a3a3a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-body code {
+    color: #80c8d0;
+    background: rgba(255, 255, 255, 0.06);
+}
+/* Modern-theme equivalents for the load-alt dialog. The
+   dark grey modal body makes the base dark-blue title and
+   grey placeholder text disappear into the surface. */
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-modal-body strong {
+    color: #ffd34d;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-alt-section-title {
+    color: #80a8d0;
+    border-bottom-color: #3a3a3a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-alt-empty {
+    color: #909090;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-alt-btn {
+    color: #1a1a1a;
+}
+.cbs-host.cbs-theme-modern ~ .cbs-modal-bd .cbs-alt-btn-factory {
+    color: #6a1a1a;
 }
 
 /* MODERN theme: dark neutral, matches the post-flash chrome */
@@ -5528,15 +5737,16 @@ body.srv2003-desktop .dialog-footer {
     color: rgba(255, 255, 255, 0.85);
     font-variant-numeric: tabular-nums;
 }
-/* Subscription state pill in the W4 top bar. Yellow-tinted
-   when inactive (the call-to-action), neutral when active.
-   Replaces the earlier full-width black strip below the
-   topbar that broke the blue gradient. Pressing the pill
-   opens the same subscription dialog the strip used to. */
+/* Subscription state pill in the W4 top bar. Inactive uses a
+   red-tinted background with white text (high contrast, signals
+   the disabled state without relying on a saturated yellow).
+   Active uses a green-tinted background. Both have a darker
+   ring so the pill remains visible against the brightest part
+   of the radial blue gradient. */
 .wb4-sub-pill {
-    background: rgba(0, 0, 0, 0.22);
-    border: 1px solid rgba(255, 211, 77, 0.5);
-    color: #ffd34d;
+    background: rgba(223, 64, 64, 0.30);
+    border: 1px solid rgba(255, 128, 128, 0.50);
+    color: #ffffff;
     padding: 5px 12px;
     border-radius: 14px;
     font-size: 12px;
@@ -5544,18 +5754,24 @@ body.srv2003-desktop .dialog-footer {
     cursor: pointer;
     transition: background 80ms linear;
     white-space: nowrap;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }
 .wb4-sub-pill:hover {
-    background: rgba(0, 0, 0, 0.40);
+    background: rgba(223, 64, 64, 0.50);
+    border-color: rgba(255, 192, 192, 0.65);
 }
 .wb4-sub-pill:focus {
-    outline: 2px solid #ffd34d;
+    outline: 2px solid #ffffff;
     outline-offset: 1px;
 }
 .wb4-sub-pill-active {
-    border-color: rgba(180, 230, 180, 0.5);
-    color: #c0f0c0;
+    background: rgba(64, 160, 80, 0.30);
+    border-color: rgba(128, 220, 144, 0.55);
+    color: #ffffff;
     cursor: default;
+}
+.wb4-sub-pill-active:hover {
+    background: rgba(64, 160, 80, 0.30);
 }
 .wb4-content {
     position: relative;
@@ -6218,22 +6434,26 @@ body.srv2003-desktop .dialog-footer {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 .wb-friction-bd-w4 .wb-btn {
-    background: rgba(255, 255, 255, 0.10);
+    background: rgba(255, 255, 255, 0.16);
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.32);
     border-radius: 4px;
     padding: 8px 16px;
     font-weight: 500;
 }
-.wb-friction-bd-w4 .wb-btn:hover { background: rgba(255, 255, 255, 0.18); }
+.wb-friction-bd-w4 .wb-btn:hover { background: rgba(255, 255, 255, 0.26); }
+.wb-friction-bd-w4 .wb-btn:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.55);
+    outline-offset: 1px;
+}
 .wb-friction-bd-w4 .wb-btn-primary {
-    background: linear-gradient(180deg, #4a90df 0%, #2a6abf 100%);
+    background: linear-gradient(180deg, #3a80cf 0%, #1a5aaf 100%);
     color: #ffffff;
-    border-color: rgba(255, 255, 255, 0.30);
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+    border-color: rgba(255, 255, 255, 0.40);
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.45);
 }
 .wb-friction-bd-w4 .wb-btn-primary:hover {
-    background: linear-gradient(180deg, #5aa0ef 0%, #3a7acf 100%);
+    background: linear-gradient(180deg, #4a90df 0%, #2a6abf 100%);
 }
 
 /* W5 - Waterboard 5 (PS5-era, light grey, frosted)

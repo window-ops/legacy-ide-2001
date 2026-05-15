@@ -72,7 +72,7 @@
     function saveSites(sites) {
         var existing = load() || {};
         // Only the description and state columns are worth persisting;
-        // host header, IP, port etc. don\'t change at runtime.
+        // host header, IP, port etc. don't change at runtime.
         existing.sites = sites.map(function(s) {
             return { desc: s.desc, state: s.state };
         });

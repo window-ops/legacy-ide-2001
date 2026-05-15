@@ -15,7 +15,7 @@
    ?srv2k3=1 URL trigger.
 
    Persists the dismissed-this-session flag in sessionStorage
-   so the badge doesn\'t re-appear after the user dismisses it.
+   so the badge doesn't re-appear after the user dismisses it.
    ============================================================ */
 (function() {
     var BADGE_ID = 'reconnectBadge';
@@ -35,10 +35,10 @@
         if (typeof STATE === 'undefined' || !STATE.defaultuser) return false;
         // Only show when the user has actively re-entered the path
         // toward Server 2003 (defaultuser exploit re-triggered, but
-        // they\'re still in the migration flow). After Reset they\'re
+        // they're still in the migration flow). After Reset they're
         // in 'locked' state; the badge stays hidden until they
         // re-engage the exploit. This avoids surprising users who
-        // didn\'t intend to go back.
+        // didn't intend to go back.
         var phase = STATE.defaultuser.phase;
         if (phase !== 'unlocked' && phase !== 'migration') return false;
         if (!STATE.defaultuser.lastSnapshot) return false;
@@ -55,7 +55,7 @@
             sessionStorage.setItem('ide.defaultuser.v1', JSON.stringify(STATE.defaultuser));
         } catch (e) {}
         document.documentElement.setAttribute('data-du-phase', 'server2003');
-        // Hide the badge before mounting so it doesn\'t flash on top.
+        // Hide the badge before mounting so it doesn't flash on top.
         var b = document.getElementById(BADGE_ID);
         if (b) b.remove();
         // Mount. mountDesktop() lives in srv2003-desktop.js and is on

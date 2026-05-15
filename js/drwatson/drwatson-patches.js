@@ -6,9 +6,9 @@
    that target the same effect store the GDX Debugger writes into:
    STATE.binaryPatches.
 
-   We do NOT call into the GDX Debugger\'s applyPatch() global
+   We do NOT call into the GDX Debugger's applyPatch() global
    because that function touches GDX-only DOM (#dbgFnList,
-   #dbgDisasm) which doesn\'t exist when only Dr. Watson is open.
+   #dbgDisasm) which doesn't exist when only Dr. Watson is open.
    Instead we set the same effect flags (bypassCurriculum,
    curriculumNonBlocking, bypassOSCheck) directly. The qnx and
    editor modules already read those flags, so Verifică and
@@ -46,7 +46,7 @@
             store[flag] = true;
         }
         // Write a System log entry so the patch is auditable in Event
-        // Viewer. eventID 1023 is Microsoft\'s "Application failed to
+        // Viewer. eventID 1023 is Microsoft's "Application failed to
         // initialize", apt for a postmortem-debugger writing patches.
         if (window.SRV2K3_EVENTLOG) {
             window.SRV2K3_EVENTLOG.write({

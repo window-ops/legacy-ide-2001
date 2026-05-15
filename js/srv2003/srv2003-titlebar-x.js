@@ -3,7 +3,7 @@
    The Server 2003 dialogs in this app each render their own
    <div class="dialog-header">title</div>, with no close button.
    Real Win32 dialogs always have an [X] in the title bar. Rather
-   than touch every dialog\'s markup (22+ call sites), we enrich
+   than touch every dialog's markup (22+ call sites), we enrich
    any Server 2003 dialog as it gets appended:
 
      - Wrap the existing header text in <span class="dialog-header-title">
@@ -30,7 +30,7 @@
      stripAll()    - remove [X] from every existing dialog.
 
    The title-bar [X] uses U+2715 (heavy multiplication X) since
-   the Marlett "r" glyph that real Windows uses for [X] won\'t
+   the Marlett "r" glyph that real Windows uses for [X] won't
    render on most browsers without the proprietary font.
    ============================================================ */
 (function () {

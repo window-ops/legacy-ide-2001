@@ -20,7 +20,7 @@
    The QNX Reset flow calls clear() to wipe the log along with
    the rest of Server-2003 state. New sessions start with a
    small bootstrap of plausible boot-time entries so the log
-   doesn\'t look unnaturally empty.
+   doesn't look unnaturally empty.
    ============================================================ */
 (function() {
     var STORAGE_KEY = 'ide.srv2k3.eventlog.v1';

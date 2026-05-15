@@ -185,6 +185,39 @@ stiva `z-index` la fiecare click, pentru a nu crește nelimitat
 că funcțiile globale critice există și că dialogurile cheie se
 deschid. Se rulează manual din consola browserului.
 
+### Parametru URL pentru debugging coreboot
+
+Ramura post-defaultuser include o secvență lungă (Server 2003 →
+BIOS Setup → flash coreboot → selector OS → instalare W3/W4/W5)
+care este obositor de parcurs manual la fiecare reîncărcare în
+timpul dezvoltării. Parametrul URL `?coreboot=<valoare>` sare
+peste această secvență și aterizează direct în starea dorită.
+
+| Valoare | Efect |
+|---|---|
+| `?coreboot=flashed` (sau `1`, sau `picker`, sau gol) | coreboot prezent, selectorul de sisteme afișat |
+| `?coreboot=w3` | coreboot + Waterboard 3 instalat și activ |
+| `?coreboot=w4` | coreboot + Waterboard 4 activ + siguranța NVRAM arsă pe W4 |
+| `?coreboot=w5` | coreboot + Waterboard 5 activ + siguranța NVRAM arsă pe W5 + cont debug pre-creat |
+| `?coreboot=bricked-w4` | coreboot + selector + siguranța NVRAM arsă pe W4 (W3 indisponibil) |
+| `?coreboot=bricked-w5` | coreboot + selector + siguranța NVRAM arsă pe W5 (W3 și W4 indisponibile) |
+| `?coreboot=reset` (sau `clear`, sau `0`) | șterge complet starea coreboot/Waterboard și revine la Server 2003 |
+
+Parametrul este aplicat pe `sessionStorage` la fiecare încărcare
+de pagină și NU este eliminat din URL după aplicare. Reîncărcarea
+păstrează aceeași stare debug. Pentru a reveni la calea normală
+de boot, încărcați o dată cu `?coreboot=reset`, apoi ștergeți
+parametrul din URL.
+
+Stările sunt scrise direct în `sessionStorage`, deci se
+păstrează doar până la închiderea tabului. Cheile afectate:
+`ide.coreboot.v1`, `ide.waterboard.v1`, `ide.nvram.brick.v1`,
+`ide.waterboard.lastboot.v1`, `ide.coreboot.setup.v2`.
+
+Implementarea este în `js/srv2003/srv2003-coreboot.js`, funcția
+`applyCorebootUrlParam`. Adăugarea unei noi valori se face prin
+extinderea acelui switch.
+
 ---
 
 ## Licență

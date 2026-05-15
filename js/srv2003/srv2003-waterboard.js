@@ -330,6 +330,7 @@
       '<div class="wbp-keys">' +
       '<button class="wbp-key-btn" data-wbp-action="setup"><kbd>F2</kbd> Setup coreboot</button>' +
       "</div>" +
+      '<div class="wbp-countdown" id="wbpCountdown" aria-live="polite"></div>' +
       "</div>" +
       "</div>";
 
@@ -337,13 +338,70 @@
       if (el.classList.contains("wbp-row-locked")) return;
       el.addEventListener("click", function () {
         var v = el.getAttribute("data-pick");
+        cancelAutoboot();
         installVariant(v);
       });
     });
     var setupBtn = root.querySelector('[data-wbp-action="setup"]');
     if (setupBtn) {
-      setupBtn.addEventListener("click", showCorebootSetup);
+      setupBtn.addEventListener("click", function () {
+        cancelAutoboot();
+        showCorebootSetup();
+      });
     }
+
+    // Boot-timeout autoboot.
+    // Reads coreboot Setup's default_os + boot_timeout. If a
+    // valid default target is set and the timeout is non-zero,
+    // start a countdown in the picker that auto-boots when it
+    // hits zero. Any key press, mouse move, or click cancels
+    // the countdown (Phoenix/coreboot behaviour: any input
+    // interrupts the boot delay).
+    var autoTimer = null;
+    var autoInterval = null;
+    function cancelAutoboot() {
+      if (autoTimer) { clearTimeout(autoTimer); autoTimer = null; }
+      if (autoInterval) { clearInterval(autoInterval); autoInterval = null; }
+      var cd = document.getElementById("wbpCountdown");
+      if (cd) cd.textContent = "";
+      window.removeEventListener("keydown", autoCancelHandler, true);
+      root.removeEventListener("mousemove", autoCancelHandler, true);
+    }
+    function autoCancelHandler() { cancelAutoboot(); }
+    function startAutobootIfConfigured() {
+      var cfg = cbLoadCfg();
+      var target = cfg.default_os;
+      if (target === "last") target = lastBootedVariant();
+      // None / empty / explicit (none) → no autoboot.
+      if (!target || target === "none") return;
+      // Must be a real variant string.
+      if (target !== "w3" && target !== "w4" && target !== "w5") return;
+      // Cannot autoboot into something the fuse blocks.
+      if (isLocked(target)) return;
+      var secs = parseInt(cfg.boot_timeout, 10);
+      if (!secs || secs <= 0) return;
+      var remaining = secs;
+      var brand = variantName(target);
+      var cdEl = document.getElementById("wbpCountdown");
+      function paint() {
+        if (!cdEl) return;
+        cdEl.textContent = "Pornire automată: " + brand +
+          " în " + remaining + " s. Apăsați orice tastă sau mișcați mouse-ul pentru a anula.";
+      }
+      paint();
+      autoInterval = setInterval(function () {
+        remaining -= 1;
+        if (remaining <= 0) {
+          cancelAutoboot();
+          installVariant(target);
+        } else {
+          paint();
+        }
+      }, 1000);
+      window.addEventListener("keydown", autoCancelHandler, true);
+      root.addEventListener("mousemove", autoCancelHandler, true);
+    }
+
     // F2 keyboard shortcut, matches the on-screen hint.
     function onPickerKey(e) {
       if (!document.getElementById("wbRoot")) {
@@ -352,10 +410,12 @@
       }
       if (e.key === "F2") {
         e.preventDefault();
+        cancelAutoboot();
         showCorebootSetup();
       }
     }
     window.addEventListener("keydown", onPickerKey, true);
+    startAutobootIfConfigured();
   }
 
   // ============================================================
@@ -418,6 +478,170 @@
   }
   function cbSaveCfg(cfg) {
     try { sessionStorage.setItem(CB_CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+  }
+
+  // ============================================================
+  // CUSTOM DIALOG HELPERS (cbsAlert / cbsConfirm / cbsPrompt)
+  // Module-scope so any waterboard surface (Setup, power-off,
+  // friction wrappers) can request a modal without falling back
+  // to the browser-native alert()/confirm()/prompt() which look
+  // out of place over the simulated chrome. The DOM is the same
+  // .cbs-modal-bd / .cbs-modal markup the Setup utility already
+  // uses, so theme overrides apply automatically.
+  // ============================================================
+  function cbsEscape(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[c];
+    });
+  }
+  function cbsParagraphs(text) {
+    // Split a plain-text message on blank lines into <p> blocks.
+    // Single \n inside a paragraph stays as a soft break.
+    return text.split(/\n{2,}/).map(function (p) {
+      return "<p>" + cbsEscape(p).replace(/\n/g, "<br>") + "</p>";
+    }).join("");
+  }
+  function cbsBuildModal(opts) {
+    // opts: { title, bodyHtml, actions: [{label, key, kind?}], onClose }
+    // kind: "default" (focused, fires on Enter), "danger", undefined
+    var bd = document.createElement("div");
+    bd.className = "cbs-modal-bd";
+    var actionsHtml = opts.actions.map(function (a) {
+      var cls = "cbs-action";
+      if (a.kind === "default") cls += " cbs-action-default";
+      if (a.kind === "danger")  cls += " cbs-action-danger";
+      return '<button class="' + cls + '" data-cbs-modal-act="' + cbsEscape(a.key) + '">' +
+        cbsEscape(a.label) + "</button>";
+    }).join("");
+    bd.innerHTML =
+      '<div class="cbs-modal">' +
+      '<div class="cbs-modal-title">' + cbsEscape(opts.title) + "</div>" +
+      '<div class="cbs-modal-body">' + opts.bodyHtml + "</div>" +
+      '<div class="cbs-modal-actions">' + actionsHtml + "</div>" +
+      "</div>";
+    document.body.appendChild(bd);
+    function close(key) {
+      bd.removeEventListener("keydown", onKey, true);
+      bd.remove();
+      if (opts.onClose) opts.onClose(key);
+    }
+    function onKey(e) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        // Find the cancel action if present, else default close.
+        var cancel = null;
+        for (var i = 0; i < opts.actions.length; i++) {
+          if (opts.actions[i].key === "cancel" || opts.actions[i].key === "no") {
+            cancel = opts.actions[i].key;
+            break;
+          }
+        }
+        close(cancel);
+      } else if (e.key === "Enter") {
+        // Enter triggers the default action, but ONLY if focus
+        // isn't on a text input (otherwise it would skip the
+        // input's normal Enter-submits handler).
+        if (document.activeElement && document.activeElement.tagName === "INPUT") return;
+        var def = null;
+        for (var j = 0; j < opts.actions.length; j++) {
+          if (opts.actions[j].kind === "default") { def = opts.actions[j].key; break; }
+        }
+        if (def != null) {
+          e.preventDefault();
+          e.stopPropagation();
+          close(def);
+        }
+      }
+    }
+    bd.addEventListener("keydown", onKey, true);
+    bd.querySelectorAll("[data-cbs-modal-act]").forEach(function (b) {
+      b.addEventListener("click", function () { close(b.getAttribute("data-cbs-modal-act")); });
+    });
+    // Focus the default action so keyboard users can confirm
+    // or cancel without first hunting for a focusable element.
+    var def = bd.querySelector(".cbs-action-default");
+    if (def) def.focus();
+    return { close: function () { close(null); }, root: bd };
+  }
+  function cbsAlert(title, message, onClose) {
+    cbsBuildModal({
+      title: title,
+      bodyHtml: cbsParagraphs(message),
+      actions: [{ label: "OK", key: "ok", kind: "default" }],
+      onClose: function () { if (onClose) onClose(); }
+    });
+  }
+  function cbsConfirm(title, message, onConfirm, onCancel) {
+    cbsBuildModal({
+      title: title,
+      bodyHtml: cbsParagraphs(message),
+      actions: [
+        { label: "OK", key: "ok", kind: "default" },
+        { label: "Anulează", key: "cancel" }
+      ],
+      onClose: function (key) {
+        if (key === "ok") { if (onConfirm) onConfirm(); }
+        else { if (onCancel) onCancel(); }
+      }
+    });
+  }
+  function cbsConfirmDanger(title, message, onConfirm, onCancel) {
+    // Same as cbsConfirm but the OK button is styled danger and
+    // Cancel is the keyboard default so users don't accidentally
+    // destroy state by mashing Enter.
+    cbsBuildModal({
+      title: title,
+      bodyHtml: cbsParagraphs(message),
+      actions: [
+        { label: "Anulează", key: "cancel", kind: "default" },
+        { label: "Continuă", key: "ok", kind: "danger" }
+      ],
+      onClose: function (key) {
+        if (key === "ok") { if (onConfirm) onConfirm(); }
+        else { if (onCancel) onCancel(); }
+      }
+    });
+  }
+  function cbsPrompt(title, label, defaultValue, onSubmit, onCancel) {
+    var inputId = "cbsPromptInput_" + Math.floor(Math.random() * 1e6);
+    var bodyHtml =
+      '<p>' + cbsEscape(label) + '</p>' +
+      '<input type="text" id="' + inputId + '" class="cbs-prompt-input" value="' +
+      cbsEscape(defaultValue == null ? "" : defaultValue) + '">';
+    var modal = cbsBuildModal({
+      title: title,
+      bodyHtml: bodyHtml,
+      actions: [
+        { label: "OK", key: "ok", kind: "default" },
+        { label: "Anulează", key: "cancel" }
+      ],
+      onClose: function (key) {
+        var inp = document.getElementById(inputId);
+        var v = inp ? inp.value : null;
+        if (key === "ok") { if (onSubmit) onSubmit(v); }
+        else { if (onCancel) onCancel(); }
+      }
+    });
+    // Move focus from the default action to the input so the
+    // user can start typing immediately. Enter inside the input
+    // also fires "ok" because we stop preventing Enter when
+    // the active element is a text input (see onKey).
+    setTimeout(function () {
+      var inp = document.getElementById(inputId);
+      if (inp) {
+        inp.focus();
+        inp.select();
+        inp.addEventListener("keydown", function (e) {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            modal.close();
+            var v = inp.value;
+            if (onSubmit) onSubmit(v);
+          }
+        });
+      }
+    }, 0);
   }
   // Backward-compat shim: a couple of helpers elsewhere still
   // reach for the v1 schema. Keep them as thin wrappers over
@@ -627,9 +851,9 @@
         '<div class="cbs-window-help">' + headerHelp + '<br>' + legend + "</div>" +
         '<div class="cbs-items" id="cbsItems">' + itemsHtml + "</div>" +
         '<div class="cbs-actions">' +
-        '<button class="cbs-action cbs-action-default" data-cbs-act="select">&lt;Select&gt;</button>' +
-        '<button class="cbs-action" data-cbs-act="exit">&lt; Exit &gt;</button>' +
-        '<button class="cbs-action" data-cbs-act="help">&lt; Help &gt;</button>' +
+        '<button class="cbs-action cbs-action-default" data-cbs-act="select" tabindex="-1">&lt;Select&gt;</button>' +
+        '<button class="cbs-action" data-cbs-act="exit" tabindex="-1">&lt; Exit &gt;</button>' +
+        '<button class="cbs-action" data-cbs-act="help" tabindex="-1">&lt; Help &gt;</button>' +
         "</div>" +
         "</div>" +
         "</div>";
@@ -643,13 +867,32 @@
         });
       });
       root.querySelectorAll("[data-cbs-act]").forEach(function (el) {
+        // Block keyboard activation on these buttons; the
+        // global onKey handler owns Enter/Space and dispatches
+        // based on the highlighted ITEM, not the focused
+        // button. Without this guard, clicking an action with
+        // the mouse leaves focus on it and a subsequent Enter
+        // press fires the WRONG action (the one the user last
+        // clicked) instead of activating the highlighted item.
+        el.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); }
+        });
         el.addEventListener("click", function () {
           var act = el.getAttribute("data-cbs-act");
+          // Drop focus from the button so the next Enter is
+          // unambiguous.
+          if (el.blur) el.blur();
           if (act === "select") activate();
           else if (act === "exit") exitFlow();
           else if (act === "help") showHelp();
         });
       });
+      // Defensively clear any leftover focus from a previous
+      // render so the global Enter handler is the only thing
+      // listening for keyboard activation.
+      if (document.activeElement && document.activeElement !== document.body) {
+        try { document.activeElement.blur(); } catch (_) {}
+      }
     }
     function cbCrumbLabel(stk) {
       // Build "General setup" / "Console options" trail
@@ -721,24 +964,31 @@
       } else if (item.type === "action") {
         msg = "Acțiune: " + item.label + ".";
       }
-      alert(msg);
+      cbsAlert("Help", msg);
     }
     function openStringEditor(item) {
-      var v = prompt(item.label, cfg[item.id] || "");
-      if (v == null) return;
-      if (item.maxLen && v.length > item.maxLen) v = v.substring(0, item.maxLen);
-      cfg[item.id] = v;
-      render();
+      cbsPrompt(item.label, item.label + ":", cfg[item.id] || "", function (v) {
+        if (v == null) return;
+        if (item.maxLen && v.length > item.maxLen) v = v.substring(0, item.maxLen);
+        cfg[item.id] = v;
+        render();
+      });
     }
     function runAction(actId) {
       if (actId === "save_alt") {
-        var name = prompt("Numele configurației de salvat (slot 1..3):", "slot1");
-        if (!name) return;
-        try {
-          var key = "ide.coreboot.altcfg." + name.replace(/[^a-zA-Z0-9_-]/g, "");
-          sessionStorage.setItem(key, JSON.stringify(cfg));
-          alert("Configurația a fost salvată în slotul \"" + name + "\".");
-        } catch (e) { alert("Eroare la salvare."); }
+        cbsPrompt(
+          "Save Alternate Configuration File",
+          "Numele configurației de salvat:",
+          "slot1",
+          function (name) {
+            if (!name) return;
+            try {
+              var key = "ide.coreboot.altcfg." + name.replace(/[^a-zA-Z0-9_-]/g, "");
+              sessionStorage.setItem(key, JSON.stringify(cfg));
+              cbsAlert("Saved", "Configurația a fost salvată în slotul \"" + name + "\".");
+            } catch (e) { cbsAlert("Error", "Eroare la salvare."); }
+          }
+        );
         return;
       }
       if (actId === "load_alt") {
@@ -755,19 +1005,22 @@
         // picker exactly as the first-time flash does; the
         // NVRAM fuse and the variant state are untouched
         // (flashing coreboot does NOT clear them).
-        if (!confirm(
+        cbsConfirmDanger(
+          "Reflash coreboot firmware",
           "Această acțiune va rescrie complet regiunea coreboot din SPI flash (8 MB). " +
-          "Toate setările de mai sus vor fi păstrate. Siguranța NVRAM (dacă este arsă) NU este afectată. " +
-          "Nu opriți aparatul în timpul procedurii: o întrerupere în timpul scrierii lasă aparatul nepornibil. " +
-          "Continuați?"
-        )) return;
-        cbSaveCfg(cfg);
-        if (window.SRV2K3_COREBOOT && typeof window.SRV2K3_COREBOOT.runFlashSequence === "function") {
-          window.removeEventListener("keydown", onKey, true);
-          window.SRV2K3_COREBOOT.runFlashSequence();
-        } else {
-          alert("Modulul coreboot nu este disponibil în această imagine.");
-        }
+          "Toate setările de mai sus vor fi păstrate. Siguranța NVRAM (dacă este arsă) NU este afectată.\n\n" +
+          "Nu opriți aparatul în timpul procedurii: o întrerupere în timpul scrierii lasă aparatul nepornibil.\n\n" +
+          "Continuați?",
+          function () {
+            cbSaveCfg(cfg);
+            if (window.SRV2K3_COREBOOT && typeof window.SRV2K3_COREBOOT.runFlashSequence === "function") {
+              window.removeEventListener("keydown", onKey, true);
+              window.SRV2K3_COREBOOT.runFlashSequence();
+            } else {
+              cbsAlert("Error", "Modulul coreboot nu este disponibil în această imagine.");
+            }
+          }
+        );
         return;
       }
     }
@@ -813,18 +1066,21 @@
         el.addEventListener("click", function () {
           var what = el.getAttribute("data-cbs-load");
           if (what === "factory") {
-            if (!confirm(
-              "Aceasta va reflasha regiunile NVRAM editabile cu valorile din imaginea de fabrică. " +
-              "Siguranța de generație (WB_FUSE_GEN) și pagina 0x12 vor fi rescrise. " +
-              "Toate datele sistemului de operare instalat se vor pierde. Continuați?"
-            )) return;
-            try {
-              sessionStorage.removeItem(STORAGE_BRICK_KEY);
-              sessionStorage.removeItem(STORAGE_KEY);
-            } catch (e) {}
-            bd.remove();
-            cbSaveCfg(cfg);
-            showConsolePicker();
+            cbsConfirmDanger(
+              "Factory NVRAM Backup",
+              "Aceasta va reflasha regiunile NVRAM editabile cu valorile din imaginea de fabrică.\n\n" +
+              "Siguranța de generație (WB_FUSE_GEN) și pagina 0x12 vor fi rescrise. Toate datele sistemului de operare instalat se vor pierde.\n\n" +
+              "Continuați?",
+              function () {
+                try {
+                  sessionStorage.removeItem(STORAGE_BRICK_KEY);
+                  sessionStorage.removeItem(STORAGE_KEY);
+                } catch (e) {}
+                bd.remove();
+                cbSaveCfg(cfg);
+                showConsolePicker();
+              }
+            );
             return;
           }
           if (what.indexOf("user:") === 0) {
@@ -837,11 +1093,11 @@
                 bd.remove();
                 rebuild();
                 render();
-                alert("Configurația \"" + name + "\" a fost încărcată.");
+                cbsAlert("Loaded", "Configurația \"" + name + "\" a fost încărcată.");
                 return;
               }
             } catch (e) {}
-            alert("Eroare la încărcare.");
+            cbsAlert("Error", "Eroare la încărcare.");
           }
         });
       });
@@ -902,6 +1158,18 @@
   // picker pass will read.
   // ============================================================
   function installVariant(variant) {
+    // If the requested variant is the same as what's currently
+    // installed (NVRAM state intact), skip the full install
+    // animation and hand off directly to the boot path. This
+    // covers the case where the user opens the picker via
+    // coreboot Setup → Exit (or via Reflash coreboot landing
+    // at the picker again) and re-selects the OS they already
+    // have. Reinstalling would wipe their state pointlessly.
+    var existing = loadState();
+    if (existing && existing.variant === variant) {
+      bootWaterboard(variant);
+      return;
+    }
     teardownAll();
     var root = makeRoot();
     var brandName = variantName(variant);
@@ -1007,13 +1275,25 @@
   // ============================================================
   // BOOT DISPATCHER + W5 ACCOUNT GATE
   // ============================================================
+  var STORAGE_LASTBOOT_KEY = "ide.waterboard.lastboot.v1";
+  function rememberLastBoot(variant) {
+    try { sessionStorage.setItem(STORAGE_LASTBOOT_KEY, variant); } catch (e) {}
+  }
+  function lastBootedVariant() {
+    try { return sessionStorage.getItem(STORAGE_LASTBOOT_KEY) || null; } catch (e) { return null; }
+  }
   function bootWaterboard(variant) {
     var st = loadState() || {};
-    if (st.poweredOff) { return renderPowerOff(variant); }
+    if (st.poweredOff) {
+      return renderPowerOff(variant);
+    }
     // W5 mandatory account creation: gate the first boot if
     // no account is associated yet. Closes the picker hatch
     // since W5 actively wants an account file.
-    if (variant === "w5" && !st.account) { return showAccountCreate(variant); }
+    if (variant === "w5" && !st.account) {
+      return showAccountCreate(variant);
+    }
+    rememberLastBoot(variant);
     if (variant === "w3") return bootW3();
     if (variant === "w4") return bootW4();
     return bootW5();
@@ -1644,7 +1924,7 @@
       '<div class="wb-poff-actions">' +
       '<button class="wbp-btn wbp-btn-default" id="wbPoffOn">Pornire</button>' +
       (variant === "w4" || variant === "w5"
-        ? '<button class="wbp-btn" id="wbPoffReset">Reinstalează coreboot</button>'
+        ? '<button class="wbp-btn" id="wbPoffReset">Selector de sisteme</button>'
         : "") +
       "</div>" +
       "</div>" +
@@ -1657,17 +1937,20 @@
     var rs = document.getElementById("wbPoffReset");
     if (rs) {
       rs.addEventListener("click", function () {
-        if (confirm(
-          "Această procedură va șterge contul, abonamentele și starea de instalare a jocurilor, " +
-          "apoi va relansa selectorul de sistem. Siguranța NVRAM nu va fi ștearsă: generațiile anterioare " +
-          "rămân indisponibile. Continuați?"
-        )) {
-          // Wipe variant only. Keep coreboot.v1 (we stay in
-          // the post-flash environment) and keep the NVRAM
-          // brick fuse (it cannot be undone).
-          resetState();
-          showConsolePicker();
-        }
+        // Custom confirm dialog (defined alongside the setup
+        // utility helpers) so the prompt matches the rest of
+        // the post-flash chrome instead of using a native one.
+        // Action wipes the installed OS state and drops back
+        // to the system selector; it does NOT reflash coreboot
+        // and does NOT clear the NVRAM brick fuse.
+        cbsConfirm(
+          "Selector de sisteme",
+          "Această procedură va șterge contul, abonamentele și starea de instalare a jocurilor curente, apoi va deschide selectorul de sisteme.\n\nSiguranța NVRAM (dacă este arsă) nu este afectată: generațiile anterioare rămân indisponibile până la restaurarea backup-ului de fabrică din coreboot Setup.\n\nContinuați?",
+          function () {
+            resetState();
+            showConsolePicker();
+          }
+        );
       });
     }
   }
@@ -1883,6 +2166,17 @@
   function makeGameRoot(title) {
     var bd = document.createElement("div");
     bd.className = "wb-game-bd";
+    // Games attach their own window-level keydown listeners
+    // (some with capture+preventDefault for WASD navigation).
+    // If the game closes via the X button without unhooking
+    // those listeners, every later text input loses keys whose
+    // handlers used preventDefault: typing 's' or 'a' in the
+    // W5 account form silently dropped because the leaked
+    // Sokoban / Racer / Lemur handlers were still calling
+    // preventDefault on them. The fix: each game appends its
+    // cleanup function to bd.gameCleanups, and closing the
+    // frame (via X or programmatically) runs them all.
+    bd.gameCleanups = [];
     bd.innerHTML =
       '<div class="wb-game-frame">' +
       '<div class="wb-game-titlebar">' +
@@ -1894,10 +2188,32 @@
       '<div class="wb-game-hint" id="wbGameHint"></div>' +
       "</div>";
     document.body.appendChild(bd);
-    bd.querySelector("[data-wb-game-close]").addEventListener("click", function () {
+    function closeGame() {
+      // Run cleanups in reverse-registration order so the
+      // most-recently-added (typically the keydown listener)
+      // unhooks first.
+      var fns = bd.gameCleanups.slice().reverse();
+      bd.gameCleanups = [];
+      for (var i = 0; i < fns.length; i++) {
+        try { fns[i](); } catch (_) {}
+      }
       bd.remove();
-    });
+    }
+    bd.closeGame = closeGame;
+    bd.querySelector("[data-wb-game-close]").addEventListener("click", closeGame);
     return bd;
+  }
+  // Helper: register a window-level keydown listener for a
+  // game AND queue its removal in the game's cleanup list, so
+  // closing via X (not just Esc) unhooks it. Games that use
+  // WASD (preventDefault on 'a' / 's' / 'd' / 'w') would
+  // otherwise leak and silently swallow those letters in
+  // subsequent text inputs (e.g. the W5 account form).
+  function addGameKeyHandler(bd, onKey) {
+    window.addEventListener("keydown", onKey, true);
+    bd.gameCleanups.push(function () {
+      window.removeEventListener("keydown", onKey, true);
+    });
   }
 
   // ============================================================
@@ -2055,7 +2371,7 @@
       step();
     }, tickMs);
     function cleanup() { clearInterval(stepTimer); window.removeEventListener("keydown", onKey, true); }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     draw();
   }
 
@@ -2086,7 +2402,7 @@
       } else { keys[e.key] = false; }
       if (["ArrowUp", "ArrowDown", "w", "W", "s", "S"].indexOf(e.key) >= 0) e.preventDefault();
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     window.addEventListener("keyup", onKey, true);
     function frame() {
       if (!document.body.contains(bd)) { cleanup(); return; }
@@ -2163,7 +2479,7 @@
     function onKey(e) {
       if (e.key === "Escape") { bd.remove(); window.removeEventListener("keydown", onKey, true); }
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
   }
 
   function launchStub(g, variant) {
@@ -2181,7 +2497,7 @@
     function onKey(e) {
       if (e.key === "Escape") { bd.remove(); window.removeEventListener("keydown", onKey, true); }
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
   }
 
   // ============================================================
@@ -2234,7 +2550,7 @@
         if (playerLane < 2) playerLane += 1; e.preventDefault();
       }
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     function cleanup() { window.removeEventListener("keydown", onKey, true); }
     function frame() {
       if (!document.body.contains(bd)) { cleanup(); return; }
@@ -2484,7 +2800,7 @@
         if (turn === "p" && !gameOver) endPlayerTurn();
       }
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     function cleanup() { window.removeEventListener("keydown", onKey, true); }
     reset();
   }
@@ -2627,7 +2943,7 @@
     function onKey(e) {
       if (e.key === "Escape") { bd.remove(); window.removeEventListener("keydown", onKey, true); }
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     logLine("Bătălia începe. Creatura Spectrală vă blochează calea către a 7-a galaxie.");
     updateUi();
   }
@@ -2687,7 +3003,7 @@
       } else { keys[e.key] = false; }
       if (["ArrowLeft", "ArrowRight", "ArrowUp", " ", "w", "W", "a", "A", "d", "D"].indexOf(e.key) >= 0) e.preventDefault();
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     window.addEventListener("keyup", onKey, true);
     function cleanup() {
       window.removeEventListener("keydown", onKey, true);
@@ -2808,47 +3124,56 @@
     var area = bd.querySelector("#wbGameArea");
     var hint = bd.querySelector("#wbGameHint");
     hint.textContent = "← → ↑ ↓ sau WASD pentru a mișca lemurul. U anulează ultima mișcare, R resetează. Esc închide.";
-    // Level encoding: # wall, . floor, $ box, * box-on-target,
-    // @ player, + player-on-target, space outside.
-    // 3 boxes ($), 3 targets (*), 1 player (@). Solvable by
-    // pushing each box one or two squares right. Box-on-target
-    // is encoded as * and counted as one box and one target.
-    var LEVEL = [
-      "##########",
-      "#........#",
-      "#..####..#",
-      "#..#..*..#",
-      "#.@$....*#",
-      "#..$..*..#",
-      "#..$.....#",
-      "##########"
-    ];
-    var ROWS = LEVEL.length, COLS = LEVEL[0].length;
+    // Explicit map. The previous string-encoded level used `*`
+    // to mean "box on target", which the parser counted as BOTH
+    // a box and a target. That made 3 visible `*` glyphs in
+    // the source render as 3 boxes + 3 extra `$` boxes = 6
+    // boxes for 3 targets. Spelling everything out separately
+    // removes the multiplication entirely.
+    var ROWS = 8, COLS = 10;
     var CELL = 44;
+    // Walls: full 10x8 border. No interior walls.
+    var INITIAL_WALLS = [];
+    for (var wx = 0; wx < COLS; wx++) {
+      INITIAL_WALLS.push({ x: wx, y: 0 });
+      INITIAL_WALLS.push({ x: wx, y: ROWS - 1 });
+    }
+    for (var wy = 1; wy < ROWS - 1; wy++) {
+      INITIAL_WALLS.push({ x: 0, y: wy });
+      INITIAL_WALLS.push({ x: COLS - 1, y: wy });
+    }
+    // 3 boxes, 3 targets. Boxes column 3, targets column 8.
+    // Each box is pushed right 5 times to reach its target;
+    // the player has to navigate around between pushes so it
+    // is not a one-pass solve. All target rows are reachable
+    // by pushing right only, which is the only direction a
+    // box at column 3 can move (south and east are clear, but
+    // pushing south/up requires a player position that is
+    // blocked by walls or other boxes initially).
+    var INITIAL_PLAYER  = { x: 1, y: 3 };
+    var INITIAL_BOXES   = [ { x: 3, y: 3 }, { x: 3, y: 4 }, { x: 3, y: 5 } ];
+    var INITIAL_TARGETS = [ { x: 8, y: 3 }, { x: 8, y: 4 }, { x: 8, y: 5 } ];
     var canvas = document.createElement("canvas");
     canvas.width = COLS * CELL; canvas.height = ROWS * CELL + 40;
     canvas.className = "wb-canvas"; canvas.tabIndex = 0; canvas.style.outline = "none";
     area.appendChild(canvas); canvas.focus();
     addTouchControls(bd, "dpad-undo-reset");
     var ctx = canvas.getContext("2d");
-    // Static layout: walls + targets
-    var walls = [];
-    var targets = [];
-    var boxes = [];
-    var player = { x: 0, y: 0 };
+    var walls   = INITIAL_WALLS.map(function (w) { return { x: w.x, y: w.y }; });
+    var targets = INITIAL_TARGETS.map(function (t) { return { x: t.x, y: t.y }; });
+    var boxes   = INITIAL_BOXES.map(function (b) { return { x: b.x, y: b.y }; });
+    var player  = { x: INITIAL_PLAYER.x, y: INITIAL_PLAYER.y };
     var history = [];
     var won = false;
     function load() {
-      walls = []; targets = []; boxes = []; history = []; won = false;
-      for (var y = 0; y < ROWS; y++) {
-        for (var x = 0; x < COLS; x++) {
-          var c = LEVEL[y][x];
-          if (c === "#") walls.push({ x: x, y: y });
-          if (c === "*" || c === "+") targets.push({ x: x, y: y });
-          if (c === "$" || c === "*") boxes.push({ x: x, y: y });
-          if (c === "@" || c === "+") { player.x = x; player.y = y; }
-        }
-      }
+      // Reset routine for R / replay: copy each initial array
+      // by value so future moves don't mutate the originals.
+      walls   = INITIAL_WALLS.map(function (w)   { return { x: w.x, y: w.y }; });
+      targets = INITIAL_TARGETS.map(function (t) { return { x: t.x, y: t.y }; });
+      boxes   = INITIAL_BOXES.map(function (b)   { return { x: b.x, y: b.y }; });
+      player  = { x: INITIAL_PLAYER.x, y: INITIAL_PLAYER.y };
+      history = [];
+      won = false;
     }
     function isWall(x, y) {
       return walls.some(function (w) { return w.x === x && w.y === y; });
@@ -2955,7 +3280,7 @@
       else if (e.key === "ArrowLeft" || e.key === "a" || e.key === "A") { move(-1, 0); e.preventDefault(); }
       else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") { move(1, 0); e.preventDefault(); }
     }
-    window.addEventListener("keydown", onKey, true);
+    addGameKeyHandler(bd, onKey);
     function cleanup() { window.removeEventListener("keydown", onKey, true); }
     load();
     draw();

@@ -74,7 +74,7 @@
         if (document.getElementById(winId)) return;
 
         // Per-role state. Both tabs and shares persist per-instance so
-        // adding a share doesn\'t blow away when you tab to Sessions and
+        // adding a share doesn't blow away when you tab to Sessions and
         // back.
         var state = (role === 'file') ? {
             activeTab: 'shares',
@@ -123,9 +123,9 @@
         bd.setAttribute('role', 'dialog');
         bd.setAttribute('aria-modal', 'true');
         document.body.appendChild(bd);
-        // If we\'re opening the app role admin, sync the backend flag
+        // If we're opening the app role admin, sync the backend flag
         // from whatever state.sites was loaded with so reopening the
-        // window doesn\'t lose the flag (state is per-instance, but the
+        // window doesn't lose the flag (state is per-instance, but the
         // flag lives on STATE which persists across opens).
         if (role === 'app') {
             var c = state.sites.find(function(s) { return s.desc === 'Curriculum Reporting'; });
@@ -366,7 +366,7 @@
                 }
                 render();
             });
-            // Per-row Start/Stop button: toggles a single site\'s state
+            // Per-row Start/Stop button: toggles a single site's state
             // and re-renders. This is the verb users actually need to
             // stop only Curriculum Reporting (the validation backend),
             // leaving Default Web Site and SharePoint alone.

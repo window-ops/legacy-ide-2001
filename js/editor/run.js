@@ -17,7 +17,7 @@ function runCode() {
   var output = $("output");
   var fx = runtimeEffects();
   // Backend re-validation override (Server 2003 only): if Curriculum
-  // Reporting site is up, the local bypass flags don\'t apply at run
+  // Reporting site is up, the local bypass flags don't apply at run
   // time either. The flag is set from File/App Server admin and is
   // never set in the QNX session, so this stays scoped.
   if (STATE.serverBackendOnline) {
@@ -108,7 +108,7 @@ function runCode() {
       '- Pentru a rula codul fără revalidare, opriți site-ul „Curriculum Reporting" din <em>Administrare Server de Aplicații</em> &rarr; tabul <em>Web Sites</em>.' +
       "</div>";
     output.appendChild(msg);
-    // If the lint didn\'t flag anything but a patch is installed,
+    // If the lint didn't flag anything but a patch is installed,
     // stop execution here rather than letting the program run and
     // confuse the user about whether the backend actually blocked.
     if (hits.length === 0) {
@@ -133,7 +133,7 @@ function runCode() {
     ];
   }
   // When the backend is online, force blocking display even if a
-  // patch had set curriculumNonBlocking. The school server doesn\'t
+  // patch had set curriculumNonBlocking. The school server doesn't
   // care about the local non-blocking flag.
   var curriculumNb =
     !!(fx.curriculumNonBlocking && !fx.bypassCurriculum) &&

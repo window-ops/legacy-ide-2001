@@ -172,13 +172,24 @@ function ensureDebuggerDocsMounted() {
         '        <tr><td><code>?srv2k3=clean</code></td><td>Montează Server 2003 cu snapshot curat (fără patch-uri, fără cache de credențiale).</td></tr>' +
         '        <tr><td><code>?smoke=1</code></td><td>Rulează suita de teste smoke a IDE-ului. Verifică debuggerul, lint-ul, persistența, jurnalul de evenimente, matricea backend × programă.</td></tr>' +
         '        <tr><td><code>?debug=1</code></td><td>Activează panoul de depanare în colțul din dreapta jos. Conținutul se adaptează contextului: GDX Debugger, dialogurile Server 2003, sesiunea QNX, BIOS Setup.</td></tr>' +
+        '        <tr><th colspan="2" style="text-align:left;padding-top:10px;">Ramura coreboot / Waterboard (post-flash)</th></tr>' +
+        '        <tr><td><code>?coreboot=flashed</code></td><td>Marchează coreboot ca instalat și aterizează la selectorul de sisteme. Aliasuri: <code>1</code>, <code>picker</code>, gol.</td></tr>' +
+        '        <tr><td><code>?coreboot=w3</code></td><td>coreboot + Waterboard 3 instalat și activ.</td></tr>' +
+        '        <tr><td><code>?coreboot=w4</code></td><td>coreboot + Waterboard 4 activ + siguranța NVRAM arsă pe W4.</td></tr>' +
+        '        <tr><td><code>?coreboot=w5</code></td><td>coreboot + Waterboard 5 activ + siguranța NVRAM arsă pe W5 + cont debug pre-creat.</td></tr>' +
+        '        <tr><td><code>?coreboot=bricked-w4</code></td><td>coreboot + selector + siguranța NVRAM arsă pe W4 (W3 indisponibil).</td></tr>' +
+        '        <tr><td><code>?coreboot=bricked-w5</code></td><td>coreboot + selector + siguranța NVRAM arsă pe W5 (W3 și W4 indisponibile).</td></tr>' +
+        '        <tr><td><code>?coreboot=reset</code></td><td>Șterge complet starea coreboot și Waterboard. Aliasuri: <code>clear</code>, <code>0</code>.</td></tr>' +
         '        </tbody>' +
         '      </table>' +
         '      <h5>Combinații utile</h5>' +
         '      <ul>' +
         '        <li><code>?srv2k3=1&debug=1</code>: jump direct la Server 2003 cu overlay-ul de debug activ. Util pentru a urmări <code>STATE.serverBackendOnline</code> când oprești site-ul Curriculum Reporting.</li>' +
         '        <li><code>?smoke=1&debug=1</code>: rulează testele smoke cu overlay-ul vizibil pentru a urmări trecerea prin contexte.</li>' +
+        '        <li><code>?coreboot=w5&debug=1</code>: aterizează direct în Waterboard 5 cu overlay activ; util pentru a verifica dialogurile de friction (verificare disc, abonament, regiune) și legăturile către coreboot Setup.</li>' +
+        '        <li><code>?coreboot=bricked-w5</code>: aterizează la selector cu fuse arsă; verifică starea „două generații blocate" fără să fie nevoie să pornești W4 apoi W5 manual.</li>' +
         '      </ul>' +
+        '      <p style="margin-top: 10px; font-size: 11px; color: #606060;">Parametrii coreboot scriu în <code>sessionStorage</code> și nu sunt eliminați din URL după aplicare. Reîncărcarea păstrează aceeași stare. Pentru a reveni la Server 2003 normal, încarcă o dată cu <code>?coreboot=reset</code>, apoi șterge parametrul din URL.</p>' +
         '    </article>' +
         '  </div>' +
         '</section>';

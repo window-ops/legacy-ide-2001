@@ -104,13 +104,24 @@
           '<tr><td style="padding:4px;"><code>?srv2k3=clean</code></td><td style="padding:4px;">Montează Server 2003 cu snapshot curat (fără patch-uri).</td></tr>' +
           '<tr><td style="padding:4px;"><code>?smoke=1</code></td><td style="padding:4px;">Rulează suita de teste smoke a IDE-ului. Verifică debuggerul, lint-ul, persistența, jurnalul de evenimente, matricea backend × programă.</td></tr>' +
           '<tr><td style="padding:4px;"><code>?debug=1</code></td><td style="padding:4px;">Activează panoul de depanare în colțul din dreapta jos. Conținutul se adaptează contextului: GDX Debugger, dialogurile Server 2003 (regedit, Event Viewer, role admin, Dr. Watson), sesiunea QNX, BIOS Setup.</td></tr>' +
+          '<tr><th colspan="2" align="left" style="padding:8px 4px 4px;border-top:1px solid #c0c0c0;font-weight:600;">Ramura coreboot / Waterboard (după BIOS flash)</th></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=flashed</code></td><td style="padding:4px;">Marchează coreboot ca instalat și aterizează la selectorul de sisteme (W3 / W4 / W5). Aliasuri: <code>1</code>, <code>picker</code>, sau parametru gol.</td></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=w3</code></td><td style="padding:4px;">coreboot + Waterboard 3 instalat și activ.</td></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=w4</code></td><td style="padding:4px;">coreboot + Waterboard 4 activ + siguranța NVRAM arsă pe W4.</td></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=w5</code></td><td style="padding:4px;">coreboot + Waterboard 5 activ + siguranța NVRAM arsă pe W5 + cont debug pre-creat.</td></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=bricked-w4</code></td><td style="padding:4px;">coreboot + selector + siguranța NVRAM arsă pe W4 (W3 indisponibil).</td></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=bricked-w5</code></td><td style="padding:4px;">coreboot + selector + siguranța NVRAM arsă pe W5 (W3 și W4 indisponibile).</td></tr>' +
+          '<tr><td style="padding:4px;"><code>?coreboot=reset</code></td><td style="padding:4px;">Șterge complet starea coreboot și Waterboard, revine la Server 2003 normal. Aliasuri: <code>clear</code>, <code>0</code>.</td></tr>' +
           "</table>" +
           '<h3 style="font-size:13px; margin: 12px 0 4px;">Combinații utile</h3>' +
           "<ul>" +
           "<li><code>?srv2k3=1&debug=1</code>: jump direct la Server 2003 cu overlay-ul de debug activ. Util pentru a urmări <code>STATE.serverBackendOnline</code> în timp ce opriți site-ul Curriculum Reporting.</li>" +
           "<li><code>?srv2k3=clean&debug=1</code>: snapshot curat cu overlay activ, pentru a verifica că niciun patch nu este moștenit.</li>" +
           "<li><code>?smoke=1&debug=1</code>: rulează testele smoke cu overlay-ul vizibil pentru a urmări trecerea prin contexte (debugger, dialogs, srv2003, qnx).</li>" +
-          "</ul>",
+          "<li><code>?coreboot=w5&debug=1</code>: aterizează direct în Waterboard 5 cu overlay activ. Util pentru a verifica dialoguri, ecranele de friction (verificare disc, abonament, regiune), butoanele care duc la coreboot Setup.</li>" +
+          "<li><code>?coreboot=bricked-w5</code>: aterizează la selector cu siguranța arsă; verifică starea „două generații blocate\" fără să fie nevoie să porniți W4 apoi W5.</li>" +
+          "</ul>" +
+          '<p style="margin-top: 12px; font-size: 11px; color: #404040;">Parametrii coreboot scriu în <code>sessionStorage</code> și nu sunt eliminați din URL după aplicare. Reîncărcarea păstrează aceeași stare. Pentru a reveni la Server 2003 normal, încărcați o dată cu <code>?coreboot=reset</code>, apoi ștergeți parametrul din URL.</p>',
       },
       {
         id: "win-history",

@@ -3,7 +3,7 @@
    Context-aware developer overlay. Detects what the user is
    currently doing and surfaces the relevant state. Always
    shows the phase + a small "context" indicator on top so
-   it\'s clear which bucket of fields is being displayed.
+   it's clear which bucket of fields is being displayed.
 
    Contexts (priority order, first match wins):
      1. GDX Debugger open  -> CPU regs, RIP, active patches

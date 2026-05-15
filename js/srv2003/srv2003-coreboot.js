@@ -321,7 +321,36 @@
       var el = document.getElementById("cbLog");
       if (el) el.innerHTML = "";
     }
-    function log(line, cls) {
+    // Read the configured log level from the coreboot Setup
+    // utility (waterboard module). Real coreboot ships
+    // BIOS_LOG_LEVEL: messages tagged with a level above the
+    // configured threshold are suppressed. Higher number = more
+    // verbose. Default is NOTICE (5) when nothing is configured.
+    var CB_LOG_LEVELS = {
+      EMERG: 0, ALERT: 1, CRIT: 2, ERR: 3,
+      WARNING: 4, NOTICE: 5, INFO: 6, DEBUG: 7, SPEW: 8
+    };
+    function configuredLogLevel() {
+      try {
+        var raw = sessionStorage.getItem("ide.coreboot.setup.v2");
+        if (!raw) return 5;
+        var cfg = JSON.parse(raw);
+        var n = CB_LOG_LEVELS[cfg.log_level];
+        return (typeof n === "number") ? n : 5;
+      } catch (e) { return 5; }
+    }
+    var activeLogLevel = configuredLogLevel();
+    function log(line, levelOrCls, cls) {
+      // Backwards-compatible signature: existing callers pass
+      // (line) or (line, cls). New callers pass
+      // (line, level) or (line, level, cls). Detect by type.
+      var level = 5;
+      if (typeof levelOrCls === "number") {
+        level = levelOrCls;
+      } else if (typeof levelOrCls === "string") {
+        cls = levelOrCls;
+      }
+      if (level > activeLogLevel) return;
       var el = document.getElementById("cbLog");
       if (!el) return;
       var d = document.createElement("div");
@@ -359,6 +388,12 @@
       );
       var b = document.getElementById("cbAbortClose");
       if (b) b.addEventListener("click", function () {
+        // Drop the body class BEFORE removing the flash root.
+        // The class hides every other body child via a CSS
+        // rule; if we remove the root first and leave the
+        // class on, the body has no visible children for one
+        // frame and the user sees a flash of blank white.
+        document.body.classList.remove("coreboot-flashing");
         root.remove();
       });
     }
@@ -399,7 +434,7 @@
       setActiveBlocks(["eth", "pci"]);
       // Honor live BIOS settings: if the on-board NIC is disabled
       // or the PXE option ROM is not loaded at POST, the PXE stack
-      // can\'t talk to the bootstrap server. Fail with the same
+      // can't talk to the bootstrap server. Fail with the same
       // error string a real PXE Boot Agent would print.
       var bios = (typeof window.STATE !== "undefined" && window.STATE.bios) || {};
       if (bios.onboardLan === "Disabled") {
@@ -423,10 +458,14 @@
         );
       }
       log("PXE-E51: NIC found, MAC 00:1b:fc:0a:42:7c");
+      log("  pci  0:18.0: VIA VT6105M Rhine III", 7);
+      log("    config space: vendor=1106 device=3106 class=020000", 8);
       await delay(400);
       log("DHCP DISCOVER  --> 255.255.255.255");
+      log("    xid=0xa1b2c3d4 secs=0 options=53,55,57", 8);
       await delay(450);
       log("DHCP OFFER    <-- 10.0.0.1  (gdx-net.local)");
+      log("    siaddr=10.0.0.1 yiaddr=10.0.0.42 lease=86400", 7);
       await delay(350);
       log("DHCP REQUEST   --> 10.0.0.1");
       await delay(350);
@@ -436,7 +475,7 @@
       log("Next-server:  10.0.0.1");
       log("Boot file:    /tftp/coreboot-gdx.rom");
       await delay(450);
-      log("Link is up at 100Mbit FullDuplex.", "cb-ok");
+      log("Link is up at 100Mbit FullDuplex.", 5, "cb-ok");
     }
 
     // Helper used by stagePxe when a BIOS-disabled subsystem makes
@@ -461,6 +500,7 @@
       clearLog();
       setActiveBlocks(["eth", "pci", "south"]);
       log("Opening TFTP RRQ tftp://10.0.0.1/coreboot-gdx.rom");
+      log("    op=0x01 mode=octet blksize=1428 windowsize=8", 7);
       await delay(400);
       log("Block size negotiated: 1428 (window 8)");
       await delay(300);
@@ -476,9 +516,12 @@
               " KB / 512 KB",
           );
         }
+        // SPEW-level: per-block ACK trace
+        log("    DATA block " + (i + 1) + " (" + Math.floor(step) + " B)  ACK", 8);
         await delay(120);
       }
-      log("Transfer complete. 524288 bytes in 2.6 s.", "cb-ok");
+      log("Transfer complete. 524288 bytes in 2.6 s.", 5, "cb-ok");
+      log("    throughput: 202 KB/s  retransmissions: 0", 7);
       await delay(300);
     }
 
@@ -487,14 +530,16 @@
       clearLog();
       setActiveBlocks([]);
       log("Computing SHA-256 of the received payload...");
+      log("    feed: 524288 bytes, block size 64 B, 8192 iterations", 7);
+      log("    initial state H0..H7 from FIPS 180-4 §5.3.3", 8);
       await delay(700);
       log("Expected: " + ctx.payloadHash);
       await delay(300);
       // The flash is satirically reliable on this BIOS revision; we
-      // don\'t do the deliberate first-attempt mismatch any more.
+      // don't do the deliberate first-attempt mismatch any more.
       log("Computed: " + ctx.payloadHash);
       await delay(400);
-      log("SHA-256 OK.", "cb-ok");
+      log("SHA-256 OK.", 5, "cb-ok");
       await delay(300);
     }
 
@@ -517,19 +562,40 @@
       log("   - matches southbridge ID (1106:3227)");
       log("   - matches SPI flash JEDEC (EF 40 17)");
       await delay(300);
-      log("Payload is compatible with this mainboard.", "cb-ok");
+      log("Payload is compatible with this mainboard.", 5, "cb-ok");
       log("");
-      log(
-        "WARNING: continuing past this point will erase the original",
-        "cb-warn",
-      );
-      log(
-        "Phoenix BIOS. Once erased it cannot be restored from this",
-        "cb-warn",
-      );
-      log("interface.", "cb-warn");
+      // Detect whether this is a fresh flash (Phoenix BIOS still
+      // resident) or a reflash (coreboot already installed). The
+      // warning + confirmation copy differs: the first time the
+      // user is destroying their factory firmware permanently;
+      // on a reflash the existing coreboot region is just being
+      // rewritten in place. Phoenix is no longer involved.
+      var alreadyFlashed = isFlashed();
+      if (alreadyFlashed) {
+        log(
+          "Note: coreboot 4.22-gdx is already resident in this region.",
+          4, "cb-warn"
+        );
+        log(
+          "The existing image will be erased and re-written with the",
+          4, "cb-warn"
+        );
+        log("payload received in stage 2.", 4, "cb-warn");
+      } else {
+        log(
+          "WARNING: continuing past this point will erase the original",
+          4, "cb-warn"
+        );
+        log(
+          "Phoenix BIOS. Once erased it cannot be restored from this",
+          4, "cb-warn"
+        );
+        log("interface.", 4, "cb-warn");
+      }
       setAction(
-        '<button class="cb-btn cb-btn-default" id="cbConfirmFlash">Continuă cu flash-ul</button>' +
+        '<button class="cb-btn cb-btn-default" id="cbConfirmFlash">' +
+        (alreadyFlashed ? "Continuă cu reflash-ul" : "Continuă cu flash-ul") +
+        '</button>' +
         '<button class="cb-btn" id="cbConfirmAbort">Anulează</button>',
       );
       var which = await new Promise(function (res) {
@@ -574,6 +640,7 @@
       setActiveBlocks(["spi", "lpc", "south"]);
       log("Erasing 8 SPI flash sectors (4 KB each)...");
       log("Target region: 0x000000 - 0x07FFFF");
+      log("    WREN sent, status reg: 0x02 (WEL set)", 7);
       await delay(300);
       var sectors = [
         "0x000000-0x00FFFF",
@@ -588,6 +655,7 @@
       for (var i = 0; i < sectors.length; i++) {
         if (ctx.cancelled) return "abort";
         log("  Erase " + sectors[i] + " ... ", "");
+        log("    opcode 0x20 (SE), poll WIP every 25ms", 8);
         await delay(420 + Math.random() * 200);
         // Append OK to the last line
         var el = document.getElementById("cbLog");
@@ -598,7 +666,7 @@
         ctx.sectorsErased = i + 1;
       }
       await delay(250);
-      log("All target sectors erased (FFh).", "cb-ok");
+      log("All target sectors erased (FFh).", 5, "cb-ok");
       await delay(250);
     }
 
@@ -608,6 +676,7 @@
       setActiveBlocks(["spi", "lpc", "south", "cpu"]);
       log("Writing coreboot-gdx.rom to SPI flash @ 0x000000");
       log("Page size: 256 bytes, write enable latch each page.");
+      log("    opcode 0x02 (PP), CS held low per page", 7);
       await delay(300);
       var pages = 0;
       var totalPages = 64;
@@ -625,13 +694,15 @@
               "%)",
           );
         }
+        // SPEW: per-page trace
+        log("    page " + pages + " @0x" + (i * 0x2000).toString(16).padStart(6, "0").toUpperCase() + "  WIP cleared", 8);
         await delay(70);
       }
       await delay(300);
       log("Verifying written region...");
       await delay(500);
-      log("  Read-back SHA-256 matches payload.", "cb-ok");
-      log("Write complete.", "cb-ok");
+      log("  Read-back SHA-256 matches payload.", 5, "cb-ok");
+      log("Write complete.", 5, "cb-ok");
       await delay(300);
     }
 
@@ -787,6 +858,84 @@
     }
     return true;
   }
+  // ============================================================
+  // URL PARAMETER OVERRIDE
+  // Adds a debug shortcut: `?coreboot=<value>` lets a developer
+  // skip past the Server 2003 + BIOS Setup + flash sequence and
+  // land directly in any post-flash state. Applied BEFORE
+  // checkBootTakeover() so the takeover picks up the writes.
+  //
+  // Supported values:
+  //   flashed / 1 / picker    - coreboot present, picker shows
+  //   w3                       - coreboot + Waterboard 3 active
+  //   w4                       - coreboot + Waterboard 4 active + brick fuse W4
+  //   w5                       - coreboot + Waterboard 5 active + brick fuse W5 + debug account
+  //   bricked-w4               - coreboot + picker + brick fuse W4 (no variant installed)
+  //   bricked-w5               - coreboot + picker + brick fuse W5
+  //   reset / clear / 0        - wipe all coreboot/waterboard state
+  // The parameter is applied on every page load. It is NOT
+  // removed from the URL afterwards, so refreshing keeps the
+  // same debug state. To return to the Server 2003 boot path,
+  // load with `?coreboot=reset` once, then remove the param.
+  // ============================================================
+  function applyCorebootUrlParam() {
+    var raw;
+    try {
+      raw = new URLSearchParams(location.search).get("coreboot");
+    } catch (e) { return; }
+    if (raw === null) return;
+    var v = (raw === "" ? "flashed" : raw).toLowerCase();
+    var WB_KEY    = "ide.waterboard.v1";
+    var BRICK_KEY = "ide.nvram.brick.v1";
+    var LAST_KEY  = "ide.waterboard.lastboot.v1";
+    var SETUP_KEY = "ide.coreboot.setup.v2";
+    function setFlashed() {
+      saveState({
+        flashed: true,
+        flashedAt: Date.now(),
+        payloadVersion: "coreboot-4.22-gdx",
+      });
+    }
+    function setVariant(variant) {
+      var state = { variant: variant };
+      // W5 has a mandatory account gate at bootWaterboard; a
+      // debug placeholder lets it through without showing the
+      // account creation screen every page load.
+      if (variant === "w5") {
+        state.account = { name: "debug", region: "RO", createdAt: Date.now() };
+      }
+      try { sessionStorage.setItem(WB_KEY, JSON.stringify(state)); } catch (e) {}
+      try { sessionStorage.setItem(LAST_KEY, variant); } catch (e) {}
+    }
+    function setBrick(variant) {
+      try { sessionStorage.setItem(BRICK_KEY, variant); } catch (e) {}
+    }
+    function clearAll() {
+      try {
+        sessionStorage.removeItem(STORAGE_KEY);
+        sessionStorage.removeItem(WB_KEY);
+        sessionStorage.removeItem(BRICK_KEY);
+        sessionStorage.removeItem(LAST_KEY);
+        sessionStorage.removeItem(SETUP_KEY);
+      } catch (e) {}
+    }
+    if (v === "reset" || v === "clear" || v === "0") {
+      clearAll();
+      return;
+    }
+    if (v === "flashed" || v === "1" || v === "picker") {
+      setFlashed();
+      return;
+    }
+    if (v === "w3") { setFlashed(); setVariant("w3"); return; }
+    if (v === "w4") { setFlashed(); setVariant("w4"); setBrick("w4"); return; }
+    if (v === "w5") { setFlashed(); setVariant("w5"); setBrick("w5"); return; }
+    if (v === "bricked-w4") { setFlashed(); setBrick("w4"); return; }
+    if (v === "bricked-w5") { setFlashed(); setBrick("w5"); return; }
+    // Unknown value: silently ignored. The accepted values are
+    // documented in the GDX debugger and Server 2003 help.
+  }
+  applyCorebootUrlParam();
   // Run synchronously on script load. Anything that runs after
   // (mountDesktop, etc.) checks the same flag and stays out.
   checkBootTakeover();
